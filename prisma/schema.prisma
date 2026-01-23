@@ -1,0 +1,72 @@
+generator client {
+  provider   = "prisma-client"
+  output     = "./generated"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Expense {
+  id        String   @id @default(uuid())
+  amount    Float
+  category  String
+  date      DateTime
+  notes     String?
+  type      String   @default("expense") // "expense" or "income"
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, date])
+}
+
+model User {
+  id             String          @id @default(uuid())
+  email          String          @unique
+  name           String?
+  image          String?
+  currency       String          @default("USD")
+  createdAt      DateTime        @default(now())
+  expenses       Expense[]
+  savingsBuckets SavingsBucket[]
+  savingsEntries SavingsEntry[]
+}
+
+model Budget {
+  id        String   @id @default(uuid())
+  amount    Float
+  month     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model SavingsBucket {
+  id                    String         @id @default(uuid())
+  name                  String
+  color                 String
+  goalAmount            Float?
+  interestYearlyPercent Float?
+  createdAt             DateTime       @default(now())
+  userId                String
+  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries               SavingsEntry[]
+
+  @@index([userId, createdAt])
+}
+
+model SavingsEntry {
+  id        String        @id @default(uuid())
+  amount    Float
+  date      DateTime
+  entryType String        @default("deposit")
+  notes     String?
+  createdAt DateTime      @default(now())
+  bucketId  String
+  userId    String
+  bucket    SavingsBucket @relation(fields: [bucketId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([bucketId])
+  @@index([userId, date])
+}

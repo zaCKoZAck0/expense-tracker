@@ -1,0 +1,2 @@
+// PWA support removed.
+export {};

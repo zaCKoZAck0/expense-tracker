@@ -1,0 +1,2 @@
+// Offline support removed.
+export {};

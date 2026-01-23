@@ -1,0 +1,13 @@
+- Always add comments to complex logic.
+- Never use 'any' type in TypeScript; prefer specific types or generics.
+- Always refactor large components into smaller, reusable components.
+- Use error boundaries to handle errors in React components.
+- Before creating a new component or utility, check if one already exists in the codebase.
+- Don't unnecessarily override styles to existing components, only do when absolutely needed.
+- Use shadcn components variants instead of creating new styled or overriding base components.
+- Build mobile-first and ensure responsiveness across different screen sizes.
+- Always insure security best practices when handling user data and authentication.
+- Prefer documentation over instinct when making decisions.
+- Cleanup unused imports, unused logic and unused variables to maintain code clarity.
+  – Don't use next.js router, treat the application as a single page app, use React state management with query params instead.
+  - Delete files (using rm command) and code that are no longer needed or used in the project.
