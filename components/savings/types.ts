@@ -22,20 +22,57 @@ export interface SavingsBucket {
   userId?: string;
 }
 
+export type ColorOption = {
+  id: string;
+  label: string;
+  swatchLight: string;
+  swatchDark: string;
+};
+
 export const STORAGE_KEY = "savings_buckets_v1";
 
-export const COLOR_OPTIONS: { id: string; label: string; swatch: string }[] = [
-  { id: "peach", label: "Peach", swatch: "#fcd5ce" },
-  { id: "mint", label: "Mint", swatch: "#d8f3dc" },
-  { id: "sky", label: "Sky", swatch: "#e0f2fe" },
-  { id: "lavender", label: "Lavender", swatch: "#ede9fe" },
-  { id: "gold", label: "Gold", swatch: "#fef3c7" },
-  { id: "rose", label: "Rose", swatch: "#ffe4e6" },
-  { id: "sage", label: "Sage", swatch: "#e4f1e1" },
-  { id: "denim", label: "Denim", swatch: "#e3e8ff" },
-  { id: "coral", label: "Coral", swatch: "#ffe5d9" },
-  { id: "plum", label: "Plum", swatch: "#f3e8ff" },
+export const COLOR_OPTIONS: ColorOption[] = [
+  {
+    id: "peach",
+    label: "Peach",
+    swatchLight: "#ea8a68",
+    swatchDark: "#f7c6b5",
+  },
+  { id: "mint", label: "Mint", swatchLight: "#3ba475", swatchDark: "#b5e3c6" },
+  { id: "sky", label: "Sky", swatchLight: "#3b82f6", swatchDark: "#cde8ff" },
+  {
+    id: "lavender",
+    label: "Lavender",
+    swatchLight: "#7c69ef",
+    swatchDark: "#e1d7ff",
+  },
+  { id: "gold", label: "Gold", swatchLight: "#d18b16", swatchDark: "#f4d36a" },
+  { id: "rose", label: "Rose", swatchLight: "#e05a87", swatchDark: "#ffd1dc" },
+  { id: "sage", label: "Sage", swatchLight: "#6d8c6c", swatchDark: "#d8e7d4" },
+  {
+    id: "denim",
+    label: "Denim",
+    swatchLight: "#3f69c6",
+    swatchDark: "#d2dcff",
+  },
+  {
+    id: "coral",
+    label: "Coral",
+    swatchLight: "#e4644f",
+    swatchDark: "#ffd3c7",
+  },
+  { id: "plum", label: "Plum", swatchLight: "#8e5dbd", swatchDark: "#ead9ff" },
 ];
+
+export function getBucketSwatch(
+  colorId: string,
+  theme: "light" | "dark" | undefined,
+): string {
+  const option = COLOR_OPTIONS.find((c) => c.id === colorId);
+  if (!option) return "#6b7280";
+  if (theme === "dark") return option.swatchDark;
+  return option.swatchLight;
+}
 
 export function safeUuid() {
   if (typeof crypto !== "undefined" && crypto.randomUUID)

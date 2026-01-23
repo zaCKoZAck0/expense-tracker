@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useTheme } from "next-themes";
 import { ArrowLeft, PiggyBank, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,10 +21,10 @@ import { getBudgetTrendData } from "@/app/actions/analytics";
 import { BucketForm } from "@/components/savings/bucket-form";
 import { BucketDetail } from "@/components/savings/bucket-detail";
 import {
-  COLOR_OPTIONS,
   SavingsBucket,
   computeBucketStats,
   bucketProgress,
+  getBucketSwatch,
 } from "@/components/savings/types";
 
 type BudgetSavingsStats = {
@@ -76,6 +77,7 @@ function BudgetSavingsCard({
 }
 
 export default function SavingsPage() {
+  const { resolvedTheme } = useTheme();
   const [buckets, setBuckets] = useState<SavingsBucket[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -429,9 +431,14 @@ export default function SavingsPage() {
                       <PiggyBank
                         className="h-14 w-14"
                         style={{
-                          color:
-                            COLOR_OPTIONS.find((c) => c.id === bucket.color)
-                              ?.swatch || "#6b7280",
+                          color: getBucketSwatch(
+                            bucket.color,
+                            resolvedTheme === "dark"
+                              ? "dark"
+                              : resolvedTheme === "light"
+                                ? "light"
+                                : undefined,
+                          ),
                         }}
                       />
                       <div className="flex-1 space-y-1">

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTheme } from "next-themes";
 import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { COLOR_OPTIONS } from "./types";
+import { COLOR_OPTIONS, getBucketSwatch } from "./types";
 
 interface BucketFormProps {
   onSubmit: (input: {
@@ -34,6 +35,7 @@ export function BucketForm({
   initialValues,
   submitLabel = "Create bucket",
 }: BucketFormProps) {
+  const { resolvedTheme } = useTheme();
   const [name, setName] = useState(initialValues?.name ?? "");
   const [color, setColor] = useState<string>(
     initialValues?.color ?? COLOR_OPTIONS[0]?.id ?? "peach",
@@ -87,7 +89,12 @@ export function BucketForm({
                   ? "ring-2 ring-offset-2 ring-primary border-transparent"
                   : "border-foreground/50"
               }`}
-              style={{ backgroundColor: option.swatch }}
+              style={{
+                backgroundColor: getBucketSwatch(
+                  option.id,
+                  (resolvedTheme as "light" | "dark" | undefined),
+                ),
+              }}
             />
           ))}
         </div>

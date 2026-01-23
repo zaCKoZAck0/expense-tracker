@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useTheme } from "next-themes";
 import { PiggyBank, Plus, Target, TrendingUp, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -28,11 +29,11 @@ import { BucketForm } from "./bucket-form";
 import { EntryForm } from "./entry-form";
 import { ActivityList } from "./activity-list";
 import {
-  COLOR_OPTIONS,
   SavingsBucket,
   bucketProgress,
   computeBucketStats,
   formatBucketDate,
+  getBucketSwatch,
 } from "./types";
 import { StatTile } from "./stat-tile";
 
@@ -75,6 +76,14 @@ export function BucketDetail({
   onDeleteBucket,
   onDeleteEntry,
 }: BucketDetailProps) {
+  const { resolvedTheme } = useTheme();
+  // Normalize theme to supported literal values to satisfy getBucketSwatch typing.
+  const themeMode: "light" | "dark" | undefined =
+    resolvedTheme === "dark"
+      ? "dark"
+      : resolvedTheme === "light"
+        ? "light"
+        : undefined;
   const stats = computeBucketStats(bucket);
   const hasInterestRate =
     typeof bucket.interestYearlyPercent === "number" &&
@@ -91,9 +100,7 @@ export function BucketDetail({
           <PiggyBank
             className="h-10 w-10"
             style={{
-              color:
-                COLOR_OPTIONS.find((c) => c.id === bucket.color)?.swatch ||
-                "#6b7280",
+              color: getBucketSwatch(bucket.color, themeMode),
             }}
           />
           <div>
