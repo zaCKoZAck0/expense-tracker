@@ -34,7 +34,7 @@ export function AnalyticsClient({
   };
 
   return (
-    <div className="flex flex-col gap-6 pt-6">
+    <div className="flex flex-col gap-6 pb-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Analytics</h2>
       </div>
