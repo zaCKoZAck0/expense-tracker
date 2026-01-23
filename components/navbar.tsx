@@ -13,11 +13,15 @@ import {
 } from "@/components/ui/select";
 import { useNavigation } from "@/components/navigation-provider";
 import { useMemo } from "react";
+import { usePathname } from "next/navigation";
 
 export function Navbar() {
   const { data: session, status } = useSession();
   const user = session?.user;
   const { selectedMonth, setSelectedMonth, page } = useNavigation();
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/auth")) return null;
 
   // Generate list of past months (up to 12 months back from current)
   const availableMonths = useMemo(() => {

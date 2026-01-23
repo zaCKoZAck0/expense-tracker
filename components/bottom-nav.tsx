@@ -4,9 +4,13 @@ import { BarChart3, Home, PiggyBank } from "lucide-react";
 import Link from "next/link";
 import { useNavigation, Page } from "@/components/navigation-provider";
 import type React from "react";
+import { usePathname } from "next/navigation";
 
 export function BottomNav() {
   const { page: currentPage } = useNavigation();
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/auth")) return null;
 
   const links: {
     page: Page;

@@ -20,7 +20,7 @@ export default async function Home({
 
   if (page === "analytics") {
     if (!isAuthed) {
-      redirect("/?page=profile");
+      redirect("/auth");
     }
     return (
       <Suspense
@@ -35,7 +35,7 @@ export default async function Home({
 
   if (page === "savings") {
     if (!isAuthed) {
-      redirect("/?page=profile");
+      redirect("/auth");
     }
     return (
       <Suspense
@@ -50,7 +50,7 @@ export default async function Home({
 
   if (page === "transactions") {
     if (!isAuthed) {
-      redirect("/?page=profile");
+      redirect("/auth");
     }
     return (
       <Suspense
@@ -70,7 +70,7 @@ export default async function Home({
   }
 
   if (!isAuthed) {
-    redirect("/?page=profile");
+    redirect("/auth");
   }
 
   // Dashboard now fetches data on client based on selected month
