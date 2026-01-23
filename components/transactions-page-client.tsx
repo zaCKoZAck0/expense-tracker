@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState, useEffect, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,7 +26,7 @@ import { useNavigation } from "@/components/navigation-provider";
 import { Transaction } from "@/components/transaction-list";
 import { ChevronLeft, ChevronRight, ArrowUpDown, Filter, X } from "lucide-react";
 import { format } from "date-fns";
-import { useState, useEffect } from "react";
+
 import { size } from "zod";
 
 interface TransactionsPageClientProps {
@@ -312,7 +312,7 @@ export function TransactionsPageClient({
                  ) : (
                      Object.entries(groupedTransactions).map(
                        ([groupMonth, monthTransactions]) => (
-                         <>
+                         <Fragment key={groupMonth}>
                            <TableRow key={groupMonth} className="bg-muted/50 hover:bg-muted/50">
                              <TableCell colSpan={2} className="py-2 font-medium text-xs text-muted-foreground uppercase tracking-wider">
                                {groupMonth}
@@ -371,7 +371,7 @@ export function TransactionsPageClient({
                                </TableRow>
                              );
                            })}
-                         </>
+                         </Fragment>
                        ),
                      )
                  )

@@ -14,14 +14,15 @@ async function getUserId() {
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { bucketId?: string } },
+  { params }: { params: Promise<{ bucketId?: string }> },
 ) {
   const userId = await getUserId();
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const resolvedParams = await params;
   const segments = new URL(req.url ?? "").pathname.split("/").filter(Boolean);
-  const bucketId = params?.bucketId ?? segments.at(-1);
+  const bucketId = resolvedParams?.bucketId ?? segments.at(-1);
   if (!bucketId)
     return NextResponse.json(
       { error: "Bucket id is required" },
@@ -66,14 +67,15 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { bucketId?: string } },
+  { params }: { params: Promise<{ bucketId?: string }> },
 ) {
   const userId = await getUserId();
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const resolvedParams = await params;
   const segments = new URL(req.url ?? "").pathname.split("/").filter(Boolean);
-  const bucketId = params?.bucketId ?? segments.at(-1);
+  const bucketId = resolvedParams?.bucketId ?? segments.at(-1);
   if (!bucketId)
     return NextResponse.json(
       { error: "Bucket id is required" },

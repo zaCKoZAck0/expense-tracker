@@ -13,14 +13,16 @@ async function getUserId() {
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { entryId: string } },
+  { params }: { params: Promise<{ entryId: string }> },
 ) {
   const userId = await getUserId();
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const resolvedParams = await params;
   const entry = await db.savingsEntry.findUnique({
-    where: { id: params.entryId },
+    where: { id: resolvedParams.entryId },
+
     select: {
       id: true,
       bucketId: true,
@@ -66,14 +68,15 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { entryId?: string } },
+  { params }: { params: Promise<{ entryId?: string }> },
 ) {
   const userId = await getUserId();
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const resolvedParams = await params;
   const entryId =
-    params?.entryId ??
+    resolvedParams?.entryId ??
     new URL(req.url ?? "").pathname.split("/").filter(Boolean).pop();
   if (!entryId)
     return NextResponse.json(
