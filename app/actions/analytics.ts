@@ -1,23 +1,38 @@
-'use server';
+"use server";
 
-import { db } from '@/lib/db';
-import { auth } from '@/auth';
-import { unstable_cache } from 'next/cache';
-import { format, subMonths, startOfMonth, endOfMonth, startOfDay } from 'date-fns';
+import { db } from "@/lib/db";
+import { auth } from "@/auth";
+import { unstable_cache } from "next/cache";
+import {
+  format,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  startOfDay,
+} from "date-fns";
 
 const getAnalyticsTag = (userId: string) => `analytics-${userId}`;
 
 const monthsCacheByUser = new Map<string, ReturnType<typeof unstable_cache>>();
-const categoryCacheByUser = new Map<string, ReturnType<typeof unstable_cache>>();
+const categoryCacheByUser = new Map<
+  string,
+  ReturnType<typeof unstable_cache>
+>();
 const trendCacheByUser = new Map<string, ReturnType<typeof unstable_cache>>();
-const activityCacheByUser = new Map<string, ReturnType<typeof unstable_cache>>();
-const currencyCacheByUser = new Map<string, ReturnType<typeof unstable_cache>>();
+const activityCacheByUser = new Map<
+  string,
+  ReturnType<typeof unstable_cache>
+>();
+const currencyCacheByUser = new Map<
+  string,
+  ReturnType<typeof unstable_cache>
+>();
 
 async function getOrCreateUserId() {
   const session = await auth();
   const email = session?.user?.email;
   if (!email) {
-    return { success: false, error: 'Unauthorized' } as const;
+    return { success: false, error: "Unauthorized" } as const;
   }
 
   const name = session?.user?.name ?? undefined;
@@ -47,13 +62,13 @@ const getMonthsCache = (userId: string) => {
   const cacheFn = unstable_cache(
     async () => {
       const earliestExpense = await db.expense.findFirst({
-        orderBy: { date: 'asc' },
+        orderBy: { date: "asc" },
         select: { date: true },
         where: { userId },
       });
 
       if (!earliestExpense) {
-        return [format(new Date(), 'yyyy-MM')];
+        return [format(new Date(), "yyyy-MM")];
       }
 
       const start = startOfMonth(earliestExpense.date);
@@ -64,13 +79,13 @@ const getMonthsCache = (userId: string) => {
 
       // Iterate month-by-month; cheap due to single user range.
       while (current <= end) {
-        months.push(format(current, 'yyyy-MM'));
+        months.push(format(current, "yyyy-MM"));
         current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
       }
 
       return months.reverse();
     },
-    ['analytics-available-months', userId],
+    ["analytics-available-months", userId],
     { tags: [getAnalyticsTag(userId)], revalidate: 900 },
   );
 
@@ -89,7 +104,7 @@ const getCategoryCache = (userId: string) => {
       const end = endOfMonth(date);
 
       const expenses = await db.expense.groupBy({
-        by: ['category'],
+        by: ["category"],
         where: {
           userId,
           date: {
@@ -103,24 +118,32 @@ const getCategoryCache = (userId: string) => {
       });
 
       const categoryColors: Record<string, string> = {
-        Food: '#ef4444',
-        Transport: '#f97316',
-        Utilities: '#eab308',
-        Entertainment: '#84cc16',
-        Health: '#10b981',
-        Shopping: '#3b82f6',
-        Others: '#a855f7',
+        Food: "#ef4444",
+        Transport: "#f97316",
+        Utilities: "#eab308",
+        Entertainment: "#84cc16",
+        Health: "#10b981",
+        Shopping: "#3b82f6",
+        Others: "#a855f7",
       };
 
-      const defaultColors = ['#14b8a6', '#06b6d4', '#6366f1', '#d946ef', '#f43f5e'];
+      const defaultColors = [
+        "#14b8a6",
+        "#06b6d4",
+        "#6366f1",
+        "#d946ef",
+        "#f43f5e",
+      ];
 
       return expenses.map((entry, index) => ({
         category: entry.category,
         amount: entry._sum.amount || 0,
-        fill: categoryColors[entry.category] || defaultColors[index % defaultColors.length],
+        fill:
+          categoryColors[entry.category] ||
+          defaultColors[index % defaultColors.length],
       }));
     },
-    ['analytics-category-data', userId],
+    ["analytics-category-data", userId],
     { tags: [getAnalyticsTag(userId)], revalidate: 900 },
   );
 
@@ -133,20 +156,25 @@ const getTrendCache = (userId: string) => {
   if (cached) return cached;
 
   // Include current month key in cache key so it rolls when time moves forward.
-  const currentMonthKey = format(new Date(), 'yyyy-MM');
+  const currentMonthKey = format(new Date(), "yyyy-MM");
 
   const cacheFn = unstable_cache(
     async () => {
       const today = new Date();
-      const months: Array<{ date: Date; label: string; key: string; monthYear: string }> = [];
+      const months: Array<{
+        date: Date;
+        label: string;
+        key: string;
+        monthYear: string;
+      }> = [];
 
       for (let i = 5; i >= 0; i--) {
         const d = subMonths(today, i);
         months.push({
           date: d,
-          label: format(d, 'MMMM'),
-          key: format(d, 'yyyy-MM'),
-          monthYear: format(d, 'MMMM yyyy'),
+          label: format(d, "MMMM"),
+          key: format(d, "yyyy-MM"),
+          monthYear: format(d, "MMMM yyyy"),
         });
       }
 
@@ -166,13 +194,15 @@ const getTrendCache = (userId: string) => {
             _sum: { amount: true },
           });
 
-          const monthKey = format(monthMeta.date, 'yyyy-MM');
+          const monthKey = format(monthMeta.date, "yyyy-MM");
 
-          let budget = await db.budget.findUnique({ where: { month: monthKey } });
+          let budget = await db.budget.findUnique({
+            where: { month: monthKey },
+          });
           if (!budget) {
             budget = await db.budget.findFirst({
               where: { month: { lte: monthKey } },
-              orderBy: { month: 'desc' },
+              orderBy: { month: "desc" },
             });
           }
 
@@ -186,7 +216,7 @@ const getTrendCache = (userId: string) => {
 
       return data;
     },
-    ['analytics-budget-trend', userId, currentMonthKey],
+    ["analytics-budget-trend", userId, currentMonthKey],
     { tags: [getAnalyticsTag(userId)], revalidate: 1800 },
   );
 
@@ -200,14 +230,14 @@ const getActivityCache = (userId: string) => {
 
   const today = startOfDay(new Date());
   const startWindow = subMonths(today, 9);
-  const startKey = format(startWindow, 'yyyy-MM');
+  const startKey = format(startWindow, "yyyy-MM");
 
   const cacheFn = unstable_cache(
     async () => {
       const entries = await db.expense.findMany({
         where: {
           userId,
-          type: 'expense',
+          type: "expense",
           date: {
             gte: startWindow,
             lte: today,
@@ -219,14 +249,17 @@ const getActivityCache = (userId: string) => {
       const dailyMap = new Map<string, number>();
 
       for (const entry of entries) {
-        const dayKey = format(entry.date, 'yyyy-MM-dd');
+        const dayKey = format(entry.date, "yyyy-MM-dd");
         const prev = dailyMap.get(dayKey) ?? 0;
         dailyMap.set(dayKey, prev + entry.amount);
       }
 
-      return Array.from(dailyMap.entries()).map(([date, count]) => ({ date, count }));
+      return Array.from(dailyMap.entries()).map(([date, count]) => ({
+        date,
+        count,
+      }));
     },
-    ['analytics-daily-activity', userId, startKey],
+    ["analytics-daily-activity", userId, startKey],
     { tags: [getAnalyticsTag(userId)], revalidate: 1800 },
   );
 
@@ -244,9 +277,9 @@ const getCurrencyCache = (userId: string) => {
         where: { id: userId },
         select: { currency: true },
       });
-      return user?.currency ?? 'USD';
+      return user?.currency ?? "USD";
     },
-    ['analytics-user-currency', userId],
+    ["analytics-user-currency", userId],
     { tags: [getAnalyticsTag(userId)], revalidate: 3600 },
   );
 

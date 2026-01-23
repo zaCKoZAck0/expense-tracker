@@ -45,7 +45,8 @@ type DashboardData = {
 };
 
 export function DashboardClient() {
-  const { selectedExpense, closeExpense, selectedMonth, refreshKey } = useNavigation();
+  const { selectedExpense, closeExpense, selectedMonth, refreshKey } =
+    useNavigation();
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -67,33 +68,38 @@ export function DashboardClient() {
           totalSpent: result.data.totalSpent,
           totalIncome: result.data.totalIncome,
           remaining: result.data.remaining,
-          expenses: result.data.expenses.map((expense: {
-            id: string;
-            amount: number;
-            category: string;
-            date: Date | string;
-            notes: string | null;
-            type: "expense" | "income" | string;
-            userId?: string;
-            createdAt?: Date | string;
-          }) => ({
-            id: expense.id,
-            amount: expense.amount,
-            category: expense.category,
-            date: typeof expense.date === "string"
-              ? expense.date
-              : expense.date instanceof Date
-                ? expense.date.toISOString()
-                : new Date(expense.date as unknown as string).toISOString(),
-            notes: expense.notes,
-            type: expense.type as "expense" | "income",
-            userId: expense.userId,
-            createdAt: expense.createdAt
-              ? (expense.createdAt instanceof Date
+          expenses: result.data.expenses.map(
+            (expense: {
+              id: string;
+              amount: number;
+              category: string;
+              date: Date | string;
+              notes: string | null;
+              type: "expense" | "income" | string;
+              userId?: string;
+              createdAt?: Date | string;
+            }) => ({
+              id: expense.id,
+              amount: expense.amount,
+              category: expense.category,
+              date:
+                typeof expense.date === "string"
+                  ? expense.date
+                  : expense.date instanceof Date
+                    ? expense.date.toISOString()
+                    : new Date(expense.date as unknown as string).toISOString(),
+              notes: expense.notes,
+              type: expense.type as "expense" | "income",
+              userId: expense.userId,
+              createdAt: expense.createdAt
+                ? expense.createdAt instanceof Date
                   ? expense.createdAt.toISOString()
-                  : new Date(expense.createdAt as unknown as string).toISOString())
-              : undefined,
-          })),
+                  : new Date(
+                      expense.createdAt as unknown as string,
+                    ).toISOString()
+                : undefined,
+            }),
+          ),
           dailySpending: result.data.dailySpending,
           daysInMonth: result.data.daysInMonth,
         };
@@ -132,9 +138,7 @@ export function DashboardClient() {
   if (isLoading) {
     return (
       <main className="space-y-6 pb-24">
-        <div className="text-center text-muted-foreground py-8">
-          Loading...
-        </div>
+        <div className="text-center text-muted-foreground py-8">Loading...</div>
       </main>
     );
   }

@@ -23,7 +23,11 @@ export default async function Home({
       redirect("/?page=profile");
     }
     return (
-      <Suspense fallback={<div className="p-6 text-muted-foreground">Loading analytics...</div>}>
+      <Suspense
+        fallback={
+          <div className="p-6 text-muted-foreground">Loading analytics...</div>
+        }
+      >
         <AnalyticsPage />
       </Suspense>
     );
@@ -34,7 +38,11 @@ export default async function Home({
       redirect("/?page=profile");
     }
     return (
-      <Suspense fallback={<div className="p-6 text-muted-foreground">Loading savings...</div>}>
+      <Suspense
+        fallback={
+          <div className="p-6 text-muted-foreground">Loading savings...</div>
+        }
+      >
         <SavingsPage />
       </Suspense>
     );
@@ -45,7 +53,13 @@ export default async function Home({
       redirect("/?page=profile");
     }
     return (
-      <Suspense fallback={<div className="p-6 text-muted-foreground">Loading transactions...</div>}>
+      <Suspense
+        fallback={
+          <div className="p-6 text-muted-foreground">
+            Loading transactions...
+          </div>
+        }
+      >
         <TransactionsPage searchParams={params} />
       </Suspense>
     );
@@ -61,7 +75,11 @@ export default async function Home({
 
   // Dashboard now fetches data on client based on selected month
   return (
-    <Suspense fallback={<div className="p-6 text-muted-foreground">Loading dashboard...</div>}>
+    <Suspense
+      fallback={
+        <div className="p-6 text-muted-foreground">Loading dashboard...</div>
+      }
+    >
       <DashboardClient />
     </Suspense>
   );

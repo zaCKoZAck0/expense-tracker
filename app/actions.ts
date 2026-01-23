@@ -39,9 +39,18 @@ type NormalizedTransactionsOptions = {
 };
 
 const budgetCacheByUser = new Map<string, ReturnType<typeof unstable_cache>>();
-const expensesRangeCacheByUser = new Map<string, ReturnType<typeof unstable_cache>>();
-const transactionsCacheByUser = new Map<string, ReturnType<typeof unstable_cache>>();
-const dashboardCacheByUser = new Map<string, ReturnType<typeof unstable_cache>>();
+const expensesRangeCacheByUser = new Map<
+  string,
+  ReturnType<typeof unstable_cache>
+>();
+const transactionsCacheByUser = new Map<
+  string,
+  ReturnType<typeof unstable_cache>
+>();
+const dashboardCacheByUser = new Map<
+  string,
+  ReturnType<typeof unstable_cache>
+>();
 
 const normalizeTransactionsOptions = (
   options: TransactionsOptions,
@@ -87,8 +96,12 @@ const buildTransactionWhereClause = (
   }
 
   if (options.startDate || options.endDate) {
-    const startDate = options.startDate ? new Date(options.startDate) : undefined;
-    const endDate = options.endDate ? toEndOfDay(new Date(options.endDate)) : undefined;
+    const startDate = options.startDate
+      ? new Date(options.startDate)
+      : undefined;
+    const endDate = options.endDate
+      ? toEndOfDay(new Date(options.endDate))
+      : undefined;
     where.date = {
       ...(startDate ? { gte: startDate } : {}),
       ...(endDate ? { lte: endDate } : {}),
@@ -170,7 +183,9 @@ const getTransactionsCache = (userId: string) => {
 
   const cacheFn = unstable_cache(
     async (optionsKey: string) => {
-      const normalized = JSON.parse(optionsKey) as NormalizedTransactionsOptions;
+      const normalized = JSON.parse(
+        optionsKey,
+      ) as NormalizedTransactionsOptions;
       const where = buildTransactionWhereClause(userId, normalized);
       const orderBy = { [normalized.sortBy]: normalized.sortOrder } as const;
       const skip = (normalized.page - 1) * normalized.limit;
@@ -235,16 +250,29 @@ const getDashboardCache = (userId: string) => {
       const latestEntries = await latestEntriesPromise;
       const statsEntries = await statsEntriesPromise;
 
-      const expenseEntries = statsEntries.filter((entry) => entry.type !== "income");
-      const incomeEntries = statsEntries.filter((entry) => entry.type === "income");
+      const expenseEntries = statsEntries.filter(
+        (entry) => entry.type !== "income",
+      );
+      const incomeEntries = statsEntries.filter(
+        (entry) => entry.type === "income",
+      );
 
-      const totalSpent = expenseEntries.reduce((acc, curr) => acc + curr.amount, 0);
-      const totalIncome = incomeEntries.reduce((acc, curr) => acc + curr.amount, 0);
+      const totalSpent = expenseEntries.reduce(
+        (acc, curr) => acc + curr.amount,
+        0,
+      );
+      const totalIncome = incomeEntries.reduce(
+        (acc, curr) => acc + curr.amount,
+        0,
+      );
 
       const dailySpendingMap = new Map<number, number>();
       for (const expense of expenseEntries) {
         const day = new Date(expense.date).getDate();
-        dailySpendingMap.set(day, (dailySpendingMap.get(day) || 0) + expense.amount);
+        dailySpendingMap.set(
+          day,
+          (dailySpendingMap.get(day) || 0) + expense.amount,
+        );
       }
 
       const dailySpending = Array.from(dailySpendingMap.entries()).map(
@@ -262,7 +290,13 @@ const getDashboardCache = (userId: string) => {
       };
     },
     ["dashboard-data", userId],
-    { tags: [getDashboardTag(userId), getExpensesTag(userId), getBudgetTag(userId)] },
+    {
+      tags: [
+        getDashboardTag(userId),
+        getExpensesTag(userId),
+        getBudgetTag(userId),
+      ],
+    },
   );
 
   dashboardCacheByUser.set(userId, cacheFn);
@@ -289,7 +323,7 @@ export const getCachedUser = async () => {
     {
       tags: [getUserTag(email)],
       revalidate: 3600, // Hard revalidate every hour just in case
-    }
+    },
   );
 
   const user = await fetchUser(email);
@@ -345,7 +379,8 @@ export async function getOrCreateUser() {
 export async function setBudget(amount: number, month: string) {
   try {
     const userRes = await getCachedUser();
-    if (!userRes.success) return { success: false, error: userRes.error } as const;
+    if (!userRes.success)
+      return { success: false, error: userRes.error } as const;
 
     const budget = await db.budget.upsert({
       where: {
@@ -552,7 +587,8 @@ export async function getTransactions(options: TransactionsOptions) {
 export async function getDashboardData(month: string) {
   try {
     const userRes = await getCachedUser();
-    if (!userRes.success) return { success: false, error: userRes.error } as const;
+    if (!userRes.success)
+      return { success: false, error: userRes.error } as const;
 
     const data = await getDashboardCache(userRes.data.id)(month);
     return { success: true, data } as const;

@@ -107,9 +107,6 @@ export function ActivityList({
                   ) : null}
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-sm font-medium text-muted-foreground">
-                    {formatMoney(isWithdrawal ? -entry.amount : entry.amount)}
-                  </div>
                   <Dialog
                     open={isEditing}
                     onOpenChange={(open) =>
