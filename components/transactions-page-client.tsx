@@ -23,7 +23,7 @@ import { formatCurrency, formatDateUTC } from "@/lib/utils";
 import { useUserSettings } from "@/components/user-settings-provider";
 import { cn } from "@/lib/utils";
 import { useNavigation } from "@/components/navigation-provider";
-import { Transaction } from "@/components/transaction-list";
+import { Transaction } from "@/components/expense-list";
 import { ChevronLeft, ChevronRight, ArrowUpDown, Filter, X } from "lucide-react";
 import { format } from "date-fns";
 

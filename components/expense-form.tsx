@@ -7,7 +7,7 @@ import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { CalendarIcon } from "lucide-react";
-import { cn, formatDateUTC, toUTCNoon } from "@/lib/utils";
+import { cn, formatDateUTC } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useNavigation } from "@/components/navigation-provider";
 import { Calendar } from "@/components/ui/calendar";
@@ -65,12 +65,13 @@ interface ExpenseFormProps {
 export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const { selectedMonth, triggerRefresh } = useNavigation();
+  const { selectedMonth } = useNavigation();
 
-  // Default date to current date for new expenses, or existing date when editing
+  // Default date to selected month (first day) for new expenses
   const getDefaultDate = () => {
     if (expense?.date) return new Date(expense.date);
-    return toUTCNoon(new Date()); // Current date
+    const [year, month] = selectedMonth.split("-");
+    return new Date(parseInt(year), parseInt(month) - 1, 1);
   };
 
   const form = useForm<ExpenseFormValues>({
@@ -93,7 +94,6 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
         }
         toast.success("Expense updated successfully");
         router.refresh();
-        triggerRefresh();
         onSuccess?.();
         return;
       }
@@ -105,9 +105,9 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
       }
       toast.success("Expense added successfully");
       router.refresh();
-      triggerRefresh();
+      const [year, month] = selectedMonth.split("-");
       form.reset({
-        date: toUTCNoon(new Date()),
+        date: new Date(parseInt(year), parseInt(month) - 1, 1),
         notes: "",
         amount: 0,
         category: undefined,
@@ -201,7 +201,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
                     <Calendar
                       mode="single"
                       selected={field.value}
-                      onSelect={(date) => field.onChange(date ? toUTCNoon(date) : undefined)}
+                      onSelect={field.onChange}
                       disabled={(date) =>
                         date > new Date() || date < new Date("1900-01-01")
                       }

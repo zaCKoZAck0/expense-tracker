@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useEffect, useState } from "react";
 import { BudgetSummary } from "@/components/budget-summary";
-import { TransactionList } from "@/components/transaction-list";
+import { TransactionList } from "@/components/expense-list";
 import { AddExpenseButton } from "@/components/add-expense-button";
 import { useNavigation } from "@/components/navigation-provider";
 import ExpenseDetail from "@/components/expense-detail";
@@ -67,15 +67,32 @@ export function DashboardClient() {
           totalSpent: result.data.totalSpent,
           totalIncome: result.data.totalIncome,
           remaining: result.data.remaining,
-          expenses: result.data.expenses.map((expense) => ({
+          expenses: result.data.expenses.map((expense: {
+            id: string;
+            amount: number;
+            category: string;
+            date: Date | string;
+            notes: string | null;
+            type: "expense" | "income" | string;
+            userId?: string;
+            createdAt?: Date | string;
+          }) => ({
             id: expense.id,
             amount: expense.amount,
             category: expense.category,
-            date: new Date(expense.date).toISOString(),
+            date: typeof expense.date === "string"
+              ? expense.date
+              : expense.date instanceof Date
+                ? expense.date.toISOString()
+                : new Date(expense.date as unknown as string).toISOString(),
             notes: expense.notes,
             type: expense.type as "expense" | "income",
             userId: expense.userId,
-            createdAt: expense.createdAt ? new Date(expense.createdAt).toISOString() : undefined,
+            createdAt: expense.createdAt
+              ? (expense.createdAt instanceof Date
+                  ? expense.createdAt.toISOString()
+                  : new Date(expense.createdAt as unknown as string).toISOString())
+              : undefined,
           })),
           dailySpending: result.data.dailySpending,
           daysInMonth: result.data.daysInMonth,

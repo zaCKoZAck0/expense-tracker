@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard-client";
 import SavingsPage from "../components/savings-page";
 import TransactionsPage from "@/components/transactions-page";
+import { Suspense } from "react";
 
 export default async function Home({
   searchParams,
@@ -21,21 +22,33 @@ export default async function Home({
     if (!isAuthed) {
       redirect("/?page=profile");
     }
-    return <AnalyticsPage />;
+    return (
+      <Suspense fallback={<div className="p-6 text-muted-foreground">Loading analytics...</div>}>
+        <AnalyticsPage />
+      </Suspense>
+    );
   }
 
   if (page === "savings") {
     if (!isAuthed) {
       redirect("/?page=profile");
     }
-    return <SavingsPage />;
+    return (
+      <Suspense fallback={<div className="p-6 text-muted-foreground">Loading savings...</div>}>
+        <SavingsPage />
+      </Suspense>
+    );
   }
 
   if (page === "transactions") {
     if (!isAuthed) {
       redirect("/?page=profile");
     }
-    return <TransactionsPage searchParams={params} />;
+    return (
+      <Suspense fallback={<div className="p-6 text-muted-foreground">Loading transactions...</div>}>
+        <TransactionsPage searchParams={params} />
+      </Suspense>
+    );
   }
 
   if (page === "profile") {
@@ -47,5 +60,9 @@ export default async function Home({
   }
 
   // Dashboard now fetches data on client based on selected month
-  return <DashboardClient />;
+  return (
+    <Suspense fallback={<div className="p-6 text-muted-foreground">Loading dashboard...</div>}>
+      <DashboardClient />
+    </Suspense>
+  );
 }

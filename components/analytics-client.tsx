@@ -4,7 +4,6 @@ import { useState } from "react";
 import { BudgetLineChart } from "@/components/analytics/budget-line-chart";
 import { ExpensePieChart } from "@/components/analytics/expense-pie-chart";
 import { ActivityHeatmap } from "@/components/analytics/activity-heatmap";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getExpenseCategoryData } from "@/app/actions/analytics";
 
 interface AnalyticsClientProps {
@@ -51,14 +50,9 @@ export function AnalyticsClient({
             onMonthChange={handleMonthChange}
           />
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Per Day Spend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ActivityHeatmap data={dailyActivityData} currency={currency} />
-          </CardContent>
-        </Card>
+        <div>
+          <ActivityHeatmap data={dailyActivityData} currency={currency} />
+        </div>
       </div>
     </div>
   );
