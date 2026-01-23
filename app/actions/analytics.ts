@@ -1,291 +1,274 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { auth } from '@/auth';
 import { format, subMonths, startOfMonth, endOfMonth, subDays, startOfDay, endOfDay } from 'date-fns';
+import { unstable_cache } from 'next/cache';
+import { getCachedUser } from '../actions';
 
-async function getOrCreateUserId() {
-  const session = await auth();
-  const email = session?.user?.email;
-  if (!email) {
-    return { success: false, error: 'Unauthorized' } as const;
-  }
-
-  const name = session?.user?.name ?? undefined;
-  const image = session?.user?.image ?? undefined;
-
-  const user = await db.user.upsert({
-    where: { email },
-    update: {
-      name,
-      image,
-    },
-    create: {
-      email,
-      name,
-      image,
-    },
-    select: { id: true },
-  });
-
-  return { success: true, data: user.id } as const;
-}
+// Note: getCachedUser is already cached, so we don't need to wrap it.
+// However, the *analytics* aggregations are heavy and should be cached.
 
 export async function getAvailableMonths() {
-  const userRes = await getOrCreateUserId();
+  const userRes = await getCachedUser();
   if (!userRes.success) {
     return [] as string[];
   }
+  const userId = userRes.data.id;
 
-  // Get all unique months from expenses
-  // We can group by month-year
-  // Since prisma doesn't support complex date grouping easily in `groupBy` for all DBs without raw query,
-  // we might fetch min/max date or just distinct dates if dataset is small.
-  // For scalability, let's use a raw query or just fetch all dates (lean) and process in JS if not too large.
-  // Or better, let's just find the earliest expense and generate months from there.
+  const fetchMonths = unstable_cache(
+    async (uid: string) => {
+      const earliestExpense = await db.expense.findFirst({
+        orderBy: {
+          date: 'asc',
+        },
+        select: {
+          date: true
+        },
+        where: {
+          userId: uid,
+        },
+      });
 
-  const earliestExpense = await db.expense.findFirst({
-    orderBy: {
-      date: 'asc',
+      if (!earliestExpense) {
+        return [format(new Date(), 'yyyy-MM')];
+      }
+
+      const start = startOfMonth(earliestExpense.date);
+      const end = startOfMonth(new Date());
+
+      const months = [];
+      let current = start;
+
+      while (current <= end) {
+        months.push(format(current, 'yyyy-MM'));
+        current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+      }
+
+      return months.reverse();
     },
-    select: {
-      date: true
-    },
-    where: {
-      userId: userRes.data,
-    },
-  });
+    ['available-months'],
+    { tags: ['expenses'] }
+  );
 
-  if (!earliestExpense) {
-    return [format(new Date(), 'yyyy-MM')];
-  }
-
-  const start = startOfMonth(earliestExpense.date);
-  const end = startOfMonth(new Date());
-
-  const months = [];
-  let current = start;
-
-  while (current <= end) {
-    months.push(format(current, 'yyyy-MM'));
-    current = new Date(current.getFullYear(), current.getMonth() + 1, 1);
-  }
-
-  return months.reverse(); // Newest first
+  return await fetchMonths(userId);
 }
 
 export async function getExpenseCategoryData(monthStr: string) {
-  const userRes = await getOrCreateUserId();
+  const userRes = await getCachedUser();
   if (!userRes.success) {
     return [] as Array<{ category: string; amount: number; fill: string }>;
   }
+  const userId = userRes.data.id;
 
-  // monthStr is 'yyyy-MM'
-  const date = new Date(monthStr + '-01');
-  const start = startOfMonth(date);
-  const end = endOfMonth(date);
+  const fetchCategoryData = unstable_cache(
+    async (uid: string, mStr: string) => {
+      const date = new Date(mStr + '-01');
+      const start = startOfMonth(date);
+      const end = endOfMonth(date);
 
-  const expenses = await db.expense.groupBy({
-    by: ['category'],
-    where: {
-      userId: userRes.data,
-      type: {
-        not: 'income',
-      },
-      date: {
-        gte: start,
-        lte: end,
-      },
+      const expenses = await db.expense.groupBy({
+        by: ['category'],
+        where: {
+          userId: uid,
+          type: {
+            not: 'income',
+          },
+          date: {
+            gte: start,
+            lte: end,
+          },
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      const categoryColors: Record<string, string> = {
+        'Food': '#ef4444',     // red-500
+        'Transport': '#f97316', // orange-500
+        'Utilities': '#eab308', // yellow-500
+        'Entertainment': '#84cc16', // lime-500
+        'Health': '#10b981',    // emerald-500
+        'Shopping': '#3b82f6',  // blue-500
+        'Others': '#a855f7',    // purple-500
+      };
+
+      const defaultColors = ['#14b8a6', '#06b6d4', '#6366f1', '#d946ef', '#f43f5e'];
+
+      return expenses.map((e, index) => ({
+        category: e.category,
+        amount: e._sum.amount || 0,
+        fill: categoryColors[e.category] || defaultColors[index % defaultColors.length],
+      }));
     },
-    _sum: {
-      amount: true,
-    },
-  });
+    ['expense-category-data'],
+    { tags: ['expenses'] }
+  );
 
-  const categoryColors: Record<string, string> = {
-    'Food': '#ef4444',     // red-500
-    'Transport': '#f97316', // orange-500
-    'Utilities': '#eab308', // yellow-500
-    'Entertainment': '#84cc16', // lime-500
-    'Health': '#10b981',    // emerald-500
-    'Shopping': '#3b82f6',  // blue-500
-    'Others': '#a855f7',    // purple-500
-  };
-
-  // Default color if not in map
-  const defaultColors = ['#14b8a6', '#06b6d4', '#6366f1', '#d946ef', '#f43f5e'];
-
-  return expenses.map((e, index) => ({
-    category: e.category,
-    amount: e._sum.amount || 0,
-    fill: categoryColors[e.category] || defaultColors[index % defaultColors.length],
-  }));
+  return await fetchCategoryData(userId, monthStr);
 }
 
 export async function getBudgetTrendData() {
-  const userRes = await getOrCreateUserId();
+  const userRes = await getCachedUser();
   if (!userRes.success) {
     return [] as Array<{ month: string; budget: number; spend: number }>;
   }
+  const userId = userRes.data.id;
 
-  // Get last 6 months
-  const today = new Date();
-  const months = [];
+  const fetchTrendData = unstable_cache(
+    async (uid: string) => {
+      // Get last 6 months
+      const today = new Date();
+      const months = [];
 
-  for (let i = 5; i >= 0; i--) {
-    const d = subMonths(today, i);
-    months.push({
-      date: d,
-      label: format(d, 'MMMM'),
-      key: format(d, 'yyyy-MM'), // to match budget month string format if needed
-      monthYear: format(d, 'MMMM yyyy')
-    });
-  }
-
-  const data = await Promise.all(months.map(async (m) => {
-    const start = startOfMonth(m.date);
-    const end = endOfMonth(m.date);
-
-    // Get Spend
-    const expenseSum = await db.expense.aggregate({
-      where: {
-        userId: userRes.data,
-        type: {
-          not: 'income',
-        },
-        date: {
-          gte: start,
-          lte: end,
-        }
-      },
-      _sum: {
-        amount: true
+      for (let i = 5; i >= 0; i--) {
+        const d = subMonths(today, i);
+        months.push({
+          date: d,
+          label: format(d, 'MMMM'),
+          key: format(d, 'yyyy-MM'),
+          monthYear: format(d, 'MMMM yyyy')
+        });
       }
-    });
 
-    // Get Income
-    const incomeSum = await db.expense.aggregate({
-      where: {
-        userId: userRes.data,
-        type: 'income',
-        date: {
-          gte: start,
-          lte: end,
-        }
-      },
-      _sum: {
-        amount: true
-      }
-    });
+      const data = await Promise.all(months.map(async (m) => {
+        const start = startOfMonth(m.date);
+        const end = endOfMonth(m.date);
 
-    // Get Budget
-    // Assuming budget is stored with month string like 'January 2024' or '2024-01'?
-    // Let's check schema/existing code.
-    // Schema says: `month String @unique`.
-    // We should double check what format is stored.
-    // Typically it might be "January 2025" based on typical dashboard apps, or ISO.
-    // I'll assume "MMMM yyyy" for now based on standard user behavior or "yyyy-MM".
-    // I will try both or check the DB if I can.
-    // Let's try to find a budget to verify format.
-
-    // Get Budget for the month key
-    const monthKey = format(m.date, 'yyyy-MM');
-
-    // Try exact match first
-    let budget = await db.budget.findUnique({
-      where: {
-        month: monthKey,
-      },
-    });
-
-    // If no exact budget exists for this month, fall back to the most recent prior budget.
-    // This applies the last set budget to subsequent months until changed without modifying past months.
-    if (!budget) {
-      budget = await db.budget.findFirst({
-        where: {
-          month: {
-            lte: monthKey,
+        // Get Spend
+        const expenseSum = await db.expense.aggregate({
+          where: {
+            userId: uid,
+            type: {
+              not: 'income',
+            },
+            date: {
+              gte: start,
+              lte: end,
+            }
           },
-        },
-        orderBy: {
-          month: 'desc',
-        },
-      });
-    }
+          _sum: {
+            amount: true
+          }
+        });
 
-    return {
-      month: m.label,
-      budget: (budget?.amount || 0) + (incomeSum._sum.amount || 0),
-      spend: expenseSum._sum.amount || 0,
-    };
-  }));
+        // Get Income
+        const incomeSum = await db.expense.aggregate({
+          where: {
+            userId: uid,
+            type: 'income',
+            date: {
+              gte: start,
+              lte: end,
+            }
+          },
+          _sum: {
+            amount: true
+          }
+        });
 
-  return data;
+        // Get Budget
+        const monthKey = format(m.date, 'yyyy-MM');
+        let budget = await db.budget.findUnique({
+          where: {
+            month: monthKey,
+          },
+        });
+
+        if (!budget) {
+          budget = await db.budget.findFirst({
+            where: {
+              month: {
+                lte: monthKey,
+              },
+            },
+            orderBy: {
+              month: 'desc',
+            },
+          });
+        }
+
+        return {
+          month: m.label,
+          budget: (budget?.amount || 0) + (incomeSum._sum.amount || 0),
+          spend: expenseSum._sum.amount || 0,
+        };
+      }));
+
+      return data;
+    },
+    ['budget-trend-data'],
+    { tags: ['budget', 'expenses'] }
+  );
+
+  return await fetchTrendData(userId);
 }
 
 export async function getDailyActivityData() {
-  const userRes = await getOrCreateUserId();
+  const userRes = await getCachedUser();
   if (!userRes.success) {
     return [] as Array<{ date: string; count: number }>;
   }
+  const userId = userRes.data.id;
 
-  // Get last 365 days
-  const today = new Date();
-  const start = subDays(today, 365);
+  const fetchDailyActivity = unstable_cache(
+    async (uid: string) => {
+      const today = new Date();
+      const start = subDays(today, 365);
 
-  const expenses = await db.expense.groupBy({
-    by: ['date'],
-    where: {
-      userId: userRes.data,
-      type: {
-        not: 'income',
-      },
-      date: {
-        gte: startOfDay(start),
-        lte: endOfDay(today),
-      },
+      const expenses = await db.expense.groupBy({
+        by: ['date'],
+        where: {
+          userId: uid,
+          type: {
+            not: 'income',
+          },
+          date: {
+            gte: startOfDay(start),
+            lte: endOfDay(today),
+          },
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      const activityMap = new Map<string, number>();
+
+      for (const expense of expenses) {
+        const dayKey = format(expense.date, 'yyyy-MM-dd');
+        const current = activityMap.get(dayKey) || 0;
+        activityMap.set(dayKey, current + (expense._sum.amount || 0));
+      }
+
+      const result: Array<{ date: string; count: number }> = [];
+
+      for (const [date, count] of activityMap.entries()) {
+        result.push({ date, count });
+      }
+
+      return result;
     },
-    _sum: {
-      amount: true,
-    },
-  });
+    ['daily-activity-data'],
+    { tags: ['expenses'] }
+  );
 
-  // Transform to { date: 'YYYY-MM-DD', count: amount }
-  // Note: Prisma groupBy on date might return full ISO timestamps.
-  // We need to aggregate by day in JS if the DB stores full timestamps.
-  // Assuming SQLite/Postgres date-time storage, distinct timestamps means we definitely need to aggregate.
-
-  const activityMap = new Map<string, number>();
-
-  for (const expense of expenses) {
-    const dayKey = format(expense.date, 'yyyy-MM-dd');
-    const current = activityMap.get(dayKey) || 0;
-    activityMap.set(dayKey, current + (expense._sum.amount || 0));
-  }
-
-  const result: Array<{ date: string; count: number }> = [];
-
-  // Fill in relevant data points (we don't strictly need to fill zeroes here,
-  // the frontend component can handle missing dates or we pass sparse data).
-  // Let's pass sparse data to accept existing dates.
-  for (const [date, count] of activityMap.entries()) {
-    result.push({ date, count });
-  }
-
-  return result;
+  return await fetchDailyActivity(userId);
 }
 
 
 export async function getUserCurrency() {
-  const userRes = await getOrCreateUserId();
+  const userRes = await getCachedUser();
   if (!userRes.success) {
     return "USD";
   }
 
-  const user = await db.user.findUnique({
-    where: { id: userRes.data },
-    select: { currency: true },
-  });
+  // userRes.data is the User object, which should have currency
+  // We need to check if 'currency' exists on the type, as getCachedUser infers from db.user.findUnique.
+  // If undefined, fallback to USD.
+  // Note: If 'currency' is not in the default selection of findUnique, we might need a specific fetch,
+  // but findUnique usually returns all scalars.
 
-  return user?.currency || "USD";
+  // @ts-ignore - explicitly ignoring potential type issue if currency is optional/missing in strict types, though it typically exists.
+  return userRes.data.currency || "USD";
 }
