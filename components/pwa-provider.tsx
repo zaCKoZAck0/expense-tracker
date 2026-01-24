@@ -2,7 +2,6 @@
 
 import {
   useEffect,
-  useCallback,
   createContext,
   useContext,
   useState,
@@ -27,49 +26,24 @@ export function usePWA() {
 
 export function PWAProvider({ children }: { children: ReactNode }) {
   const [isInstalled, setIsInstalled] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator !== "undefined" ? navigator.onLine : true,
+  );
   const [swRegistration, setSwRegistration] =
     useState<ServiceWorkerRegistration | null>(null);
 
-  const registerServiceWorker = useCallback(async () => {
-    if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
-      return;
-    }
-
-    try {
-      const registration = await navigator.serviceWorker.register(
-        "/service-worker.js",
-        {
-          scope: "/",
-          updateViaCache: "none",
-        },
-      );
-
-      setSwRegistration(registration);
-
-      // Check for updates periodically
-      registration.addEventListener("updatefound", () => {
-        const newWorker = registration.installing;
-        if (newWorker) {
-          newWorker.addEventListener("statechange", () => {
-            if (
-              newWorker.state === "installed" &&
-              navigator.serviceWorker.controller
-            ) {
-              // New content available, could prompt user to refresh
-              console.log("New content available, refresh to update.");
-            }
-          });
-        }
-      });
-
-      console.log("Service Worker registered successfully");
-    } catch (error) {
-      console.error("Service Worker registration failed:", error);
-    }
-  }, []);
-
   useEffect(() => {
+    // Guard against server-side execution before accessing window APIs
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    let isMounted = true;
+    let registration: ServiceWorkerRegistration | null = null;
+    let updateFoundHandler:
+      | ((this: ServiceWorkerRegistration, event: Event) => void)
+      | null = null;
+
     // Check if app is installed (standalone mode)
     const checkInstalled = () => {
       const isStandalone =
@@ -84,19 +58,68 @@ export function PWAProvider({ children }: { children: ReactNode }) {
     const handleOffline = () => setIsOnline(false);
 
     checkInstalled();
-    setIsOnline(navigator.onLine);
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
-    // Register service worker
-    registerServiceWorker();
+    const registerServiceWorker = async () => {
+      if (!("serviceWorker" in navigator)) {
+        return;
+      }
+
+      try {
+        registration = await navigator.serviceWorker.register(
+          "/service-worker.js",
+          {
+            scope: "/",
+            updateViaCache: "none",
+          },
+        );
+
+        updateFoundHandler = () => {
+          const newWorker = registration?.installing;
+          if (newWorker) {
+            newWorker.addEventListener("statechange", () => {
+              if (
+                newWorker.state === "installed" &&
+                navigator.serviceWorker.controller
+              ) {
+                // New content available, could prompt user to refresh
+                console.log("New content available, refresh to update.");
+              }
+            });
+          }
+        };
+
+        if (updateFoundHandler) {
+          registration.addEventListener("updatefound", updateFoundHandler);
+        }
+
+        // Track the ready registration asynchronously to avoid synchronous state updates
+        navigator.serviceWorker.ready.then((readyRegistration) => {
+          if (isMounted) {
+            setSwRegistration(readyRegistration);
+          }
+        });
+
+        console.log("Service Worker registered successfully");
+      } catch (error) {
+        console.error("Service Worker registration failed:", error);
+      }
+    };
+
+    // Register the service worker after listeners are set to avoid synchronous state updates
+    void registerServiceWorker();
 
     return () => {
+      isMounted = false;
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      if (registration && updateFoundHandler) {
+        registration.removeEventListener("updatefound", updateFoundHandler);
+      }
     };
-  }, [registerServiceWorker]);
+  }, []);
 
   return (
     <PWAContext.Provider value={{ isInstalled, isOnline, swRegistration }}>
