@@ -159,7 +159,10 @@ export function PWAProvider({ children }: { children: ReactNode }) {
       isMounted = false;
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
       window.removeEventListener("appinstalled", handleAppInstalled);
       if (registration && updateFoundHandler) {
         registration.removeEventListener("updatefound", updateFoundHandler);
@@ -168,7 +171,15 @@ export function PWAProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <PWAContext.Provider value={{ isInstalled, isOnline, swRegistration, canInstall, promptInstall }}>
+    <PWAContext.Provider
+      value={{
+        isInstalled,
+        isOnline,
+        swRegistration,
+        canInstall,
+        promptInstall,
+      }}
+    >
       {children}
     </PWAContext.Provider>
   );
