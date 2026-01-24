@@ -334,14 +334,14 @@ export default function SavingsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto max-w-3xl p-4">
+      <div className="container mx-auto max-w-3xl px-2 sm:px-4 py-4">
         <p className="text-sm text-muted-foreground">Loading savings…</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto max-w-3xl p-4 space-y-6">
+    <div className="container mx-auto max-w-3xl py-4 space-y-6">
       <div className="flex flex-wrap items-center gap-3 justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold">Savings</h1>
