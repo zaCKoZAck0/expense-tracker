@@ -6,18 +6,29 @@ import {
   useContext,
   useState,
   ReactNode,
+  useCallback,
 } from "react";
+
+// BeforeInstallPromptEvent is not in standard TypeScript types
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 
 interface PWAContextValue {
   isInstalled: boolean;
   isOnline: boolean;
   swRegistration: ServiceWorkerRegistration | null;
+  canInstall: boolean;
+  promptInstall: () => Promise<boolean>;
 }
 
 const PWAContext = createContext<PWAContextValue>({
   isInstalled: false,
   isOnline: true,
   swRegistration: null,
+  canInstall: false,
+  promptInstall: async () => false,
 });
 
 export function usePWA() {
@@ -31,6 +42,25 @@ export function PWAProvider({ children }: { children: ReactNode }) {
   );
   const [swRegistration, setSwRegistration] =
     useState<ServiceWorkerRegistration | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+
+  const canInstall = !isInstalled && deferredPrompt !== null;
+
+  const promptInstall = useCallback(async (): Promise<boolean> => {
+    if (!deferredPrompt) return false;
+
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      // Clear the prompt - can only be used once
+      setDeferredPrompt(null);
+      return outcome === "accepted";
+    } catch (error) {
+      console.error("Install prompt failed:", error);
+      return false;
+    }
+  }, [deferredPrompt]);
 
   useEffect(() => {
     // Guard against server-side execution before accessing window APIs
@@ -57,10 +87,24 @@ export function PWAProvider({ children }: { children: ReactNode }) {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
+    // Capture the beforeinstallprompt event
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    // Handle successful installation
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+    };
+
     checkInstalled();
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     const registerServiceWorker = async () => {
       if (!("serviceWorker" in navigator)) {
@@ -115,6 +159,8 @@ export function PWAProvider({ children }: { children: ReactNode }) {
       isMounted = false;
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
       if (registration && updateFoundHandler) {
         registration.removeEventListener("updatefound", updateFoundHandler);
       }
@@ -122,7 +168,7 @@ export function PWAProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <PWAContext.Provider value={{ isInstalled, isOnline, swRegistration }}>
+    <PWAContext.Provider value={{ isInstalled, isOnline, swRegistration, canInstall, promptInstall }}>
       {children}
     </PWAContext.Provider>
   );
