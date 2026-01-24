@@ -53,42 +53,43 @@ export function BudgetSummary({
               isOverBudget ? "border-destructive/50" : ""
             }`}
           >
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-base font-medium tracking-tight text-muted-foreground">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>
                 {isOverBudget ? "Over budget" : "Left to spend"}
               </CardTitle>
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
-                <WalletIcon className="h-4 w-4 text-primary" />
-              </div>
+              <WalletIcon className="h-4 w-4" />
             </CardHeader>
-            <CardContent className="space-y-4 pt-0">
+            <CardContent className="space-y-2">
               {isOverBudget ? (
                 <div className="space-y-1">
-                  <p className="text-2xl font-bold tracking-tight text-destructive">
+                  <p className="font-semibold text-destructive">
                     Over by {formatCurrency(overBudgetAmount, currency)}
                   </p>
-                  <p className="text-sm font-medium text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     Monthly budget: {formatCurrency(budgetAmount, currency)}
                   </p>
                 </div>
               ) : (
-                <div className="space-y-1">
-                  <p className="text-2xl font-bold tracking-tight text-foreground">
+                <p>
+                  <span className="font-bold">
                     {formatCurrency(safeRemaining, currency)}
-                    <span className="text-base font-medium text-muted-foreground ml-2">
-                      out of {formatCurrency(budgetAmount, currency)}
-                    </span>
-                  </p>
-                </div>
+                  </span>{" "}
+                  out of {formatCurrency(budgetAmount, currency)}
+                </p>
               )}
               <Progress
-                className={`h-3 ${isOverBudget ? "bg-destructive/20" : ""}`}
+                className={`h-4 ${isOverBudget ? "bg-destructive/20" : ""}`}
                 indicatorClassName={isOverBudget ? "bg-destructive" : undefined}
                 value={progressValue}
               />
-              <div className="pt-3 border-t border-border/50">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Daily spending</p>
-                <DailySpendingChart data={dailySpending} daysInMonth={daysInMonth} />
+              <div className="pt-2">
+                <p className="text-xs text-muted-foreground mb-1">
+                  Daily spending
+                </p>
+                <DailySpendingChart
+                  data={dailySpending}
+                  daysInMonth={daysInMonth}
+                />
               </div>
             </CardContent>
           </Card>

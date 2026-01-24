@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { SyncStatus } from "@/components/sync-status";
 import ThemeToggle from "@/components/theme-toggle";
 import {
   Select,
@@ -75,6 +76,7 @@ export function Navbar() {
         )}
 
         <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
+          <SyncStatus />
           <ThemeToggle />
         </div>
 
@@ -83,3 +85,4 @@ export function Navbar() {
     </header>
   );
 }
+

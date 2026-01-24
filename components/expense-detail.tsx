@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { categoryIcons, defaultCategoryIcon } from "@/lib/constants";
+import { categoryIcons, incomeCategoryIcons, defaultCategoryIcon } from "@/lib/constants";
 import { Button } from "./ui/button";
 import { useUserSettings } from "@/components/user-settings-provider";
 import { useNavigation } from "@/components/navigation-provider";
@@ -34,7 +33,8 @@ import { ArrowLeft, Edit, Trash, MoreVertical } from "lucide-react";
 import { ExpenseForm } from "@/components/expense-form";
 import { toast } from "sonner";
 import type { Expense } from "@/lib/types";
-import { deleteExpense as deleteExpenseAction } from "@/app/actions";
+import { useDeleteExpense } from "@/hooks/use-local-data";
+import { useSyncContext } from "@/components/sync-provider";
 
 export default function ExpenseDetail({
   expense,
@@ -45,24 +45,31 @@ export default function ExpenseDetail({
 }) {
   const { currency } = useUserSettings();
   const { triggerRefresh } = useNavigation();
-  const Icon = categoryIcons[expense.category] || defaultCategoryIcon;
+  const deleteExpenseLocal = useDeleteExpense();
+  const { syncNow } = useSyncContext();
+  const isIncome = expense.type === "income";
+  const Icon = isIncome 
+    ? (incomeCategoryIcons[expense.category] || defaultCategoryIcon)
+    : (categoryIcons[expense.category] || defaultCategoryIcon);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   async function handleDelete() {
     startTransition(async () => {
-      const result = await deleteExpenseAction(expense.id);
-      if (!result.success) {
-        toast.error(result.error ?? "Failed to delete expense");
-        return;
+      try {
+        // Delete from local Dexie DB
+        await deleteExpenseLocal(expense.id);
+        toast.success("Transaction deleted");
+        triggerRefresh();
+        // Sync in background
+        syncNow().catch(console.error);
+        onBack?.();
+        setDeleteOpen(false);
+      } catch (error) {
+        console.error("Failed to delete expense:", error);
+        toast.error("Failed to delete transaction");
       }
-      toast.success("Expense deleted");
-      router.refresh();
-      triggerRefresh();
-      onBack?.();
-      setDeleteOpen(false);
     });
   }
 

@@ -60,7 +60,7 @@ export default async function Home({
           </div>
         }
       >
-        <TransactionsPage searchParams={params} />
+        <TransactionsPage />
       </Suspense>
     );
   }

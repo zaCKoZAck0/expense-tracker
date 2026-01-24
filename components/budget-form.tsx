@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,8 +18,9 @@ import { Input } from "@/components/ui/input";
 import { AmountInput } from "@/components/ui/amount-input";
 import { toast } from "sonner";
 import { getCurrentMonthKey } from "@/lib/utils";
-import { setBudget as setBudgetAction } from "@/app/actions";
 import { useNavigation } from "@/components/navigation-provider";
+import { useSetBudget } from "@/hooks/use-local-data";
+import { useSyncContext } from "@/components/sync-provider";
 
 const formSchema = z.object({
   amount: z.preprocess(
@@ -44,8 +44,9 @@ export function BudgetForm({
   onSuccess,
 }: BudgetFormProps) {
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
   const { triggerRefresh } = useNavigation();
+  const setBudgetLocal = useSetBudget();
+  const { syncNow } = useSyncContext();
 
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(formSchema) as Resolver<BudgetFormValues>,
@@ -57,15 +58,18 @@ export function BudgetForm({
 
   function onSubmit(values: BudgetFormValues) {
     startTransition(async () => {
-      const result = await setBudgetAction(values.amount, values.month);
-      if (!result.success) {
-        toast.error(result.error ?? "Failed to save budget");
-        return;
+      try {
+        // Save to local Dexie DB
+        await setBudgetLocal(values.amount, values.month);
+        toast.success("Budget saved");
+        triggerRefresh();
+        // Sync in background
+        syncNow().catch(console.error);
+        onSuccess?.();
+      } catch (error) {
+        console.error("Failed to save budget:", error);
+        toast.error("Failed to save budget");
       }
-      toast.success("Budget saved");
-      router.refresh();
-      triggerRefresh();
-      onSuccess?.();
     });
   }
 

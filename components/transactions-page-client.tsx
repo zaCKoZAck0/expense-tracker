@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState, useEffect, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,104 +21,85 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { categoryIcons, defaultCategoryIcon } from "@/lib/constants";
+import { categoryIcons, incomeCategoryIcons, defaultCategoryIcon } from "@/lib/constants";
 import { formatCurrency, formatDateUTC } from "@/lib/utils";
 import { useUserSettings } from "@/components/user-settings-provider";
 import { cn } from "@/lib/utils";
 import { useNavigation } from "@/components/navigation-provider";
 import { Transaction } from "@/components/expense-list";
 import ExpenseDetail from "@/components/expense-detail";
+import { useTransactions } from "@/hooks/use-local-data";
 import {
   ChevronLeft,
   ChevronRight,
   ArrowUpDown,
   Filter,
   X,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 
-import { size } from "zod";
-
-interface TransactionsPageClientProps {
-  initialTransactions: any[];
-  totalCount: number;
-  totalPages: number;
-  currentPage: number;
-  sortBy: "date" | "amount";
-  sortOrder: "asc" | "desc";
-  filterType: "expense" | "income" | "all";
-  month?: string;
-}
-
-export function TransactionsPageClient({
-  initialTransactions,
-  totalCount,
-  totalPages,
-  currentPage,
-  sortBy,
-  sortOrder,
-  filterType,
-  month,
-}: TransactionsPageClientProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+// Component now uses Dexie data directly - no props needed
+export function TransactionsPageClient() {
   const { currency } = useUserSettings();
   const { openExpense, selectedExpense, closeExpense } = useNavigation();
 
-  // Helper to update URL params
-  const updateParams = useCallback(
-    (updates: Record<string, string | number | null>) => {
-      const params = new URLSearchParams(searchParams.toString());
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value === null) {
-          params.delete(key);
-        } else {
-          params.set(key, String(value));
-        }
-      });
-      router.push(`?${params.toString()}`);
-    },
-    [router, searchParams],
-  );
+  // Local state for filters and pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState<"date" | "amount">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filterType, setFilterType] = useState<"expense" | "income" | "all">("all");
+  const [isGrouped, setIsGrouped] = useState(true);
+  const [localStartDate, setLocalStartDate] = useState("");
+  const [localEndDate, setLocalEndDate] = useState("");
+  const [localMinAmount, setLocalMinAmount] = useState("");
+  const [localMaxAmount, setLocalMaxAmount] = useState("");
+  const [appliedFilters, setAppliedFilters] = useState<{
+    startDate?: string;
+    endDate?: string;
+    minAmount?: number;
+    maxAmount?: number;
+  }>({});
 
-  // Normalizing data (dates come as strings from server component -> client boundary if not careful,
-  // but here we get them from server action which might return Date objects if directly called,
-  // BUT effectively Next.js serializes arguments.
-  // Actually, wait, properties passed from Server to Client component must be serializable.
-  // Date objects are NOT serializable directly in props usually, they get converted to string or need to be toJSON.
-  // Let's assume initialTransactions needs date parsing.
-  const transactions: Transaction[] = useMemo(() => {
-    return initialTransactions.map((t: any) => ({
-      ...t,
-      date: new Date(t.date),
-      type: t.type as "expense" | "income",
-    }));
-  }, [initialTransactions]);
+  const limit = 20;
 
-  // Local state for filters
-  const [isGrouped, setIsGrouped] = useState(true); // Default to grouped
-  const [localFilterType, setLocalFilterType] = useState(filterType);
-  const [localStartDate, setLocalStartDate] = useState(
-    searchParams.get("startDate") || "",
-  );
-  const [localEndDate, setLocalEndDate] = useState(
-    searchParams.get("endDate") || "",
-  );
-  const [localMinAmount, setLocalMinAmount] = useState(
-    searchParams.get("minAmount") || "",
-  );
-  const [localMaxAmount, setLocalMaxAmount] = useState(
-    searchParams.get("maxAmount") || "",
-  );
+  // Use Dexie-backed hook for transactions
+  const { data, isLoading } = useTransactions({
+    page: currentPage,
+    limit,
+    sortBy,
+    sortOrder,
+    filterType,
+    startDate: appliedFilters.startDate,
+    endDate: appliedFilters.endDate,
+    minAmount: appliedFilters.minAmount,
+    maxAmount: appliedFilters.maxAmount,
+  });
 
-  // Update local state when params change
-  useEffect(() => {
-    setLocalFilterType(filterType);
-    setLocalStartDate(searchParams.get("startDate") || "");
-    setLocalEndDate(searchParams.get("endDate") || "");
-    setLocalMinAmount(searchParams.get("minAmount") || "");
-    setLocalMaxAmount(searchParams.get("maxAmount") || "");
-  }, [searchParams, filterType]);
+  const transactions = data?.transactions ?? [];
+  const totalCount = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
+
+  // Helper to update filters
+  const applyFilters = useCallback(() => {
+    setAppliedFilters({
+      startDate: localStartDate || undefined,
+      endDate: localEndDate || undefined,
+      minAmount: localMinAmount ? parseFloat(localMinAmount) : undefined,
+      maxAmount: localMaxAmount ? parseFloat(localMaxAmount) : undefined,
+    });
+    setCurrentPage(1);
+  }, [localStartDate, localEndDate, localMinAmount, localMaxAmount]);
+
+  const resetFilters = useCallback(() => {
+    setFilterType("all");
+    setLocalStartDate("");
+    setLocalEndDate("");
+    setLocalMinAmount("");
+    setLocalMaxAmount("");
+    setAppliedFilters({});
+    setCurrentPage(1);
+  }, []);
 
   // Group by month
   const groupedTransactions = useMemo(() => {
@@ -140,11 +120,29 @@ export function TransactionsPageClient({
     return groups;
   }, [transactions, isGrouped]);
 
+  // Check for active filters indicator
+  const hasActiveFilters = filterType !== "all" || 
+    appliedFilters.startDate || 
+    appliedFilters.endDate || 
+    appliedFilters.minAmount !== undefined || 
+    appliedFilters.maxAmount !== undefined;
+
   // If an expense is selected, show the detail view
   if (selectedExpense) {
     return (
       <div className="space-y-6 pb-24 pt-6">
         <ExpenseDetail expense={selectedExpense} onBack={closeExpense} />
+      </div>
+    );
+  }
+
+  // Loading state
+  if (isLoading && transactions.length === 0) {
+    return (
+      <div className="space-y-6 pb-24 pt-6">
+        <div className="flex items-center justify-center h-48">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
       </div>
     );
   }
@@ -161,9 +159,7 @@ export function TransactionsPageClient({
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                   Filters
                 </span>
-                {(filterType !== "all" ||
-                  searchParams.get("startDate") ||
-                  searchParams.get("minAmount")) && (
+                {hasActiveFilters && (
                   <span className="ml-1 flex h-2 w-2 rounded-full bg-primary" />
                 )}
               </Button>
@@ -190,8 +186,11 @@ export function TransactionsPageClient({
                     Type
                   </h4>
                   <Tabs
-                    defaultValue={localFilterType}
-                    onValueChange={(v: any) => setLocalFilterType(v)}
+                    value={filterType}
+                    onValueChange={(v) => {
+                      setFilterType(v as "expense" | "income" | "all");
+                      setCurrentPage(1);
+                    }}
                     className="w-full"
                   >
                     <TabsList className="grid w-full grid-cols-3 h-8">
@@ -275,36 +274,13 @@ export function TransactionsPageClient({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setLocalFilterType("all");
-                      setLocalStartDate("");
-                      setLocalEndDate("");
-                      setLocalMinAmount("");
-                      setLocalMaxAmount("");
-                      updateParams({
-                        filterType: "all",
-                        startDate: null,
-                        endDate: null,
-                        minAmount: null,
-                        maxAmount: null,
-                        pageNumber: 1,
-                      });
-                    }}
+                    onClick={resetFilters}
                   >
                     Reset
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => {
-                      updateParams({
-                        filterType: localFilterType,
-                        startDate: localStartDate || null,
-                        endDate: localEndDate || null,
-                        minAmount: localMinAmount || null,
-                        maxAmount: localMaxAmount || null,
-                        pageNumber: 1,
-                      });
-                    }}
+                    onClick={applyFilters}
                   >
                     Apply
                   </Button>
@@ -327,34 +303,38 @@ export function TransactionsPageClient({
               <DropdownMenuSeparator />
               <DropdownMenuCheckboxItem
                 checked={sortBy === "date" && sortOrder === "desc"}
-                onCheckedChange={() =>
-                  updateParams({ sortBy: "date", sortOrder: "desc" })
-                }
+                onCheckedChange={() => {
+                  setSortBy("date");
+                  setSortOrder("desc");
+                }}
               >
                 Newest Date
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={sortBy === "date" && sortOrder === "asc"}
-                onCheckedChange={() =>
-                  updateParams({ sortBy: "date", sortOrder: "asc" })
-                }
+                onCheckedChange={() => {
+                  setSortBy("date");
+                  setSortOrder("asc");
+                }}
               >
                 Oldest Date
               </DropdownMenuCheckboxItem>
               <DropdownMenuSeparator />
               <DropdownMenuCheckboxItem
                 checked={sortBy === "amount" && sortOrder === "desc"}
-                onCheckedChange={() =>
-                  updateParams({ sortBy: "amount", sortOrder: "desc" })
-                }
+                onCheckedChange={() => {
+                  setSortBy("amount");
+                  setSortOrder("desc");
+                }}
               >
                 Highest Amount
               </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem
                 checked={sortBy === "amount" && sortOrder === "asc"}
-                onCheckedChange={() =>
-                  updateParams({ sortBy: "amount", sortOrder: "asc" })
-                }
+                onCheckedChange={() => {
+                  setSortBy("amount");
+                  setSortOrder("asc");
+                }}
               >
                 Lowest Amount
               </DropdownMenuCheckboxItem>
@@ -392,10 +372,10 @@ export function TransactionsPageClient({
                         </TableCell>
                       </TableRow>
                       {monthTransactions.map((transaction) => {
-                        const Icon =
-                          categoryIcons[transaction.category] ||
-                          defaultCategoryIcon;
                         const isIncome = transaction.type === "income";
+                        const Icon = isIncome 
+                          ? (incomeCategoryIcons[transaction.category] || defaultCategoryIcon)
+                          : (categoryIcons[transaction.category] || defaultCategoryIcon);
 
                         return (
                           <TableRow
@@ -460,9 +440,10 @@ export function TransactionsPageClient({
               </TableRow>
             ) : (
               transactions.map((transaction) => {
-                const Icon =
-                  categoryIcons[transaction.category] || defaultCategoryIcon;
                 const isIncome = transaction.type === "income";
+                const Icon = isIncome 
+                  ? (incomeCategoryIcons[transaction.category] || defaultCategoryIcon)
+                  : (categoryIcons[transaction.category] || defaultCategoryIcon);
 
                 return (
                   <TableRow
@@ -523,7 +504,7 @@ export function TransactionsPageClient({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => updateParams({ pageNumber: currentPage - 1 })}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             disabled={currentPage <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -532,7 +513,7 @@ export function TransactionsPageClient({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => updateParams({ pageNumber: currentPage + 1 })}
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
             disabled={currentPage >= totalPages}
           >
             Next

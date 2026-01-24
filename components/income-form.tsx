@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,7 +38,8 @@ import {
   incomeCategoryIcons,
   defaultCategoryIcon,
 } from "@/lib/constants";
-import { addExpense as addIncomeAction } from "@/app/actions";
+import { useAddExpense, getLocalUserId } from "@/hooks/use-local-data";
+import { useSyncContext } from "@/components/sync-provider";
 
 const formSchema = z.object({
   amount: z.preprocess(
@@ -59,8 +59,9 @@ interface IncomeFormProps {
 
 export function IncomeForm({ onSuccess }: IncomeFormProps) {
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
-  const { selectedMonth, triggerRefresh } = useNavigation();
+  const { triggerRefresh } = useNavigation();
+  const addExpenseLocal = useAddExpense();
+  const { syncNow } = useSyncContext();
 
   // Default date to current date for new income entries
   const getDefaultDate = () => {
@@ -79,24 +80,29 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
 
   function onSubmit(values: IncomeFormValues) {
     startTransition(async () => {
-      const result = await addIncomeAction({
-        ...values,
-        type: "income",
-      });
-      if (!result.success) {
-        toast.error(result.error ?? "Failed to add income");
-        return;
+      try {
+        // Get userId from local DB
+        const userId = await getLocalUserId();
+        // Save to local Dexie DB with type: "income"
+        await addExpenseLocal({
+          ...values,
+          type: "income",
+        }, userId);
+        toast.success("Income added successfully");
+        triggerRefresh();
+        // Sync in background
+        syncNow().catch(console.error);
+        form.reset({
+          date: toUTCNoon(new Date()),
+          notes: "",
+          amount: 0,
+          category: undefined,
+        });
+        onSuccess?.();
+      } catch (error) {
+        console.error("Failed to add income:", error);
+        toast.error("Failed to add income");
       }
-      toast.success("Income added successfully");
-      router.refresh();
-      triggerRefresh();
-      form.reset({
-        date: toUTCNoon(new Date()),
-        notes: "",
-        amount: 0,
-        category: undefined,
-      });
-      onSuccess?.();
     });
   }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,12 +44,11 @@ import {
 } from "@/lib/constants";
 import type { Expense } from "@/lib/types";
 import {
-  addExpense as addExpenseAction,
-  updateExpense as updateExpenseAction,
-} from "@/app/actions";
-
-// Combined categories for validation
-const allCategories = [...categories, ...incomeCategories] as const;
+  useAddExpense,
+  useUpdateExpense,
+  getLocalUserId,
+} from "@/hooks/use-local-data";
+import { useSyncContext } from "@/components/sync-provider";
 
 const formSchema = z.object({
   amount: z.preprocess(
@@ -72,8 +70,10 @@ interface ExpenseFormProps {
 
 export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
-  const { selectedMonth, triggerRefresh } = useNavigation();
+  const { triggerRefresh } = useNavigation();
+  const addExpenseLocal = useAddExpense();
+  const updateExpenseLocal = useUpdateExpense();
+  const { syncNow } = useSyncContext();
 
   // Track transaction type for editing
   const [transactionType, setTransactionType] = useState<"expense" | "income">(
@@ -110,69 +110,72 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
 
   function onSubmit(values: ExpenseFormValues) {
     startTransition(async () => {
-      if (expense?.id) {
-        const result = await updateExpenseAction(expense.id, {
-          ...values,
-          type: transactionType,
-        });
-        if (!result.success) {
-          toast.error(result.error ?? "Failed to update transaction");
+      try {
+        if (expense?.id) {
+          // Update existing expense locally first
+          await updateExpenseLocal(expense.id, {
+            ...values,
+            type: transactionType,
+          });
+          toast.success("Transaction updated");
+          triggerRefresh();
+          // Sync in background
+          syncNow().catch(console.error);
+          onSuccess?.();
           return;
         }
-        toast.success("Transaction updated successfully");
-        router.refresh();
-        triggerRefresh();
-        onSuccess?.();
-        return;
-      }
 
-      const result = await addExpenseAction({
-        ...values,
-        type: transactionType,
-      });
-      if (!result.success) {
-        toast.error(result.error ?? "Failed to add expense");
-        return;
+        // Add new expense locally first
+        // Get userId from local DB
+        const userId = await getLocalUserId();
+        await addExpenseLocal({
+          ...values,
+          type: transactionType,
+        }, userId);
+        toast.success(transactionType === "income" ? "Income added" : "Expense added");
+        triggerRefresh();
+        // Sync in background
+        syncNow().catch(console.error);
+        form.reset({
+          date: toUTCNoon(new Date()),
+          notes: "",
+          amount: 0,
+          category: "",
+          type: "expense",
+        });
+        setTransactionType("expense");
+        onSuccess?.();
+      } catch (error) {
+        console.error("Failed to save expense:", error);
+        toast.error("Failed to save expense");
       }
-      toast.success("Expense added successfully");
-      router.refresh();
-      triggerRefresh();
-      form.reset({
-        date: toUTCNoon(new Date()),
-        notes: "",
-        amount: 0,
-        category: "",
-      });
-      onSuccess?.();
     });
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Transaction Type Toggle - Only show when editing */}
-        {expense?.id && (
-          <div className="space-y-2">
-            <RadioGroup
-              value={transactionType}
-              onValueChange={(v) => handleTypeChange(v as "expense" | "income")}
-              className="flex gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="expense" id="type-expense" />
-                <Label htmlFor="type-expense" className="font-normal cursor-pointer">
-                  Expense
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="income" id="type-income" />
-                <Label htmlFor="type-income" className="font-normal cursor-pointer">
-                  Income
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-        )}
+        {/* Transaction Type Toggle - Always show */}
+        <div className="space-y-2">
+          <RadioGroup
+            value={transactionType}
+            onValueChange={(v) => handleTypeChange(v as "expense" | "income")}
+            className="flex gap-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="expense" id="type-expense" />
+              <Label htmlFor="type-expense" className="font-normal cursor-pointer">
+                Expense
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="income" id="type-income" />
+              <Label htmlFor="type-income" className="font-normal cursor-pointer">
+                Income
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
 
         <FormField
           control={form.control}
