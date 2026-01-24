@@ -21,7 +21,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { categoryIcons, incomeCategoryIcons, defaultCategoryIcon } from "@/lib/constants";
+import {
+  categoryIcons,
+  incomeCategoryIcons,
+  defaultCategoryIcon,
+} from "@/lib/constants";
 import { formatCurrency, formatDateUTC } from "@/lib/utils";
 import { useUserSettings } from "@/components/user-settings-provider";
 import { cn } from "@/lib/utils";
@@ -48,7 +52,9 @@ export function TransactionsPageClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<"date" | "amount">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [filterType, setFilterType] = useState<"expense" | "income" | "all">("all");
+  const [filterType, setFilterType] = useState<"expense" | "income" | "all">(
+    "all",
+  );
   const [isGrouped, setIsGrouped] = useState(true);
   const [localStartDate, setLocalStartDate] = useState("");
   const [localEndDate, setLocalEndDate] = useState("");
@@ -121,10 +127,11 @@ export function TransactionsPageClient() {
   }, [transactions, isGrouped]);
 
   // Check for active filters indicator
-  const hasActiveFilters = filterType !== "all" || 
-    appliedFilters.startDate || 
-    appliedFilters.endDate || 
-    appliedFilters.minAmount !== undefined || 
+  const hasActiveFilters =
+    filterType !== "all" ||
+    appliedFilters.startDate ||
+    appliedFilters.endDate ||
+    appliedFilters.minAmount !== undefined ||
     appliedFilters.maxAmount !== undefined;
 
   // If an expense is selected, show the detail view
@@ -271,17 +278,10 @@ export function TransactionsPageClient() {
                   </div>
                 </div>
                 <div className="flex gap-2 pt-2 justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={resetFilters}
-                  >
+                  <Button variant="outline" size="sm" onClick={resetFilters}>
                     Reset
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={applyFilters}
-                  >
+                  <Button size="sm" onClick={applyFilters}>
                     Apply
                   </Button>
                 </div>
@@ -373,9 +373,11 @@ export function TransactionsPageClient() {
                       </TableRow>
                       {monthTransactions.map((transaction) => {
                         const isIncome = transaction.type === "income";
-                        const Icon = isIncome 
-                          ? (incomeCategoryIcons[transaction.category] || defaultCategoryIcon)
-                          : (categoryIcons[transaction.category] || defaultCategoryIcon);
+                        const Icon = isIncome
+                          ? incomeCategoryIcons[transaction.category] ||
+                            defaultCategoryIcon
+                          : categoryIcons[transaction.category] ||
+                            defaultCategoryIcon;
 
                         return (
                           <TableRow
@@ -441,9 +443,10 @@ export function TransactionsPageClient() {
             ) : (
               transactions.map((transaction) => {
                 const isIncome = transaction.type === "income";
-                const Icon = isIncome 
-                  ? (incomeCategoryIcons[transaction.category] || defaultCategoryIcon)
-                  : (categoryIcons[transaction.category] || defaultCategoryIcon);
+                const Icon = isIncome
+                  ? incomeCategoryIcons[transaction.category] ||
+                    defaultCategoryIcon
+                  : categoryIcons[transaction.category] || defaultCategoryIcon;
 
                 return (
                   <TableRow
@@ -462,8 +465,7 @@ export function TransactionsPageClient() {
                           <Icon
                             className={cn(
                               "h-5 w-5 text-accent-foreground",
-                              isIncome &&
-                                "text-green-700 dark:text-green-300",
+                              isIncome && "text-green-700 dark:text-green-300",
                             )}
                           />
                         </div>
@@ -480,9 +482,7 @@ export function TransactionsPageClient() {
                     <TableCell
                       className={cn(
                         "text-right font-medium",
-                        isIncome
-                          ? "text-green-600 dark:text-green-400"
-                          : "",
+                        isIncome ? "text-green-600 dark:text-green-400" : "",
                       )}
                     >
                       {isIncome ? "+" : "-"}
@@ -504,7 +504,7 @@ export function TransactionsPageClient() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -513,7 +513,7 @@ export function TransactionsPageClient() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage >= totalPages}
           >
             Next

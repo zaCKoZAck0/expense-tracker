@@ -84,10 +84,13 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
         // Get userId from local DB
         const userId = await getLocalUserId();
         // Save to local Dexie DB with type: "income"
-        await addExpenseLocal({
-          ...values,
-          type: "income",
-        }, userId);
+        await addExpenseLocal(
+          {
+            ...values,
+            type: "income",
+          },
+          userId,
+        );
         toast.success("Income added successfully");
         triggerRefresh();
         // Sync in background
@@ -116,11 +119,7 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <AmountInput
-                  step="0.01"
-                  placeholder="0.00"
-                  {...field}
-                />
+                <AmountInput step="0.01" placeholder="0.00" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -144,11 +143,15 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
                   </FormControl>
                   <SelectContent>
                     {incomeCategories.map((cat) => {
-                      const Icon = incomeCategoryIcons[cat] || defaultCategoryIcon;
+                      const Icon =
+                        incomeCategoryIcons[cat] || defaultCategoryIcon;
                       return (
                         <SelectItem key={cat} value={cat}>
                           <div className="flex items-center gap-2">
-                            <Icon className="h-6 w-6 text-primary"  strokeWidth={2.5} />
+                            <Icon
+                              className="h-6 w-6 text-primary"
+                              strokeWidth={2.5}
+                            />
                             <span>{cat}</span>
                           </div>
                         </SelectItem>
@@ -183,7 +186,10 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className="ml-auto h-6 w-6 text-primary" strokeWidth={2.5} />
+                        <CalendarIcon
+                          className="ml-auto h-6 w-6 text-primary"
+                          strokeWidth={2.5}
+                        />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -191,7 +197,9 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
                     <Calendar
                       mode="single"
                       selected={field.value}
-                      onSelect={(date) => field.onChange(date ? toUTCNoon(date) : undefined)}
+                      onSelect={(date) =>
+                        field.onChange(date ? toUTCNoon(date) : undefined)
+                      }
                       disabled={(date) =>
                         date > new Date() || date < new Date("1900-01-01")
                       }
@@ -211,10 +219,7 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Add details about this income"
-                  {...field}
-                />
+                <Input placeholder="Add details about this income" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -222,8 +227,8 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
         />
         <div className="w-full flex justify-center pt-3">
           <Button type="submit" className=" fn" disabled={isPending}>
-          {isPending ? "Saving..." : "Save"}
-        </Button>
+            {isPending ? "Saving..." : "Save"}
+          </Button>
         </div>
       </form>
     </Form>

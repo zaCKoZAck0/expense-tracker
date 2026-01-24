@@ -85,7 +85,7 @@ export async function GET(request: Request) {
     console.error("Sync API error:", error);
     return NextResponse.json(
       { error: "Failed to fetch sync data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -93,7 +93,6 @@ export async function GET(request: Request) {
 export async function POST() {
   return NextResponse.json(
     { success: false, error: "Use GET for sync data fetch" },
-    { status: 405 }
+    { status: 405 },
   );
 }
-

@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { categoryIcons, incomeCategoryIcons, defaultCategoryIcon } from "@/lib/constants";
+import {
+  categoryIcons,
+  incomeCategoryIcons,
+  defaultCategoryIcon,
+} from "@/lib/constants";
 import { Button } from "./ui/button";
 import { useUserSettings } from "@/components/user-settings-provider";
 import { useNavigation } from "@/components/navigation-provider";
@@ -48,9 +52,9 @@ export default function ExpenseDetail({
   const deleteExpenseLocal = useDeleteExpense();
   const { syncNow } = useSyncContext();
   const isIncome = expense.type === "income";
-  const Icon = isIncome 
-    ? (incomeCategoryIcons[expense.category] || defaultCategoryIcon)
-    : (categoryIcons[expense.category] || defaultCategoryIcon);
+  const Icon = isIncome
+    ? incomeCategoryIcons[expense.category] || defaultCategoryIcon
+    : categoryIcons[expense.category] || defaultCategoryIcon;
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -156,7 +160,8 @@ export default function ExpenseDetail({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove this transaction. This action cannot be undone.
+              This will permanently remove this transaction. This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

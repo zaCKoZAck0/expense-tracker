@@ -73,14 +73,17 @@ export function useDashboardData(month: string) {
       });
     },
     [month],
-    []
+    [],
   );
 
   // Live query for budget
   const budget = useLiveQuery(
     async () => {
       // Find budget for this month or most recent before it
-      const allBudgets = await localDb.budgets.orderBy("month").reverse().toArray();
+      const allBudgets = await localDb.budgets
+        .orderBy("month")
+        .reverse()
+        .toArray();
 
       // Find exact match or most recent before this month
       const exactMatch = allBudgets.find((b) => b.month === month);
@@ -90,50 +93,50 @@ export function useDashboardData(month: string) {
       return allBudgets.find((b) => b.month <= month) || null;
     },
     [month],
-    null
+    null,
   );
 
   // Compute derived data
   const data: DashboardData | null =
     expenses !== undefined
       ? (() => {
-        const expenseList = expenses.filter((e) => e.type === "expense");
-        const incomeList = expenses.filter((e) => e.type === "income");
+          const expenseList = expenses.filter((e) => e.type === "expense");
+          const incomeList = expenses.filter((e) => e.type === "income");
 
-        const totalSpent = expenseList.reduce((sum, e) => sum + e.amount, 0);
-        const totalIncome = incomeList.reduce((sum, e) => sum + e.amount, 0);
-        const budgetAmount = budget?.amount ?? 0;
-        const remaining = budgetAmount + totalIncome - totalSpent;
+          const totalSpent = expenseList.reduce((sum, e) => sum + e.amount, 0);
+          const totalIncome = incomeList.reduce((sum, e) => sum + e.amount, 0);
+          const budgetAmount = budget?.amount ?? 0;
+          const remaining = budgetAmount + totalIncome - totalSpent;
 
-        // Calculate daily spending
-        const dailySpending: { day: number; amount: number }[] = [];
-        for (let day = 1; day <= daysInMonth; day++) {
-          const dayExpenses = expenseList.filter((e) => {
-            const d = new Date(e.date);
-            return d.getDate() === day;
-          });
-          dailySpending.push({
-            day,
-            amount: dayExpenses.reduce((sum, e) => sum + e.amount, 0),
-          });
-        }
+          // Calculate daily spending
+          const dailySpending: { day: number; amount: number }[] = [];
+          for (let day = 1; day <= daysInMonth; day++) {
+            const dayExpenses = expenseList.filter((e) => {
+              const d = new Date(e.date);
+              return d.getDate() === day;
+            });
+            dailySpending.push({
+              day,
+              amount: dayExpenses.reduce((sum, e) => sum + e.amount, 0),
+            });
+          }
 
-        return {
-          budget: budget
-            ? { id: budget.id, amount: budget.amount, month: budget.month }
-            : null,
-          totalSpent,
-          totalIncome,
-          remaining,
-          expenses: expenses.map((e) => ({
-            ...e,
-            date: new Date(e.date),
-            createdAt: e.createdAt ? new Date(e.createdAt) : undefined,
-          })),
-          dailySpending,
-          daysInMonth,
-        };
-      })()
+          return {
+            budget: budget
+              ? { id: budget.id, amount: budget.amount, month: budget.month }
+              : null,
+            totalSpent,
+            totalIncome,
+            remaining,
+            expenses: expenses.map((e) => ({
+              ...e,
+              date: new Date(e.date),
+              createdAt: e.createdAt ? new Date(e.createdAt) : undefined,
+            })),
+            dailySpending,
+            daysInMonth,
+          };
+        })()
       : null;
 
   // Initial load and server refresh
@@ -238,7 +241,9 @@ export function useTransactions(options: TransactionsOptions = {}) {
           const bDate = new Date(b.date).getTime();
           return sortOrder === "desc" ? bDate - aDate : aDate - bDate;
         } else {
-          return sortOrder === "desc" ? b.amount - a.amount : a.amount - b.amount;
+          return sortOrder === "desc"
+            ? b.amount - a.amount
+            : a.amount - b.amount;
         }
       });
 
@@ -257,8 +262,19 @@ export function useTransactions(options: TransactionsOptions = {}) {
         totalPages: Math.ceil(results.length / limit),
       };
     },
-    [page, limit, sortBy, sortOrder, filterType, month, startDate, endDate, minAmount, maxAmount],
-    { transactions: [], total: 0, page: 1, totalPages: 0 }
+    [
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      filterType,
+      month,
+      startDate,
+      endDate,
+      minAmount,
+      maxAmount,
+    ],
+    { transactions: [], total: 0, page: 1, totalPages: 0 },
   );
 
   return {
@@ -312,41 +328,38 @@ export function useAddExpense() {
 
       return id;
     },
-    [isOnline]
+    [isOnline],
   );
 
   return addExpense;
 }
 
 export function useUpdateExpense() {
-  const updateExpense = useCallback(
-    async (id: string, data: ExpenseInput) => {
-      const existing = await localDb.expenses.get(id);
-      if (!existing) throw new Error("Expense not found");
+  const updateExpense = useCallback(async (id: string, data: ExpenseInput) => {
+    const existing = await localDb.expenses.get(id);
+    if (!existing) throw new Error("Expense not found");
 
-      const updated: LocalExpense = {
-        ...existing,
-        amount: data.amount,
-        category: data.category,
-        date: data.date,
-        notes: data.notes ?? null,
-        type: data.type ?? existing.type,
-        syncStatus: "pending",
-      };
+    const updated: LocalExpense = {
+      ...existing,
+      amount: data.amount,
+      category: data.category,
+      date: data.date,
+      notes: data.notes ?? null,
+      type: data.type ?? existing.type,
+      syncStatus: "pending",
+    };
 
-      // Update local DB
-      await localDb.expenses.put(updated);
+    // Update local DB
+    await localDb.expenses.put(updated);
 
-      // Queue for sync
-      await addToSyncQueue({
-        operationType: "update",
-        entity: "expense",
-        entityId: id,
-        data: updated,
-      });
-    },
-    []
-  );
+    // Queue for sync
+    await addToSyncQueue({
+      operationType: "update",
+      entity: "expense",
+      entityId: id,
+      data: updated,
+    });
+  }, []);
 
   return updateExpense;
 }

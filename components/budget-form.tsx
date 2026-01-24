@@ -83,11 +83,7 @@ export function BudgetForm({
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <AmountInput
-                  step="0.01"
-                  placeholder="0.00"
-                  {...field}
-                />
+                <AmountInput step="0.01" placeholder="0.00" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

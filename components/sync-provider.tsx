@@ -117,7 +117,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
   // ============================================
 
   const processSyncOperation = async (
-    operation: SyncOperation
+    operation: SyncOperation,
   ): Promise<boolean> => {
     try {
       switch (operation.entity) {
@@ -251,7 +251,11 @@ export function SyncProvider({ children }: SyncProviderProps) {
         if (success && operation.id) {
           await removeSyncOperation(operation.id);
           // Update local entity sync status
-          await updateLocalEntityStatus(operation.entity, operation.entityId, "synced");
+          await updateLocalEntityStatus(
+            operation.entity,
+            operation.entityId,
+            "synced",
+          );
         }
       }
 
@@ -287,7 +291,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
   const updateLocalEntityStatus = async (
     entity: string,
     entityId: string,
-    syncStatus: "synced" | "pending" | "error"
+    syncStatus: "synced" | "pending" | "error",
   ) => {
     try {
       switch (entity) {
@@ -319,9 +323,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
     setStatus("syncing");
     try {
       // Fetch ALL data from server (full sync)
-      const response = await fetch(
-        `/api/sync?full=true`
-      );
+      const response = await fetch(`/api/sync?full=true`);
 
       if (response.ok) {
         const data = await response.json();
@@ -345,10 +347,10 @@ export function SyncProvider({ children }: SyncProviderProps) {
               .where("syncStatus")
               .equals("pending")
               .toArray();
-            
+
             // Clear all expenses and re-add synced ones plus pending
             await localDb.expenses.clear();
-            
+
             // Add all server expenses as synced
             for (const expense of data.expenses) {
               await localDb.expenses.put({
@@ -358,9 +360,11 @@ export function SyncProvider({ children }: SyncProviderProps) {
                 syncStatus: "synced",
               });
             }
-            
+
             // Re-add pending expenses that aren't duplicates
-            const serverIds = new Set(data.expenses.map((e: { id: string }) => e.id));
+            const serverIds = new Set(
+              data.expenses.map((e: { id: string }) => e.id),
+            );
             for (const pending of pendingExpenses) {
               if (!serverIds.has(pending.id)) {
                 await localDb.expenses.put(pending);
@@ -376,9 +380,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
               .where("syncStatus")
               .equals("pending")
               .toArray();
-            
+
             await localDb.budgets.clear();
-            
+
             for (const budget of data.budgets) {
               await localDb.budgets.put({
                 ...budget,
@@ -386,9 +390,11 @@ export function SyncProvider({ children }: SyncProviderProps) {
                 syncStatus: "synced",
               });
             }
-            
+
             // Re-add pending budgets for months not on server
-            const serverMonths = new Set(data.budgets.map((b: { month: string }) => b.month));
+            const serverMonths = new Set(
+              data.budgets.map((b: { month: string }) => b.month),
+            );
             for (const pending of pendingBudgets) {
               if (!serverMonths.has(pending.month)) {
                 await localDb.budgets.put(pending);

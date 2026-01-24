@@ -77,7 +77,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
 
   // Track transaction type for editing
   const [transactionType, setTransactionType] = useState<"expense" | "income">(
-    expense?.type || "expense"
+    expense?.type || "expense",
   );
 
   // Default date to today for new expenses, or the existing date when editing
@@ -98,8 +98,10 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
   });
 
   // Get current categories based on transaction type
-  const currentCategories = transactionType === "income" ? incomeCategories : categories;
-  const currentCategoryIcons = transactionType === "income" ? incomeCategoryIcons : categoryIcons;
+  const currentCategories =
+    transactionType === "income" ? incomeCategories : categories;
+  const currentCategoryIcons =
+    transactionType === "income" ? incomeCategoryIcons : categoryIcons;
 
   // Handle type change - reset category when type changes
   const handleTypeChange = (newType: "expense" | "income") => {
@@ -128,11 +130,16 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
         // Add new expense locally first
         // Get userId from local DB
         const userId = await getLocalUserId();
-        await addExpenseLocal({
-          ...values,
-          type: transactionType,
-        }, userId);
-        toast.success(transactionType === "income" ? "Income added" : "Expense added");
+        await addExpenseLocal(
+          {
+            ...values,
+            type: transactionType,
+          },
+          userId,
+        );
+        toast.success(
+          transactionType === "income" ? "Income added" : "Expense added",
+        );
         triggerRefresh();
         // Sync in background
         syncNow().catch(console.error);
@@ -164,13 +171,19 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="expense" id="type-expense" />
-              <Label htmlFor="type-expense" className="font-normal cursor-pointer">
+              <Label
+                htmlFor="type-expense"
+                className="font-normal cursor-pointer"
+              >
                 Expense
               </Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="income" id="type-income" />
-              <Label htmlFor="type-income" className="font-normal cursor-pointer">
+              <Label
+                htmlFor="type-income"
+                className="font-normal cursor-pointer"
+              >
                 Income
               </Label>
             </div>
@@ -184,11 +197,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <AmountInput
-                  step="0.01"
-                  placeholder="0.00"
-                  {...field}
-                />
+                <AmountInput step="0.01" placeholder="0.00" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -213,11 +222,15 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
                   </FormControl>
                   <SelectContent>
                     {currentCategories.map((cat) => {
-                      const Icon = currentCategoryIcons[cat] || defaultCategoryIcon;
+                      const Icon =
+                        currentCategoryIcons[cat] || defaultCategoryIcon;
                       return (
                         <SelectItem key={cat} value={cat}>
                           <div className="flex items-center gap-2">
-                            <Icon className="h-6 w-6 text-primary" strokeWidth={2.5} />
+                            <Icon
+                              className="h-6 w-6 text-primary"
+                              strokeWidth={2.5}
+                            />
                             <span>{cat}</span>
                           </div>
                         </SelectItem>
@@ -252,7 +265,10 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className="ml-auto h-6 w-6 text-primary" strokeWidth={2.5} />
+                        <CalendarIcon
+                          className="ml-auto h-6 w-6 text-primary"
+                          strokeWidth={2.5}
+                        />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -290,10 +306,10 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
           )}
         />
         <div className="w-full flex justify-center pt-3">
-        <Button type="submit" className="fn" disabled={isPending}>
-          {isPending ? "Saving..." : "Save"}
+          <Button type="submit" className="fn" disabled={isPending}>
+            {isPending ? "Saving..." : "Save"}
           </Button>
-          </div>
+        </div>
       </form>
     </Form>
   );
