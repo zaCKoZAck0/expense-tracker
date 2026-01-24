@@ -17,7 +17,7 @@ import type { SavingsBucket, SavingsEntry } from "@/components/savings/types";
 
 function localBucketToUI(
   bucket: LocalSavingsBucket,
-  entries: LocalSavingsEntry[]
+  entries: LocalSavingsEntry[],
 ): SavingsBucket {
   return {
     id: bucket.id,
@@ -42,7 +42,7 @@ function localBucketToUI(
       .sort(
         (a, b) =>
           new Date(b.createdAt ?? 0).getTime() -
-          new Date(a.createdAt ?? 0).getTime()
+          new Date(a.createdAt ?? 0).getTime(),
       ),
   };
 }
@@ -61,14 +61,14 @@ export function useSavingsData() {
   const localBuckets = useLiveQuery(
     () => localDb.savingsBuckets.toArray(),
     [],
-    []
+    [],
   );
 
   // Live query for entries
   const localEntries = useLiveQuery(
     () => localDb.savingsEntries.toArray(),
     [],
-    []
+    [],
   );
 
   // Convert to UI format
@@ -78,7 +78,7 @@ export function useSavingsData() {
           .map((b) => localBucketToUI(b, localEntries))
           .sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           )
       : [];
 
@@ -127,14 +127,14 @@ export function useSavingsData() {
                   });
                 }
               }
-            }
+            },
           );
           setHasFetchedFromServer(true);
         }
       } catch (err) {
         console.error("Failed to load savings from server:", err);
         setError(
-          err instanceof Error ? err : new Error("Failed to load savings")
+          err instanceof Error ? err : new Error("Failed to load savings"),
         );
       } finally {
         setIsLoading(false);
@@ -224,13 +224,16 @@ export function useAddBucket() {
             }
           }
         } catch (err) {
-          console.warn("Failed to sync bucket creation, queued for later:", err);
+          console.warn(
+            "Failed to sync bucket creation, queued for later:",
+            err,
+          );
         }
       }
 
       return id;
     },
-    [isOnline]
+    [isOnline],
   );
 }
 
@@ -292,7 +295,7 @@ export function useUpdateBucket() {
         }
       }
     },
-    [isOnline]
+    [isOnline],
   );
 }
 
@@ -341,11 +344,14 @@ export function useDeleteBucket() {
             }
           }
         } catch (err) {
-          console.warn("Failed to sync bucket deletion, queued for later:", err);
+          console.warn(
+            "Failed to sync bucket deletion, queued for later:",
+            err,
+          );
         }
       }
     },
-    [isOnline]
+    [isOnline],
   );
 }
 
@@ -367,7 +373,7 @@ export function useAddEntry() {
       bucketId: string,
       input: EntryInput,
       entryType: "deposit" | "withdrawal",
-      userId: string
+      userId: string,
     ): Promise<string> => {
       const id = crypto.randomUUID();
       const now = new Date();
@@ -423,7 +429,7 @@ export function useAddEntry() {
 
       return id;
     },
-    [isOnline]
+    [isOnline],
   );
 }
 
@@ -438,7 +444,7 @@ export function useUpdateEntry() {
     async (
       bucketId: string,
       entryId: string,
-      input: EntryInput
+      input: EntryInput,
     ): Promise<void> => {
       const existing = await localDb.savingsEntries.get(entryId);
       if (!existing) throw new Error("Entry not found");
@@ -488,7 +494,7 @@ export function useUpdateEntry() {
         }
       }
     },
-    [isOnline]
+    [isOnline],
   );
 }
 
@@ -538,7 +544,7 @@ export function useDeleteEntry() {
         }
       }
     },
-    [isOnline]
+    [isOnline],
   );
 }
 
