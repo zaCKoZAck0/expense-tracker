@@ -18,8 +18,8 @@ self.addEventListener("install", (event) => {
         STATIC_ASSETS.map((url) =>
           cache.add(url).catch((err) => {
             console.warn(`Failed to cache ${url}:`, err);
-          })
-        )
+          }),
+        ),
       );
     }),
   );

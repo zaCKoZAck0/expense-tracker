@@ -26,6 +26,17 @@ import {
   bucketProgress,
   getBucketSwatch,
 } from "@/components/savings/types";
+import {
+  useSavingsData,
+  useAddBucket,
+  useUpdateBucket,
+  useDeleteBucket,
+  useAddEntry,
+  useUpdateEntry,
+  useDeleteEntry,
+  getLocalUserId,
+} from "@/hooks/use-savings-data";
+import { useSyncContext } from "@/components/sync-provider";
 
 type BudgetSavingsStats = {
   totalSavings: number;
@@ -78,7 +89,8 @@ function BudgetSavingsCard({
 
 export default function SavingsPage() {
   const { resolvedTheme } = useTheme();
-  const [buckets, setBuckets] = useState<SavingsBucket[]>([]);
+  const { isOnline } = useSyncContext();
+  const { buckets, isLoading: loading } = useSavingsData();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const { currency } = useUserSettings();
@@ -87,6 +99,14 @@ export default function SavingsPage() {
     previousSavings: 0,
   });
   const [budgetSavingsLoading, setBudgetSavingsLoading] = useState(true);
+
+  // Hooks for offline-first mutations
+  const addBucketMutation = useAddBucket();
+  const updateBucketMutation = useUpdateBucket();
+  const deleteBucketMutation = useDeleteBucket();
+  const addEntryMutation = useAddEntry();
+  const updateEntryMutation = useUpdateEntry();
+  const deleteEntryMutation = useDeleteEntry();
 
   const formatMoney = useMemo(() => {
     try {
@@ -107,37 +127,6 @@ export default function SavingsPage() {
       return (value: number) => fallback.format(value);
     }
   }, [currency]);
-
-  const [loading, setLoading] = useState(true);
-
-  function replaceBucket(updated: SavingsBucket) {
-    // Keep newest buckets first and replace the updated bucket in-place
-    setBuckets((prev) => {
-      const others = prev.filter((b) => b.id !== updated.id);
-      return [updated, ...others].sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    });
-  }
-
-  async function loadBuckets() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/savings", { cache: "no-store" });
-      if (!res.ok) {
-        throw new Error(`Failed to load savings (${res.status})`);
-      }
-      const data = (await res.json()) as { buckets: SavingsBucket[] };
-      setBuckets(data.buckets ?? []);
-      setSelectedId(null); // Default to list view; user picks a bucket to expand
-    } catch (err) {
-      console.error(err);
-      toast.error("Unable to load savings right now.");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function loadBudgetSavings() {
     setBudgetSavingsLoading(true);
@@ -175,7 +164,6 @@ export default function SavingsPage() {
   }
 
   useEffect(() => {
-    loadBuckets();
     loadBudgetSavings();
   }, []);
 
@@ -191,16 +179,13 @@ export default function SavingsPage() {
     interestYearlyPercent?: number;
   }) {
     try {
-      const res = await fetch("/api/savings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
-      if (!res.ok) throw new Error("Create bucket failed");
-      const data = (await res.json()) as { bucket: SavingsBucket };
-      replaceBucket(data.bucket);
-      setSelectedId(data.bucket.id);
+      const userId = await getLocalUserId();
+      const newId = await addBucketMutation(input, userId);
+      setSelectedId(newId);
       setCreateOpen(false);
+      if (!isOnline) {
+        toast.success("Bucket created (will sync when online)");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Could not create bucket.");
@@ -212,14 +197,11 @@ export default function SavingsPage() {
     entry: { amount: number; date: string; notes?: string },
   ) {
     try {
-      const res = await fetch(`/api/savings/${bucketId}/entries`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...entry, type: "deposit" }),
-      });
-      if (!res.ok) throw new Error("Add entry failed");
-      const data = (await res.json()) as { bucket: SavingsBucket };
-      if (data.bucket) replaceBucket(data.bucket);
+      const userId = await getLocalUserId();
+      await addEntryMutation(bucketId, entry, "deposit", userId);
+      if (!isOnline) {
+        toast.success("Entry added (will sync when online)");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Could not add entry.");
@@ -231,19 +213,11 @@ export default function SavingsPage() {
     entry: { amount: number; date: string; notes?: string },
   ) {
     try {
-      const res = await fetch(`/api/savings/${bucketId}/entries`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...entry, type: "withdrawal" }),
-      });
-      if (!res.ok) {
-        const detail = await res.json().catch(() => null);
-        const message = detail?.error || "Withdraw failed";
-        toast.error(message);
-        return;
+      const userId = await getLocalUserId();
+      await addEntryMutation(bucketId, entry, "withdrawal", userId);
+      if (!isOnline) {
+        toast.success("Withdrawal added (will sync when online)");
       }
-      const data = (await res.json()) as { bucket: SavingsBucket };
-      if (data.bucket) replaceBucket(data.bucket);
     } catch (err) {
       console.error(err);
       toast.error("Could not withdraw.");
@@ -260,14 +234,10 @@ export default function SavingsPage() {
     },
   ) {
     try {
-      const res = await fetch(`/api/savings/${bucketId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(input),
-      });
-      if (!res.ok) throw new Error("Update bucket failed");
-      const data = (await res.json()) as { bucket: SavingsBucket };
-      replaceBucket(data.bucket);
+      await updateBucketMutation(bucketId, input);
+      if (!isOnline) {
+        toast.success("Bucket updated (will sync when online)");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Could not update bucket.");
@@ -276,14 +246,7 @@ export default function SavingsPage() {
 
   async function deleteBucket(bucketId: string) {
     try {
-      const res = await fetch(`/api/savings/${bucketId}`, { method: "DELETE" });
-      if (!res.ok) {
-        const detail = await res.json().catch(() => null);
-        const message = detail?.error || "Delete bucket failed";
-        toast.error(message);
-        return;
-      }
-      setBuckets((prev) => prev.filter((b) => b.id !== bucketId));
+      await deleteBucketMutation(bucketId);
       setSelectedId(null);
       toast.success("Bucket deleted");
     } catch (err) {
@@ -298,14 +261,10 @@ export default function SavingsPage() {
     input: { amount: number; date: string; notes?: string },
   ) {
     try {
-      const res = await fetch(`/api/savings/entries/${entryId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bucketId, ...input }),
-      });
-      if (!res.ok) throw new Error("Update entry failed");
-      const data = (await res.json()) as { bucket: SavingsBucket };
-      if (data.bucket) replaceBucket(data.bucket);
+      await updateEntryMutation(bucketId, entryId, input);
+      if (!isOnline) {
+        toast.success("Entry updated (will sync when online)");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Could not update entry.");
@@ -314,17 +273,7 @@ export default function SavingsPage() {
 
   async function deleteEntry(bucketId: string, entryId: string) {
     try {
-      const res = await fetch(`/api/savings/entries/${entryId}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const detail = await res.json().catch(() => null);
-        const message = detail?.error || "Delete entry failed";
-        toast.error(message);
-        return;
-      }
-      const data = (await res.json()) as { bucket?: SavingsBucket };
-      if (data.bucket) replaceBucket(data.bucket);
+      await deleteEntryMutation(bucketId, entryId);
       toast.success("Entry deleted");
     } catch (err) {
       console.error(err);
