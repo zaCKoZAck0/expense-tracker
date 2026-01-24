@@ -30,7 +30,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { AmountInput } from "@/components/ui/amount-input";
 import { Input } from "@/components/ui/input";
@@ -162,34 +161,6 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Transaction Type Toggle - Always show */}
-        <div className="space-y-2">
-          <RadioGroup
-            value={transactionType}
-            onValueChange={(v) => handleTypeChange(v as "expense" | "income")}
-            className="flex gap-4"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="expense" id="type-expense" />
-              <Label
-                htmlFor="type-expense"
-                className="font-normal cursor-pointer"
-              >
-                Expense
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="income" id="type-income" />
-              <Label
-                htmlFor="type-income"
-                className="font-normal cursor-pointer"
-              >
-                Income
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
-
         <FormField
           control={form.control}
           name="amount"
