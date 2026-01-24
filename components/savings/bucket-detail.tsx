@@ -2,9 +2,16 @@
 
 import React, { useState } from "react";
 import { useTheme } from "next-themes";
-import { PiggyBank, Plus, Target, TrendingUp, Trash } from "lucide-react";
+import { PiggyBank, Plus, Target, TrendingUp, Trash, PenLineIcon, DollarSignIcon, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +35,13 @@ import {
 import { BucketForm } from "./bucket-form";
 import { EntryForm } from "./entry-form";
 import { ActivityList } from "./activity-list";
+import { BalanceChart } from "./balance-chart";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   SavingsBucket,
   bucketProgress,
@@ -92,6 +106,7 @@ export function BucketDetail({
   const [addOpen, setAddOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [editBucketOpen, setEditBucketOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
     <div className="space-y-4">
@@ -110,45 +125,27 @@ export function BucketDetail({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setEditBucketOpen(true)}
-            className="inline-flex items-center gap-2"
-          >
-            Edit bucket
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-destructive inline-flex items-center gap-2"
-              >
-                <Trash className="h-4 w-4" /> Delete
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete bucket?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This removes the bucket and all its entries. This action
-                  cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  onClick={() => onDeleteBucket(bucket.id)}
-                >
-                  Delete bucket
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon-sm">
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setEditBucketOpen(true)}>
+              <PenLineIcon className="h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash className="h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <Dialog open={editBucketOpen} onOpenChange={setEditBucketOpen}>
@@ -176,6 +173,28 @@ export function BucketDetail({
           <DialogFooter className="hidden" />
         </DialogContent>
       </Dialog>
+
+      {/* Delete Bucket Confirmation */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete bucket?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes the bucket and all its entries. This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => onDeleteBucket(bucket.id)}
+            >
+              Delete bucket
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className={`grid gap-3 ${statColumns}`}>
         <StatTile
@@ -209,6 +228,21 @@ export function BucketDetail({
         </div>
       ) : null}
 
+      {/* Balance Growth Graph */}
+      <Accordion type="single" collapsible className="rounded-lg border">
+        <AccordionItem value="chart" className="border-none">
+          <AccordionTrigger className="px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground">
+            <span className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Balance History
+            </span>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4">
+            <BalanceChart bucket={bucket} formatMoney={formatMoney} />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
       <Separator />
 
       <div className="flex items-center justify-between gap-3">
@@ -216,8 +250,8 @@ export function BucketDetail({
         <div className="flex items-center gap-2">
           <Button
             size="sm"
+            variant="secondary"
             onClick={() => setAddOpen(true)}
-            className="inline-flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
             Add
@@ -227,6 +261,7 @@ export function BucketDetail({
             size="sm"
             onClick={() => setWithdrawOpen(true)}
           >
+            <DollarSignIcon className="h-4 w-4" />
             Withdraw
           </Button>
         </div>
@@ -235,14 +270,11 @@ export function BucketDetail({
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add entry</DialogTitle>
-            <DialogDescription>
-              Add an amount with date; compounding applies from the saved date.
-            </DialogDescription>
+            <DialogTitle>Add Contribution</DialogTitle>
           </DialogHeader>
           <EntryForm
             bucketId={bucket.id}
-            submitLabel="Add entry"
+            submitLabel="Save"
             onSubmit={(id, entry) => {
               onAddEntry(id, entry);
               setAddOpen(false);

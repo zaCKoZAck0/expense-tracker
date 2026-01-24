@@ -17,9 +17,25 @@ interface DailySpendingChartProps {
   daysInMonth: number;
 }
 
-const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const monthNames = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
-export function DailySpendingChart({ data, daysInMonth }: DailySpendingChartProps) {
+export function DailySpendingChart({
+  data,
+  daysInMonth,
+}: DailySpendingChartProps) {
   const { currency } = useUserSettings();
   const { selectedMonth } = useNavigation();
 
@@ -52,9 +68,13 @@ export function DailySpendingChart({ data, daysInMonth }: DailySpendingChartProp
 
   return (
     <div className="h-20 w-full overflow-x-auto">
-      <div className="h-full min-w-[500px]">
+      <div className="h-full min-w-125">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={fullMonthData} barCategoryGap={1} margin={{ top: 0, right: 6, bottom: 0, left: 4 }}>
+          <BarChart
+            data={fullMonthData}
+            barCategoryGap={1}
+            margin={{ top: 0, right: 6, bottom: 0, left: 4 }}
+          >
             <XAxis
               dataKey="day"
               axisLine={false}
@@ -84,7 +104,7 @@ export function DailySpendingChart({ data, daysInMonth }: DailySpendingChartProp
             />
             <Bar
               dataKey="amount"
-              fill="var(--primary)"
+              fill="var(--secondary)"
               radius={[2, 2, 0, 0]}
             />
           </BarChart>
@@ -93,4 +113,3 @@ export function DailySpendingChart({ data, daysInMonth }: DailySpendingChartProp
     </div>
   );
 }
-

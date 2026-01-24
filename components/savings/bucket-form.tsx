@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useTheme } from "next-themes";
-import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { AmountInput } from "@/components/ui/amount-input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +33,7 @@ interface BucketFormProps {
 export function BucketForm({
   onSubmit,
   initialValues,
-  submitLabel = "Create bucket",
+  submitLabel = "Save",
 }: BucketFormProps) {
   const { resolvedTheme } = useTheme();
   const [name, setName] = useState(initialValues?.name ?? "");
@@ -102,9 +102,8 @@ export function BucketForm({
 
       <div className="space-y-2">
         <Label htmlFor="goal">Goal amount (optional)</Label>
-        <Input
+        <AmountInput
           id="goal"
-          type="number"
           min="0"
           step="0.01"
           value={goalAmount}
@@ -138,9 +137,11 @@ export function BucketForm({
         </AccordionItem>
       </Accordion>
 
-      <Button type="submit" className="inline-flex items-center gap-2">
-        <Plus className="h-4 w-4" /> {submitLabel}
-      </Button>
+      <div className="w-full flex justify-center pt-3">
+        <Button type="submit">
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

@@ -136,13 +136,7 @@ const getBudgetCache = (userId: string) => {
 
   const cacheFn = unstable_cache(
     async (month: string) => {
-      const exact = await db.budget.findUnique({ where: { month } });
-      if (exact) return exact;
-
-      return db.budget.findFirst({
-        where: { month: { lte: month } },
-        orderBy: { month: "desc" },
-      });
+      return db.budget.findUnique({ where: { month } });
     },
     ["budget-data", userId],
     { tags: [getBudgetTag(userId)], revalidate: 3600 },
@@ -219,10 +213,6 @@ const getDashboardCache = (userId: string) => {
       const { startDate, endDate } = getMonthDateRange(month);
 
       const budgetPromise = db.budget.findUnique({ where: { month } });
-      const fallbackBudgetPromise = db.budget.findFirst({
-        where: { month: { lte: month } },
-        orderBy: { month: "desc" },
-      });
 
       const latestEntriesPromise = db.expense.findMany({
         where: {
@@ -245,8 +235,7 @@ const getDashboardCache = (userId: string) => {
         },
       });
 
-      const budgetResult = await budgetPromise;
-      const budget = budgetResult ?? (await fallbackBudgetPromise);
+      const budget = await budgetPromise;
       const latestEntries = await latestEntriesPromise;
       const statsEntries = await statsEntriesPromise;
 

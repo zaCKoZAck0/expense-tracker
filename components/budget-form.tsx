@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { AmountInput } from "@/components/ui/amount-input";
 import { toast } from "sonner";
 import { getCurrentMonthKey } from "@/lib/utils";
 import { setBudget as setBudgetAction } from "@/app/actions";
@@ -78,8 +79,7 @@ export function BudgetForm({
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <Input
-                  type="number"
+                <AmountInput
                   step="0.01"
                   placeholder="0.00"
                   {...field}
@@ -103,11 +103,6 @@ export function BudgetForm({
             </FormItem>
           )}
         />
-
-        <div className="text-sm text-muted-foreground">
-          This budget will apply to the selected month and will be used for
-          subsequent months until changed. Previous months are not modified.
-        </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>
           {isPending ? "Saving..." : "Save Budget"}

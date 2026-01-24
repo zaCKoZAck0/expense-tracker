@@ -4,6 +4,7 @@ export type Expense = {
   category: string;
   date: Date;
   notes?: string | null;
+  type?: "expense" | "income";
   userId?: string;
   createdAt?: Date;
 };

@@ -68,7 +68,8 @@ export function NavigationProvider({
   }, [monthParam, currentMonth]);
 
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
-  const visibleExpense = page === "dashboard" ? selectedExpense : null;
+  // Show expense detail on dashboard and transactions pages
+  const visibleExpense = (page === "dashboard" || page === "transactions") ? selectedExpense : null;
 
   // Refresh key to trigger data refetch in child components
   const [refreshKey, setRefreshKey] = useState(0);

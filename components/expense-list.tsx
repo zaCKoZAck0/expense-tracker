@@ -89,7 +89,6 @@ export function TransactionList({
       </div>
 
       <div className="border rounded-md overflow-hidden bg-background">
-        <div className="max-h-[600px] overflow-y-auto">
           <Table>
             <TableBody>
               {Object.entries(groupedTransactions).map(
@@ -125,7 +124,7 @@ export function TransactionList({
                                   className={cn(
                                     "h-5 w-5 text-accent-foreground",
                                     isIncome &&
-                                      "text-emerald-600 dark:text-emerald-400",
+                                      "text-green-700 dark:text-green-300",
                                   )}
                                 />
                               </div>
@@ -142,7 +141,7 @@ export function TransactionList({
                           <TableCell
                             className={cn(
                               "text-right font-medium",
-                              isIncome ? "text-emerald-600 dark:text-emerald-400" : "",
+                              isIncome ? "text-green-600 dark:text-green-400" : "",
                             )}
                           >
                             {isIncome ? "+" : "-"}
@@ -163,7 +162,6 @@ export function TransactionList({
                )}
             </TableBody>
           </Table>
-        </div>
       </div>
     </div>
   );

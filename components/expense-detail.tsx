@@ -12,9 +12,25 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Edit, Trash } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { ArrowLeft, Edit, Trash, MoreVertical } from "lucide-react";
 import { ExpenseForm } from "@/components/expense-form";
 import { toast } from "sonner";
 import type { Expense } from "@/lib/types";
@@ -52,12 +68,34 @@ export default function ExpenseDetail({
 
   return (
     <>
-      {/* Back button above details */}
-      <div className="mb-4">
+      {/* Header with back button and three-dot menu */}
+      <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" onClick={onBack}>
           <ArrowLeft className="h-4 w-4" />
           <span>Back</span>
         </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon-sm">
+              <MoreVertical className="h-5 w-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setEditOpen(true)}>
+              <Edit className="h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash className="h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="p-4 border rounded-md">
@@ -89,59 +127,43 @@ export default function ExpenseDetail({
         </div>
       </div>
 
-      <div className="flex items-center gap-4 justify-end">
-        <div>
-          <Dialog open={editOpen} onOpenChange={setEditOpen}>
-            <DialogTrigger asChild>
-              <Button size="lg">
-                <Edit className="h-5 w-5" />
-                Edit
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Edit Expense</DialogTitle>
-              </DialogHeader>
-              <ExpenseForm
-                expense={expense}
-                onSuccess={() => {
-                  setEditOpen(false);
-                  onBack?.();
-                }}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
+      {/* Edit Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Transaction</DialogTitle>
+          </DialogHeader>
+          <ExpenseForm
+            expense={expense}
+            onSuccess={() => {
+              setEditOpen(false);
+              onBack?.();
+            }}
+          />
+        </DialogContent>
+      </Dialog>
 
-        <div>
-          <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-            <DialogTrigger asChild>
-              <Button variant="destructive" size="lg">
-                <Trash className="h-5 w-5" />
-                Delete
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Delete Expense</DialogTitle>
-              </DialogHeader>
-              <p>Are you sure you want to delete this expense?</p>
-              <div className="mt-4 flex gap-2">
-                <Button variant="ghost" onClick={() => setDeleteOpen(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleDelete}
-                  disabled={isPending}
-                >
-                  {isPending ? "Deleting..." : "Delete"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove this transaction. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete}
+              disabled={isPending}
+            >
+              {isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

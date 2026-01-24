@@ -22,17 +22,17 @@ export function AddExpenseButton() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className="fixed left-1/2 bottom-26 -translate-x-1/2 shadow-lg z-20"
+          className="fixed left-1/2 bottom-26 -translate-x-1/2 shadow-xl shadow-primary/30 z-20 gap-2"
           size="lg"
           variant="default"
         >
-          <Plus className="h-8 w-8" strokeWidth={4} />
-          <span className="font-semibold">Add Transaction</span>
+          <Plus className="h-5 w-5" strokeWidth={2.5} />
+          <span className="font-bold tracking-tight">Add Transaction</span>
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Transaction</DialogTitle>
+          <DialogTitle className="text-xl font-bold tracking-tight">Add Transaction</DialogTitle>
         </DialogHeader>
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "expense" | "income")} className="w-full">
           <TabsList className="grid w-full grid-cols-2">

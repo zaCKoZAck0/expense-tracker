@@ -1,12 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
+import { format, parse } from "date-fns";
+import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { AmountInput } from "@/components/ui/amount-input";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface EntryFormProps {
   bucketId: string;
@@ -22,14 +29,21 @@ export function EntryForm({
   bucketId,
   onSubmit,
   initialEntry,
-  submitLabel = "Add entry",
+  submitLabel = "Save",
 }: EntryFormProps) {
   const [amount, setAmount] = useState<string>(
     initialEntry?.amount?.toString() ?? "",
   );
-  const [date, setDate] = useState<string>(
-    initialEntry?.date ?? format(new Date(), "yyyy-MM-dd"),
-  );
+
+  // Parse initial date or use today
+  const getInitialDate = () => {
+    if (initialEntry?.date) {
+      return parse(initialEntry.date, "yyyy-MM-dd", new Date());
+    }
+    return new Date();
+  };
+
+  const [date, setDate] = useState<Date>(getInitialDate);
   const [notes, setNotes] = useState<string>(initialEntry?.notes ?? "");
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -37,7 +51,7 @@ export function EntryForm({
     if (!amount || Number(amount) <= 0) return;
     onSubmit(bucketId, {
       amount: Number(amount),
-      date,
+      date: format(date, "yyyy-MM-dd"),
       notes: notes || undefined,
     });
     setAmount(initialEntry?.amount?.toString() ?? "");
@@ -45,43 +59,61 @@ export function EntryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="entry-amount">Amount</Label>
-          <Input
-            id="entry-amount"
-            type="number"
-            min="0"
-            step="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="entry-date">Date</Label>
-          <Input
-            id="entry-date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <Label htmlFor="entry-amount">Amount</Label>
+        <AmountInput
+          id="entry-amount"
+          min="0"
+          step="0.01"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="0.00"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label>Date</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="lg"
+              className={cn(
+                "w-full text-left font-normal hover:bg-background/80",
+                !date && "text-muted-foreground",
+              )}
+            >
+              {date ? format(date, "PPP") : <span>Pick a date</span>}
+              <CalendarIcon className="ml-auto h-6 w-6 text-primary" strokeWidth={2.5} />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={(d) => d && setDate(d)}
+              disabled={(d) =>
+                d > new Date() || d < new Date("1900-01-01")
+              }
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="entry-notes">Notes (optional)</Label>
-        <Textarea
+        <Input
           id="entry-notes"
-          rows={2}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Add a note"
         />
       </div>
-      <Button type="submit" className="inline-flex items-center gap-2">
-        <Plus className="h-4 w-4" /> {submitLabel}
-      </Button>
+      <div className="w-full flex justify-center pt-3">
+        <Button type="submit">
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

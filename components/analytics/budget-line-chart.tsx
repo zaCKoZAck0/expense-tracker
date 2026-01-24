@@ -29,7 +29,7 @@ const chartConfig = {
   budget: {
     label: "Budget",
     // Use secondary color for budget line
-    color: "var(--foreground)",
+    color: "var(--secondary)",
   },
   spend: {
     label: "Spend",
@@ -48,7 +48,7 @@ export function BudgetLineChart({ data }: BudgetLineChartProps) {
       <CardContent className="flex-1 pb-4">
         <ChartContainer
           config={chartConfig}
-          className="h-full w-full max-h-[350px]"
+          className="h-full w-full max-h-87.5"
         >
           <LineChart
             accessibilityLayer

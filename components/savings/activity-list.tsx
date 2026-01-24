@@ -1,7 +1,16 @@
+"use client";
+
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { ArrowDownLeft, ArrowUpRight, Pencil, Trash2 } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Pencil, Trash2, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +18,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,7 +29,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { EntryForm } from "./entry-form";
 import { SavingsBucket } from "./types";
@@ -44,6 +51,7 @@ export function ActivityList({
   onDeleteEntry,
 }: ActivityListProps) {
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null);
 
   return (
     <div className="space-y-2">
@@ -64,24 +72,25 @@ export function ActivityList({
                 : 1;
             const grown = isWithdrawal ? -entry.amount : entry.amount * factor;
             const isEditing = editingEntryId === entry.id;
+            const isDeleting = deletingEntryId === entry.id;
             const entryDateISO = format(new Date(entry.date), "yyyy-MM-dd");
             return (
               <div
                 key={entry.id}
                 className="rounded-lg border bg-muted/40 px-3 py-2 flex items-center justify-between"
               >
-                <div className="space-y-1">
+                <div className="space-y-1 group">
                   <div className="flex items-center gap-2">
                     <div className="font-medium">{formatMoney(grown)}</div>
                     <Badge
-                      variant="secondary"
+                      variant={isWithdrawal ? "destructive" : "default"}
                       className="inline-flex items-center gap-1 px-2 py-1"
                       aria-label={isWithdrawal ? "Withdrawal" : "Deposit"}
                     >
                       {isWithdrawal ? (
-                        <ArrowDownLeft className="h-4 w-4" />
+                        <ArrowDownLeft className="h-6 w-6" strokeWidth={2.5} />
                       ) : (
-                        <ArrowUpRight className="h-4 w-4" />
+                        <ArrowUpRight className="h-6 w-6" strokeWidth={2.5} />
                       )}
                       <span className="sr-only">
                         {isWithdrawal ? "Withdrawal" : "Deposit"}
@@ -106,79 +115,92 @@ export function ActivityList({
                     </div>
                   ) : null}
                 </div>
-                <div className="flex items-center gap-2">
-                  <Dialog
-                    open={isEditing}
-                    onOpenChange={(open) =>
-                      setEditingEntryId(open ? entry.id : null)
-                    }
-                  >
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Edit entry"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit entry</DialogTitle>
-                        <DialogDescription>
-                          Adjust amount, date, or notes for this entry.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <EntryForm
-                        key={entry.id}
-                        bucketId={bucket.id}
-                        initialEntry={{
-                          amount: entry.amount,
-                          date: entryDateISO,
-                          notes: entry.notes,
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon-sm">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setEditingEntryId(entry.id)}>
+                      <Pencil className="h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => setDeletingEntryId(entry.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                {/* Edit Entry Dialog */}
+                <Dialog
+                  open={isEditing}
+                  onOpenChange={(open) =>
+                    setEditingEntryId(open ? entry.id : null)
+                  }
+                >
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Edit entry</DialogTitle>
+                      <DialogDescription>
+                        Adjust amount, date, or notes for this entry.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <EntryForm
+                      key={entry.id}
+                      bucketId={bucket.id}
+                      initialEntry={{
+                        amount: entry.amount,
+                        date: entryDateISO,
+                        notes: entry.notes,
+                      }}
+                      submitLabel={
+                        isWithdrawal ? "Save withdrawal" : "Save entry"
+                      }
+                      onSubmit={(id, updated) => {
+                        onUpdateEntry(id, entry.id, updated);
+                        setEditingEntryId(null);
+                      }}
+                    />
+                    <DialogFooter className="hidden" />
+                  </DialogContent>
+                </Dialog>
+
+                {/* Delete Entry Confirmation */}
+                <AlertDialog
+                  open={isDeleting}
+                  onOpenChange={(open) =>
+                    setDeletingEntryId(open ? entry.id : null)
+                  }
+                >
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete entry?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will remove the entry and update the bucket
+                        balance.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => {
+                          onDeleteEntry(bucket.id, entry.id);
+                          setDeletingEntryId(null);
                         }}
-                        submitLabel={
-                          isWithdrawal ? "Save withdrawal" : "Save entry"
-                        }
-                        onSubmit={(id, updated) => {
-                          onUpdateEntry(id, entry.id, updated);
-                          setEditingEntryId(null);
-                        }}
-                      />
-                      <DialogFooter className="hidden" />
-                    </DialogContent>
-                  </Dialog>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive"
-                        aria-label="Delete entry"
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete entry?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will remove the entry and update the bucket
-                          balance.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          onClick={() => onDeleteEntry(bucket.id, entry.id)}
-                        >
-                          Delete entry
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
+                        Delete entry
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             );
           })}

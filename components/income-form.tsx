@@ -31,8 +31,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AmountInput } from "@/components/ui/amount-input";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   incomeCategories,
@@ -110,8 +110,7 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <Input
-                  type="number"
+                <AmountInput
                   step="0.01"
                   placeholder="0.00"
                   {...field}
@@ -143,7 +142,7 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
                       return (
                         <SelectItem key={cat} value={cat}>
                           <div className="flex items-center gap-2">
-                            <Icon className="h-4 w-4 text-muted-foreground" />
+                            <Icon className="h-6 w-6 text-primary"  strokeWidth={2.5} />
                             <span>{cat}</span>
                           </div>
                         </SelectItem>
@@ -166,9 +165,10 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
+                        size="lg"
                         variant={"outline"}
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
+                          "w-full text-left font-normal hover:bg-background/80",
                           !field.value && "text-muted-foreground",
                         )}
                       >
@@ -177,7 +177,7 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        <CalendarIcon className="ml-auto h-6 w-6 text-primary" strokeWidth={2.5} />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -205,9 +205,8 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea
+                <Input
                   placeholder="Add details about this income"
-                  className="resize-none"
                   {...field}
                 />
               </FormControl>
@@ -215,9 +214,11 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full fn" disabled={isPending}>
-          {isPending ? "Adding..." : "Add Income"}
+        <div className="w-full flex justify-center pt-3">
+          <Button type="submit" className=" fn" disabled={isPending}>
+          {isPending ? "Saving..." : "Save"}
         </Button>
+        </div>
       </form>
     </Form>
   );

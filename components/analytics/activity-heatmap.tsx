@@ -80,15 +80,15 @@ export function ActivityHeatmap({ data, currency }: ActivityHeatmapProps) {
   const getColorClass = (level: number) => {
     switch (level) {
       case 0:
-        return "bg-foreground/25"; // Empty but visible
+        return "bg-primary/25"; // Empty but visible
       case 1:
-        return "bg-primary/20";
+        return "bg-secondary/20";
       case 2:
-        return "bg-primary/40";
+        return "bg-secondary/40";
       case 3:
-        return "bg-primary/60";
+        return "bg-secondary/60";
       case 4:
-        return "bg-primary/80"; // Highest
+        return "bg-secondary/80"; // Highest
       default:
         return "bg-foreground/25";
     }
@@ -214,11 +214,11 @@ export function ActivityHeatmap({ data, currency }: ActivityHeatmapProps) {
           <div className="mt-4 flex items-center justify-end gap-2 text-xs text-muted-foreground px-4">
             <span>Less</span>
             <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-[2px] bg-foreground/25"></div>
-              <div className="w-3 h-3 rounded-[2px] bg-primary/20"></div>
-              <div className="w-3 h-3 rounded-[2px] bg-primary/40"></div>
-              <div className="w-3 h-3 rounded-[2px] bg-primary/60"></div>
-              <div className="w-3 h-3 rounded-[2px] bg-primary/80"></div>
+              <div className="w-3 h-3 rounded-[2px] bg-primary/25"></div>
+              <div className="w-3 h-3 rounded-[2px] bg-secondary/20"></div>
+              <div className="w-3 h-3 rounded-[2px] bg-secondary/40"></div>
+              <div className="w-3 h-3 rounded-[2px] bg-secondary/60"></div>
+              <div className="w-3 h-3 rounded-[2px] bg-secondary/80"></div>
             </div>
             <span>More</span>
           </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Source_Sans_3 } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
 import { AuthSessionProvider } from "@/components/auth-session-provider";
@@ -9,9 +9,10 @@ import { BottomNav } from "@/components/bottom-nav";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const sourceSans3 = Source_Sans_3({
+  variable: "--font-source-sans-3",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${outfit.variable} antialiased`}>
+      <body className={`${sourceSans3.variable} antialiased`}>
         <ThemeProvider>
           <AuthSessionProvider>
             <UserSettingsProvider>

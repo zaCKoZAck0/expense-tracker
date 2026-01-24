@@ -1,13 +1,13 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import type { Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { CalendarIcon } from "lucide-react";
-import { cn, formatDateUTC } from "@/lib/utils";
+import { cn, formatDateUTC, toUTCNoon } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useNavigation } from "@/components/navigation-provider";
 import { Calendar } from "@/components/ui/calendar";
@@ -31,12 +31,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { AmountInput } from "@/components/ui/amount-input";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import {
   categories,
   categoryIcons,
+  incomeCategories,
+  incomeCategoryIcons,
   defaultCategoryIcon,
 } from "@/lib/constants";
 import type { Expense } from "@/lib/types";
@@ -45,14 +49,18 @@ import {
   updateExpense as updateExpenseAction,
 } from "@/app/actions";
 
+// Combined categories for validation
+const allCategories = [...categories, ...incomeCategories] as const;
+
 const formSchema = z.object({
   amount: z.preprocess(
     (val) => Number(val),
     z.number().min(0.01, "Amount must be greater than 0"),
   ) as z.ZodType<number>,
-  category: z.enum(categories),
+  category: z.string().min(1, "Category is required"),
   date: z.date(),
   notes: z.string().optional(),
+  type: z.enum(["expense", "income"]).optional(),
 });
 
 type ExpenseFormValues = z.infer<typeof formSchema>;
@@ -65,13 +73,17 @@ interface ExpenseFormProps {
 export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const { selectedMonth } = useNavigation();
+  const { selectedMonth, triggerRefresh } = useNavigation();
 
-  // Default date to selected month (first day) for new expenses
+  // Track transaction type for editing
+  const [transactionType, setTransactionType] = useState<"expense" | "income">(
+    expense?.type || "expense"
+  );
+
+  // Default date to today for new expenses, or the existing date when editing
   const getDefaultDate = () => {
     if (expense?.date) return new Date(expense.date);
-    const [year, month] = selectedMonth.split("-");
-    return new Date(parseInt(year), parseInt(month) - 1, 1);
+    return toUTCNoon(new Date()); // Today's date
   };
 
   const form = useForm<ExpenseFormValues>({
@@ -80,37 +92,56 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
       date: getDefaultDate(),
       notes: expense?.notes ?? "",
       amount: expense?.amount ?? 0,
-      category: expense?.category as ExpenseFormValues["category"] | undefined,
+      category: expense?.category ?? "",
+      type: expense?.type || "expense",
     },
   });
+
+  // Get current categories based on transaction type
+  const currentCategories = transactionType === "income" ? incomeCategories : categories;
+  const currentCategoryIcons = transactionType === "income" ? incomeCategoryIcons : categoryIcons;
+
+  // Handle type change - reset category when type changes
+  const handleTypeChange = (newType: "expense" | "income") => {
+    setTransactionType(newType);
+    form.setValue("type", newType);
+    form.setValue("category", ""); // Reset category when type changes
+  };
 
   function onSubmit(values: ExpenseFormValues) {
     startTransition(async () => {
       if (expense?.id) {
-        const result = await updateExpenseAction(expense.id, values);
+        const result = await updateExpenseAction(expense.id, {
+          ...values,
+          type: transactionType,
+        });
         if (!result.success) {
-          toast.error(result.error ?? "Failed to update expense");
+          toast.error(result.error ?? "Failed to update transaction");
           return;
         }
-        toast.success("Expense updated successfully");
+        toast.success("Transaction updated successfully");
         router.refresh();
+        triggerRefresh();
         onSuccess?.();
         return;
       }
 
-      const result = await addExpenseAction(values);
+      const result = await addExpenseAction({
+        ...values,
+        type: transactionType,
+      });
       if (!result.success) {
         toast.error(result.error ?? "Failed to add expense");
         return;
       }
       toast.success("Expense added successfully");
       router.refresh();
-      const [year, month] = selectedMonth.split("-");
+      triggerRefresh();
       form.reset({
-        date: new Date(parseInt(year), parseInt(month) - 1, 1),
+        date: toUTCNoon(new Date()),
         notes: "",
         amount: 0,
-        category: undefined,
+        category: "",
       });
       onSuccess?.();
     });
@@ -119,6 +150,30 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Transaction Type Toggle - Only show when editing */}
+        {expense?.id && (
+          <div className="space-y-2">
+            <RadioGroup
+              value={transactionType}
+              onValueChange={(v) => handleTypeChange(v as "expense" | "income")}
+              className="flex gap-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="expense" id="type-expense" />
+                <Label htmlFor="type-expense" className="font-normal cursor-pointer">
+                  Expense
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="income" id="type-income" />
+                <Label htmlFor="type-income" className="font-normal cursor-pointer">
+                  Income
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        )}
+
         <FormField
           control={form.control}
           name="amount"
@@ -126,8 +181,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <Input
-                  type="number"
+                <AmountInput
                   step="0.01"
                   placeholder="0.00"
                   {...field}
@@ -146,7 +200,8 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
                 <FormLabel>Category</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
+                  key={transactionType} // Re-render when type changes
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -154,12 +209,12 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {categories.map((cat) => {
-                      const Icon = categoryIcons[cat] || defaultCategoryIcon;
+                    {currentCategories.map((cat) => {
+                      const Icon = currentCategoryIcons[cat] || defaultCategoryIcon;
                       return (
                         <SelectItem key={cat} value={cat}>
                           <div className="flex items-center gap-2">
-                            <Icon className="h-4 w-4 text-muted-foreground" />
+                            <Icon className="h-6 w-6 text-primary" strokeWidth={2.5} />
                             <span>{cat}</span>
                           </div>
                         </SelectItem>
@@ -183,6 +238,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
                     <FormControl>
                       <Button
                         variant={"outline"}
+                        size="lg"
                         className={cn(
                           "w-full pl-3 text-left font-normal",
                           !field.value && "text-muted-foreground",
@@ -193,7 +249,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
                         ) : (
                           <span>Pick a date</span>
                         )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        <CalendarIcon className="ml-auto h-6 w-6 text-primary" strokeWidth={2.5} />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -221,9 +277,8 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Add details about this expense"
-                  className="resize-none"
+                <Input
+                  placeholder="Add details about this transaction"
                   {...field}
                 />
               </FormControl>
@@ -231,9 +286,11 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full fn" disabled={isPending}>
-          {isPending ? "Adding..." : "Add Expense"}
-        </Button>
+        <div className="w-full flex justify-center pt-3">
+        <Button type="submit" className="fn" disabled={isPending}>
+          {isPending ? "Saving..." : "Save"}
+          </Button>
+          </div>
       </form>
     </Form>
   );

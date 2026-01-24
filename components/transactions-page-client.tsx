@@ -28,6 +28,7 @@ import { useUserSettings } from "@/components/user-settings-provider";
 import { cn } from "@/lib/utils";
 import { useNavigation } from "@/components/navigation-provider";
 import { Transaction } from "@/components/expense-list";
+import ExpenseDetail from "@/components/expense-detail";
 import {
   ChevronLeft,
   ChevronRight,
@@ -63,7 +64,7 @@ export function TransactionsPageClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currency } = useUserSettings();
-  const { openExpense } = useNavigation();
+  const { openExpense, selectedExpense, closeExpense } = useNavigation();
 
   // Helper to update URL params
   const updateParams = useCallback(
@@ -138,6 +139,15 @@ export function TransactionsPageClient({
     });
     return groups;
   }, [transactions, isGrouped]);
+
+  // If an expense is selected, show the detail view
+  if (selectedExpense) {
+    return (
+      <div className="space-y-6 pb-24 pt-6">
+        <ExpenseDetail expense={selectedExpense} onBack={closeExpense} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-24 pt-6">
@@ -399,14 +409,14 @@ export function TransactionsPageClient({
                                   className={cn(
                                     "flex h-10 w-10 items-center justify-center rounded-full bg-accent transition-colors",
                                     isIncome &&
-                                      "bg-emerald-100 dark:bg-emerald-900/30",
+                                      "bg-green-100 dark:bg-green-900/40",
                                   )}
                                 >
                                   <Icon
                                     className={cn(
                                       "h-5 w-5 text-accent-foreground",
                                       isIncome &&
-                                        "text-emerald-600 dark:text-emerald-400",
+                                        "text-green-700 dark:text-green-300",
                                     )}
                                   />
                                 </div>
@@ -424,7 +434,7 @@ export function TransactionsPageClient({
                               className={cn(
                                 "text-right font-medium",
                                 isIncome
-                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  ? "text-green-600 dark:text-green-400"
                                   : "",
                               )}
                             >
@@ -465,14 +475,14 @@ export function TransactionsPageClient({
                         <div
                           className={cn(
                             "flex h-10 w-10 items-center justify-center rounded-full bg-accent transition-colors",
-                            isIncome && "bg-emerald-100 dark:bg-emerald-900/30",
+                            isIncome && "bg-green-100 dark:bg-green-900/40",
                           )}
                         >
                           <Icon
                             className={cn(
                               "h-5 w-5 text-accent-foreground",
                               isIncome &&
-                                "text-emerald-600 dark:text-emerald-400",
+                                "text-green-700 dark:text-green-300",
                             )}
                           />
                         </div>
@@ -490,7 +500,7 @@ export function TransactionsPageClient({
                       className={cn(
                         "text-right font-medium",
                         isIncome
-                          ? "text-emerald-600 dark:text-emerald-400"
+                          ? "text-green-600 dark:text-green-400"
                           : "",
                       )}
                     >
