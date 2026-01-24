@@ -1,15 +1,26 @@
 // Expense Tracker Service Worker
 const CACHE_NAME = "expense-tracker-v1";
-const STATIC_CACHE_NAME = "expense-tracker-static-v1";
+const STATIC_CACHE_NAME = "expense-tracker-static-v2";
 
 // Static assets to cache immediately on install
-const STATIC_ASSETS = ["/", "/icon-192.png", "/icon-512.png"];
+const STATIC_ASSETS = [
+  "/",
+  "/icons/icon-192x192.png",
+  "/icons/icon-512x512.png",
+];
 
 // Install event - cache static assets
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      // Use addAll with error handling - don't fail if some assets missing
+      return Promise.allSettled(
+        STATIC_ASSETS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn(`Failed to cache ${url}:`, err);
+          })
+        )
+      );
     }),
   );
   // Activate immediately
@@ -46,6 +57,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Skip Next.js internal routes and hot-reload in dev
+  if (url.pathname.startsWith("/_next/")) {
+    return;
+  }
+
   // API calls - network first, fall back to cache
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
@@ -68,7 +84,31 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets and pages - stale-while-revalidate
+  // Navigation requests - network first, fall back to cached app shell
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Cache the navigation response
+          if (response.ok) {
+            const responseClone = response.clone();
+            caches.open(STATIC_CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Return cached page or fallback to root
+          return caches.match(request).then((cachedResponse) => {
+            return cachedResponse || caches.match("/");
+          });
+        }),
+    );
+    return;
+  }
+
+  // Static assets - stale-while-revalidate
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       const fetchPromise = fetch(request)
@@ -83,10 +123,7 @@ self.addEventListener("fetch", (event) => {
           return networkResponse;
         })
         .catch(() => {
-          // Return offline fallback for navigation requests
-          if (request.mode === "navigate") {
-            return caches.match("/");
-          }
+          // Return undefined if network fails and no cache
           return undefined;
         });
 
