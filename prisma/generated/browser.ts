@@ -33,6 +33,11 @@ export type User = Prisma.UserModel
  */
 export type Budget = Prisma.BudgetModel
 /**
+ * Model CategoryBudget
+ * 
+ */
+export type CategoryBudget = Prisma.CategoryBudgetModel
+/**
  * Model SavingsBucket
  * 
  */

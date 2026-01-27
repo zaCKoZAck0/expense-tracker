@@ -5,10 +5,13 @@ import { BudgetLineChart } from "@/components/analytics/budget-line-chart";
 import { ExpensePieChart } from "@/components/analytics/expense-pie-chart";
 import { IncomePieChart } from "@/components/analytics/income-pie-chart";
 import { ActivityHeatmap } from "@/components/analytics/activity-heatmap";
+import { CategoryBudgetChart } from "@/components/analytics/category-budget-chart";
 import {
   getExpenseCategoryData,
   getIncomeCategoryData,
 } from "@/app/actions/analytics";
+import { useCategoryBudgets } from "@/hooks/use-local-data";
+import { useNavigation } from "@/components/navigation-provider";
 
 interface AnalyticsClientProps {
   availableMonths: string[];
@@ -44,6 +47,18 @@ export function AnalyticsClient({
     useState<string>(initialMonth);
   const [incomePieData, setIncomePieData] = useState(initialIncomePieData);
 
+  // Get selected month from navigation for category budgets
+  const { selectedMonth: navMonth } = useNavigation();
+  const { data: categoryBudgets } = useCategoryBudgets(navMonth);
+
+  // Transform category budgets for the chart
+  const categoryBudgetChartData = categoryBudgets.map((cb) => ({
+    category: cb.category,
+    budget: cb.amount,
+    spent: cb.spent,
+    remaining: cb.remaining,
+  }));
+
   const handleMonthChange = async (month: string) => {
     setSelectedMonth(month);
     // Fetch category totals for the newly selected month.
@@ -67,6 +82,11 @@ export function AnalyticsClient({
         <div>
           <BudgetLineChart data={trendData} />
         </div>
+        {categoryBudgetChartData.length > 0 && (
+          <div>
+            <CategoryBudgetChart data={categoryBudgetChartData} />
+          </div>
+        )}
         <div>
           <ExpensePieChart
             data={pieData}

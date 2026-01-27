@@ -25,15 +25,16 @@ model Expense {
 }
 
 model User {
-  id             String          @id @default(uuid())
-  email          String          @unique
-  name           String?
-  image          String?
-  currency       String          @default("USD")
-  createdAt      DateTime        @default(now())
-  expenses       Expense[]
-  savingsBuckets SavingsBucket[]
-  savingsEntries SavingsEntry[]
+  id              String           @id @default(uuid())
+  email           String           @unique
+  name            String?
+  image           String?
+  currency        String           @default("USD")
+  createdAt       DateTime         @default(now())
+  expenses        Expense[]
+  savingsBuckets  SavingsBucket[]
+  savingsEntries  SavingsEntry[]
+  categoryBudgets CategoryBudget[]
 }
 
 model Budget {
@@ -41,6 +42,19 @@ model Budget {
   amount    Float
   month     String   @unique
   createdAt DateTime @default(now())
+}
+
+model CategoryBudget {
+  id        String   @id @default(uuid())
+  category  String
+  amount    Float
+  month     String
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category, month])
+  @@index([userId, month])
 }
 
 model SavingsBucket {

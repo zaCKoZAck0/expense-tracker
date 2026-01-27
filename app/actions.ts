@@ -586,3 +586,99 @@ export async function getDashboardData(month: string) {
     return { success: false, error: "Failed to fetch dashboard data" } as const;
   }
 }
+
+// ============================================
+// Category Budget Actions
+// ============================================
+
+const getCategoryBudgetTag = (userId: string) => `category-budgets-${userId}`;
+
+export async function getCategoryBudgets(month: string) {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error } as const;
+    }
+
+    const categoryBudgets = await db.categoryBudget.findMany({
+      where: {
+        userId: userRes.data.id,
+        month,
+      },
+      orderBy: { category: "asc" },
+    });
+
+    return { success: true, data: categoryBudgets } as const;
+  } catch (error) {
+    console.error("Failed to get category budgets:", error);
+    return { success: false, error: "Failed to get category budgets" } as const;
+  }
+}
+
+export interface CategoryBudgetInput {
+  category: string;
+  amount: number;
+  month: string;
+}
+
+export async function setCategoryBudget(data: CategoryBudgetInput) {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error } as const;
+    }
+
+    const categoryBudget = await db.categoryBudget.upsert({
+      where: {
+        userId_category_month: {
+          userId: userRes.data.id,
+          category: data.category,
+          month: data.month,
+        },
+      },
+      update: {
+        amount: data.amount,
+      },
+      create: {
+        category: data.category,
+        amount: data.amount,
+        month: data.month,
+        userId: userRes.data.id,
+      },
+    });
+
+    revalidatePath("/");
+    revalidateTag(getCategoryBudgetTag(userRes.data.id), {});
+    revalidateTag(getDashboardTag(userRes.data.id), {});
+
+    return { success: true, data: categoryBudget } as const;
+  } catch (error) {
+    console.error("Failed to set category budget:", error);
+    return { success: false, error: "Failed to set category budget" } as const;
+  }
+}
+
+export async function deleteCategoryBudget(id: string) {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error } as const;
+    }
+
+    const existing = await db.categoryBudget.findUnique({ where: { id } });
+    if (!existing || existing.userId !== userRes.data.id) {
+      return { success: false, error: "Not found or unauthorized" } as const;
+    }
+
+    await db.categoryBudget.delete({ where: { id } });
+
+    revalidatePath("/");
+    revalidateTag(getCategoryBudgetTag(userRes.data.id), {});
+    revalidateTag(getDashboardTag(userRes.data.id), {});
+
+    return { success: true } as const;
+  } catch (error) {
+    console.error("Failed to delete category budget:", error);
+    return { success: false, error: "Failed to delete category budget" } as const;
+  }
+}

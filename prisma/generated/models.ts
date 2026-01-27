@@ -11,6 +11,7 @@
 export type * from './models/Expense'
 export type * from './models/User'
 export type * from './models/Budget'
+export type * from './models/CategoryBudget'
 export type * from './models/SavingsBucket'
 export type * from './models/SavingsEntry'
 export type * from './commonInputTypes'

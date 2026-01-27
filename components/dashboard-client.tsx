@@ -5,7 +5,7 @@ import { TransactionList } from "@/components/expense-list";
 import { AddExpenseButton } from "@/components/add-expense-button";
 import { useNavigation } from "@/components/navigation-provider";
 import ExpenseDetail from "@/components/expense-detail";
-import { useDashboardData } from "@/hooks/use-local-data";
+import { useDashboardData, useCategoryBudgets } from "@/hooks/use-local-data";
 import { useUserSettings } from "@/components/user-settings-provider";
 
 type DashboardExpense = {
@@ -26,6 +26,9 @@ export function DashboardClient() {
 
   // Use local-first data hook
   const { data, isLoading } = useDashboardData(selectedMonth);
+
+  // Use category budgets hook
+  const { data: categoryBudgets } = useCategoryBudgets(selectedMonth);
 
   const expenses = useMemo<DashboardExpense[]>(() => {
     if (!data?.expenses) return [];
@@ -69,6 +72,7 @@ export function DashboardClient() {
           spentPercentage={spentPercentage}
           dailySpending={data?.dailySpending ?? []}
           daysInMonth={data?.daysInMonth ?? 30}
+          categoryBudgets={categoryBudgets}
         />
       </div>
 

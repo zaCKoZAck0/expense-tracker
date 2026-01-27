@@ -10,7 +10,7 @@ export type EntitySyncStatus = "synced" | "pending" | "error";
 export interface SyncOperation {
   id?: number;
   operationType: "create" | "update" | "delete";
-  entity: "expense" | "budget" | "savingsBucket" | "savingsEntry" | "user";
+  entity: "expense" | "budget" | "categoryBudget" | "savingsBucket" | "savingsEntry" | "user";
   entityId: string;
   data: unknown;
   timestamp: number;
@@ -51,6 +51,16 @@ export interface LocalBudget {
   syncStatus: EntitySyncStatus;
 }
 
+export interface LocalCategoryBudget {
+  id: string;
+  category: string;
+  amount: number;
+  month: string;
+  createdAt: Date;
+  userId: string;
+  syncStatus: EntitySyncStatus;
+}
+
 export interface LocalSavingsBucket {
   id: string;
   name: string;
@@ -88,6 +98,7 @@ export class ExpenseTrackerDB extends Dexie {
   users!: EntityTable<LocalUser, "id">;
   expenses!: EntityTable<LocalExpense, "id">;
   budgets!: EntityTable<LocalBudget, "id">;
+  categoryBudgets!: EntityTable<LocalCategoryBudget, "id">;
   savingsBuckets!: EntityTable<LocalSavingsBucket, "id">;
   savingsEntries!: EntityTable<LocalSavingsEntry, "id">;
   syncQueue!: EntityTable<SyncOperation, "id">;
@@ -116,6 +127,18 @@ export class ExpenseTrackerDB extends Dexie {
       syncQueue: "++id, entity, entityId, timestamp",
       syncMetadata: "id",
     });
+
+    // Version 3: Add categoryBudgets table
+    this.version(3).stores({
+      users: "id, email, syncStatus",
+      expenses: "id, userId, date, type, category, syncStatus, [userId+date]",
+      budgets: "id, month, syncStatus",
+      categoryBudgets: "id, userId, category, month, syncStatus, [userId+month], [userId+category+month]",
+      savingsBuckets: "id, userId, syncStatus",
+      savingsEntries: "id, bucketId, userId, date, syncStatus",
+      syncQueue: "++id, entity, entityId, timestamp",
+      syncMetadata: "id",
+    });
   }
 }
 
@@ -133,6 +156,7 @@ export async function clearLocalData() {
       localDb.users,
       localDb.expenses,
       localDb.budgets,
+      localDb.categoryBudgets,
       localDb.savingsBuckets,
       localDb.savingsEntries,
       localDb.syncQueue,
@@ -142,6 +166,7 @@ export async function clearLocalData() {
       await localDb.users.clear();
       await localDb.expenses.clear();
       await localDb.budgets.clear();
+      await localDb.categoryBudgets.clear();
       await localDb.savingsBuckets.clear();
       await localDb.savingsEntries.clear();
       await localDb.syncQueue.clear();

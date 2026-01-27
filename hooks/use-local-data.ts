@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import Dexie from "dexie";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   localDb,
   addToSyncQueue,
   type LocalExpense,
   type LocalBudget,
+  type LocalCategoryBudget,
   type EntitySyncStatus,
 } from "@/lib/offline-db";
 import { useSyncContext } from "@/components/sync-provider";
@@ -412,6 +414,160 @@ export function useSetBudget() {
   }, []);
 
   return setBudget;
+}
+
+// ============================================
+// Category Budget Hooks
+// ============================================
+
+export interface CategoryBudgetWithSpent {
+  id: string;
+  category: string;
+  amount: number;
+  month: string;
+  spent: number;
+  remaining: number;
+  percentage: number;
+  isOverBudget: boolean;
+}
+
+export function useCategoryBudgets(month: string) {
+  const { isOnline, refreshFromServer } = useSyncContext();
+
+  // Live query for category budgets in the selected month
+  const categoryBudgets = useLiveQuery(
+    async () => {
+      return localDb.categoryBudgets
+        .where("[userId+month]")
+        .between([Dexie.minKey, month], [Dexie.maxKey, month])
+        .filter((cb) => cb.month === month)
+        .toArray();
+    },
+    [month],
+    [],
+  );
+
+  // Live query for expenses in the selected month to calculate spent amounts
+  const expenses = useLiveQuery(
+    async () => {
+      const [year, monthNum] = month.split("-").map(Number);
+      const startDate = new Date(year, monthNum - 1, 1);
+      const endDate = new Date(year, monthNum, 0);
+
+      const monthExpenses = await localDb.expenses
+        .where("date")
+        .between(startDate, new Date(endDate.getTime() + 86400000), true, false)
+        .toArray();
+
+      // Filter by month more precisely and only expenses (not income)
+      return monthExpenses.filter((e) => {
+        const expenseDate = new Date(e.date);
+        return (
+          expenseDate.getUTCFullYear() === year &&
+          expenseDate.getUTCMonth() === monthNum - 1 &&
+          e.type === "expense"
+        );
+      });
+    },
+    [month],
+    [],
+  );
+
+  // Compute category budgets with spent amounts
+  const categoryBudgetsWithSpent: CategoryBudgetWithSpent[] = useMemo(() => {
+    if (!categoryBudgets || !expenses) return [];
+
+    // Calculate spent amount per category
+    const spentByCategory = new Map<string, number>();
+    for (const expense of expenses) {
+      const current = spentByCategory.get(expense.category) || 0;
+      spentByCategory.set(expense.category, current + expense.amount);
+    }
+
+    return categoryBudgets.map((cb) => {
+      const spent = spentByCategory.get(cb.category) || 0;
+      const remaining = cb.amount - spent;
+      const percentage = cb.amount > 0 ? (spent / cb.amount) * 100 : 0;
+
+      return {
+        id: cb.id,
+        category: cb.category,
+        amount: cb.amount,
+        month: cb.month,
+        spent,
+        remaining,
+        percentage,
+        isOverBudget: remaining < 0,
+      };
+    });
+  }, [categoryBudgets, expenses]);
+
+  return {
+    data: categoryBudgetsWithSpent,
+    isLoading: categoryBudgets === undefined || expenses === undefined,
+  };
+}
+
+export function useSetCategoryBudget() {
+  const { isOnline } = useSyncContext();
+
+  const setCategoryBudget = useCallback(
+    async (category: string, amount: number, month: string, userId: string) => {
+      // Check if category budget exists for this category and month
+      const existing = await localDb.categoryBudgets
+        .where("[userId+category+month]")
+        .equals([userId, category, month])
+        .first();
+
+      const categoryBudget: LocalCategoryBudget = {
+        id: existing?.id ?? crypto.randomUUID(),
+        category,
+        amount,
+        month,
+        createdAt: existing?.createdAt ?? new Date(),
+        userId,
+        syncStatus: "pending",
+      };
+
+      // Save to local DB
+      await localDb.categoryBudgets.put(categoryBudget);
+
+      // Queue for sync
+      await addToSyncQueue({
+        operationType: existing ? "update" : "create",
+        entity: "categoryBudget",
+        entityId: categoryBudget.id,
+        data: categoryBudget,
+      });
+
+      return categoryBudget.id;
+    },
+    [isOnline],
+  );
+
+  return setCategoryBudget;
+}
+
+export function useDeleteCategoryBudget() {
+  const deleteCategoryBudget = useCallback(async (id: string) => {
+    const existing = await localDb.categoryBudgets.get(id);
+    if (!existing) return;
+
+    // Delete from local DB
+    await localDb.categoryBudgets.delete(id);
+
+    // Queue for sync (only if it was previously synced)
+    if (existing.syncStatus === "synced") {
+      await addToSyncQueue({
+        operationType: "delete",
+        entity: "categoryBudget",
+        entityId: id,
+        data: { id },
+      });
+    }
+  }, []);
+
+  return deleteCategoryBudget;
 }
 
 // ============================================
