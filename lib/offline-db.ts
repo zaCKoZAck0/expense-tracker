@@ -10,7 +10,13 @@ export type EntitySyncStatus = "synced" | "pending" | "error";
 export interface SyncOperation {
   id?: number;
   operationType: "create" | "update" | "delete";
-  entity: "expense" | "budget" | "categoryBudget" | "savingsBucket" | "savingsEntry" | "user";
+  entity:
+    | "expense"
+    | "budget"
+    | "categoryBudget"
+    | "savingsBucket"
+    | "savingsEntry"
+    | "user";
   entityId: string;
   data: unknown;
   timestamp: number;
@@ -133,7 +139,8 @@ export class ExpenseTrackerDB extends Dexie {
       users: "id, email, syncStatus",
       expenses: "id, userId, date, type, category, syncStatus, [userId+date]",
       budgets: "id, month, syncStatus",
-      categoryBudgets: "id, userId, category, month, syncStatus, [userId+month], [userId+category+month]",
+      categoryBudgets:
+        "id, userId, category, month, syncStatus, [userId+month], [userId+category+month]",
       savingsBuckets: "id, userId, syncStatus",
       savingsEntries: "id, bucketId, userId, date, syncStatus",
       syncQueue: "++id, entity, entityId, timestamp",

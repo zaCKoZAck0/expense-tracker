@@ -41,7 +41,15 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 // Custom tick component to render category icons
-function CustomXAxisTick({ x, y, payload }: { x: number; y: number; payload: { value: string } }) {
+function CustomXAxisTick({
+  x,
+  y,
+  payload,
+}: {
+  x: number;
+  y: number;
+  payload: { value: string };
+}) {
   const Icon = categoryIcons[payload.value] || defaultCategoryIcon;
   return (
     <g transform={`translate(${x},${y})`}>
@@ -72,15 +80,16 @@ export function CategoryBudgetChart({ data }: CategoryBudgetChartProps) {
     return data.reduce((acc, curr) => acc + curr.spent, 0);
   }, [data]);
 
-  const overallPercentage = totalBudget > 0 
-    ? ((totalSpent / totalBudget) * 100).toFixed(1) 
-    : "0";
+  const overallPercentage =
+    totalBudget > 0 ? ((totalSpent / totalBudget) * 100).toFixed(1) : "0";
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Category Budget Usage</CardTitle>
-        <CardDescription>Spent vs remaining budget per category</CardDescription>
+        <CardDescription>
+          Spent vs remaining budget per category
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="mx-auto max-w-[400px]">
@@ -93,7 +102,7 @@ export function CategoryBudgetChart({ data }: CategoryBudgetChartProps) {
               axisLine={false}
               tick={CustomXAxisTick}
             />
-            <ChartTooltip 
+            <ChartTooltip
               content={<ChartTooltipContent labelKey="category" />}
               labelFormatter={(_, payload) => {
                 if (payload && payload.length > 0) {

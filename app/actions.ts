@@ -679,6 +679,9 @@ export async function deleteCategoryBudget(id: string) {
     return { success: true } as const;
   } catch (error) {
     console.error("Failed to delete category budget:", error);
-    return { success: false, error: "Failed to delete category budget" } as const;
+    return {
+      success: false,
+      error: "Failed to delete category budget",
+    } as const;
   }
 }
