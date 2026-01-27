@@ -5,14 +5,26 @@ import { BudgetLineChart } from "@/components/analytics/budget-line-chart";
 import { ExpensePieChart } from "@/components/analytics/expense-pie-chart";
 import { IncomePieChart } from "@/components/analytics/income-pie-chart";
 import { ActivityHeatmap } from "@/components/analytics/activity-heatmap";
-import { getExpenseCategoryData, getIncomeCategoryData } from "@/app/actions/analytics";
+import {
+  getExpenseCategoryData,
+  getIncomeCategoryData,
+} from "@/app/actions/analytics";
 
 interface AnalyticsClientProps {
   availableMonths: string[];
   initialMonth: string;
   initialPieData: Array<{ category: string; amount: number; fill: string }>;
-  initialIncomePieData: Array<{ category: string; amount: number; fill: string }>;
-  trendData: Array<{ month: string; budget: number; spend: number; earning: number }>;
+  initialIncomePieData: Array<{
+    category: string;
+    amount: number;
+    fill: string;
+  }>;
+  trendData: Array<{
+    month: string;
+    budget: number;
+    spend: number;
+    earning: number;
+  }>;
   dailyActivityData: Array<{ date: string; count: number }>;
   currency: string;
 }
@@ -28,7 +40,8 @@ export function AnalyticsClient({
 }: AnalyticsClientProps) {
   const [selectedMonth, setSelectedMonth] = useState<string>(initialMonth);
   const [pieData, setPieData] = useState(initialPieData);
-  const [selectedIncomeMonth, setSelectedIncomeMonth] = useState<string>(initialMonth);
+  const [selectedIncomeMonth, setSelectedIncomeMonth] =
+    useState<string>(initialMonth);
   const [incomePieData, setIncomePieData] = useState(initialIncomePieData);
 
   const handleMonthChange = async (month: string) => {

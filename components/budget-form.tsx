@@ -50,7 +50,8 @@ export function BudgetForm({
   const { triggerRefresh } = useNavigation();
   const setBudgetLocal = useSetBudget();
   const { syncNow } = useSyncContext();
-  const { includeEarningInBudget, setIncludeEarningInBudget } = useUserSettings();
+  const { includeEarningInBudget, setIncludeEarningInBudget } =
+    useUserSettings();
 
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(formSchema) as Resolver<BudgetFormValues>,
@@ -109,7 +110,10 @@ export function BudgetForm({
         />
 
         <div className="flex items-center justify-between gap-2 py-2">
-          <Label htmlFor="include-earning-budget" className="text-sm cursor-pointer">
+          <Label
+            htmlFor="include-earning-budget"
+            className="text-sm cursor-pointer"
+          >
             Include earning in budget
           </Label>
           <Switch

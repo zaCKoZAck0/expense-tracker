@@ -78,7 +78,10 @@ export function BudgetLineChart({ data }: BudgetLineChartProps) {
             checked={includeEarningInBudget}
             onCheckedChange={setIncludeEarningInBudget}
           />
-          <Label htmlFor="include-earning" className="text-sm text-muted-foreground cursor-pointer">
+          <Label
+            htmlFor="include-earning"
+            className="text-sm text-muted-foreground cursor-pointer"
+          >
             Include earning in budget
           </Label>
         </div>

@@ -146,7 +146,7 @@ export async function clearLocalData() {
       await localDb.savingsEntries.clear();
       await localDb.syncQueue.clear();
       await localDb.syncMetadata.clear();
-    }
+    },
   );
 }
 
@@ -156,7 +156,7 @@ export async function getSyncMetadata(): Promise<SyncMetadata | undefined> {
 
 export async function updateSyncMetadata(
   userId: string,
-  lastSyncedAt: Date
+  lastSyncedAt: Date,
 ): Promise<void> {
   await localDb.syncMetadata.put({
     id: "main",
@@ -170,7 +170,7 @@ export async function updateSyncMetadata(
 // ============================================
 
 export async function addToSyncQueue(
-  operation: Omit<SyncOperation, "id" | "timestamp" | "retryCount">
+  operation: Omit<SyncOperation, "id" | "timestamp" | "retryCount">,
 ): Promise<void> {
   await localDb.syncQueue.add({
     ...operation,

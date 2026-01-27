@@ -87,7 +87,10 @@ export function EntryForm({
               )}
             >
               {date ? format(date, "PPP") : <span>Pick a date</span>}
-              <CalendarIcon className="ml-auto h-6 w-6 text-primary" strokeWidth={2.5} />
+              <CalendarIcon
+                className="ml-auto h-6 w-6 text-primary"
+                strokeWidth={2.5}
+              />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -95,9 +98,7 @@ export function EntryForm({
               mode="single"
               selected={date}
               onSelect={(d) => d && setDate(toUTCNoon(d))}
-              disabled={(d) =>
-                d > new Date() || d < new Date("1900-01-01")
-              }
+              disabled={(d) => d > new Date() || d < new Date("1900-01-01")}
               initialFocus
             />
           </PopoverContent>
@@ -113,9 +114,7 @@ export function EntryForm({
         />
       </div>
       <div className="w-full flex justify-center pt-3">
-        <Button type="submit">
-          {submitLabel}
-        </Button>
+        <Button type="submit">{submitLabel}</Button>
       </div>
     </form>
   );

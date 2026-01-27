@@ -328,11 +328,18 @@ const getActivityCache = (userId: string) => {
         select: { amount: true, date: true, type: true },
       });
 
-      const dailyMap = new Map<string, { expense: number; earning: number; transactions: number }>();
+      const dailyMap = new Map<
+        string,
+        { expense: number; earning: number; transactions: number }
+      >();
 
       for (const entry of entries) {
         const dayKey = format(entry.date, "yyyy-MM-dd");
-        const prev = dailyMap.get(dayKey) ?? { expense: 0, earning: 0, transactions: 0 };
+        const prev = dailyMap.get(dayKey) ?? {
+          expense: 0,
+          earning: 0,
+          transactions: 0,
+        };
         prev.transactions += 1;
         if (entry.type === "income") {
           prev.earning += entry.amount;

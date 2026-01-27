@@ -92,12 +92,7 @@ export function TransactionsPageClient() {
       maxAmount: localMaxAmount ? parseFloat(localMaxAmount) : undefined,
     });
     setCurrentPage(1);
-  }, [
-    localStartDate,
-    localEndDate,
-    localMinAmount,
-    localMaxAmount,
-  ]);
+  }, [localStartDate, localEndDate, localMinAmount, localMaxAmount]);
 
   const resetFilters = useCallback(() => {
     setFilterType("all");

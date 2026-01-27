@@ -26,7 +26,13 @@ import {
 } from "date-fns";
 
 interface ActivityHeatmapProps {
-  data: Array<{ date: string; count: number; expense?: number; earning?: number; transactions?: number }>;
+  data: Array<{
+    date: string;
+    count: number;
+    expense?: number;
+    earning?: number;
+    transactions?: number;
+  }>;
   currency: string;
 }
 
@@ -50,7 +56,10 @@ export function ActivityHeatmap({ data, currency }: ActivityHeatmapProps) {
 
   // Transform data to Map for O(1) lookup
   const dataMap = useMemo(() => {
-    const map = new Map<string, { count: number; expense: number; earning: number; transactions: number }>();
+    const map = new Map<
+      string,
+      { count: number; expense: number; earning: number; transactions: number }
+    >();
     data.forEach((item) => {
       map.set(item.date, {
         count: item.count,
@@ -174,7 +183,12 @@ export function ActivityHeatmap({ data, currency }: ActivityHeatmapProps) {
                       const isHidden = isAfterToday || isBeforeStart;
 
                       const dateStr = format(day, "yyyy-MM-dd");
-                      const dayData = dataMap.get(dateStr) || { count: 0, expense: 0, earning: 0, transactions: 0 };
+                      const dayData = dataMap.get(dateStr) || {
+                        count: 0,
+                        expense: 0,
+                        earning: 0,
+                        transactions: 0,
+                      };
                       const level = getLevel(dayData.count);
 
                       if (isHidden) {
@@ -197,21 +211,34 @@ export function ActivityHeatmap({ data, currency }: ActivityHeatmapProps) {
                             <TooltipContent>
                               <div className="text-xs">
                                 <div className="font-semibold">
-                                  {dayData.transactions === 0
-                                    ? "No activity"
-                                    : (
-                                      <>
-                                        <div className="text-muted-foreground mb-1">
-                                          {dayData.transactions} transaction{dayData.transactions !== 1 ? "s" : ""}
+                                  {dayData.transactions === 0 ? (
+                                    "No activity"
+                                  ) : (
+                                    <>
+                                      <div className="text-muted-foreground mb-1">
+                                        {dayData.transactions} transaction
+                                        {dayData.transactions !== 1 ? "s" : ""}
+                                      </div>
+                                      {dayData.expense > 0 && (
+                                        <div>
+                                          Spent:{" "}
+                                          {formatCurrency(
+                                            dayData.expense,
+                                            currency,
+                                          )}
                                         </div>
-                                        {dayData.expense > 0 && (
-                                          <div>Spent: {formatCurrency(dayData.expense, currency)}</div>
-                                        )}
-                                        {dayData.earning > 0 && (
-                                          <div>Earned: {formatCurrency(dayData.earning, currency)}</div>
-                                        )}
-                                      </>
-                                    )}
+                                      )}
+                                      {dayData.earning > 0 && (
+                                        <div>
+                                          Earned:{" "}
+                                          {formatCurrency(
+                                            dayData.earning,
+                                            currency,
+                                          )}
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
                                 </div>
                                 <div className="text-muted-foreground mt-1">
                                   {format(day, "MMM d, yyyy")}

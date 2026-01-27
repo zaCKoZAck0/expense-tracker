@@ -31,7 +31,8 @@ export function UserSettingsProvider({
   children: React.ReactNode;
 }) {
   const [currency, setCurrencyState] = useState<string>("USD");
-  const [includeEarningInBudget, setIncludeEarningInBudgetState] = useState<boolean>(true);
+  const [includeEarningInBudget, setIncludeEarningInBudgetState] =
+    useState<boolean>(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -116,7 +117,15 @@ export function UserSettingsProvider({
   }
 
   return (
-    <UserSettingsContext.Provider value={{ currency, setCurrency, includeEarningInBudget, setIncludeEarningInBudget, loading }}>
+    <UserSettingsContext.Provider
+      value={{
+        currency,
+        setCurrency,
+        includeEarningInBudget,
+        setIncludeEarningInBudget,
+        loading,
+      }}
+    >
       {children}
     </UserSettingsContext.Provider>
   );
