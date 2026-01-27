@@ -26,7 +26,7 @@ import {
 } from "date-fns";
 
 interface ActivityHeatmapProps {
-  data: Array<{ date: string; count: number }>;
+  data: Array<{ date: string; count: number; expense?: number; earning?: number; transactions?: number }>;
   currency: string;
 }
 
@@ -50,9 +50,14 @@ export function ActivityHeatmap({ data, currency }: ActivityHeatmapProps) {
 
   // Transform data to Map for O(1) lookup
   const dataMap = useMemo(() => {
-    const map = new Map<string, number>();
+    const map = new Map<string, { count: number; expense: number; earning: number; transactions: number }>();
     data.forEach((item) => {
-      map.set(item.date, item.count); // item.date should be YYYY-MM-DD
+      map.set(item.date, {
+        count: item.count,
+        expense: item.expense ?? item.count,
+        earning: item.earning ?? 0,
+        transactions: item.transactions ?? 0,
+      });
     });
     return map;
   }, [data]);
@@ -169,8 +174,8 @@ export function ActivityHeatmap({ data, currency }: ActivityHeatmapProps) {
                       const isHidden = isAfterToday || isBeforeStart;
 
                       const dateStr = format(day, "yyyy-MM-dd");
-                      const count = dataMap.get(dateStr) || 0;
-                      const level = getLevel(count);
+                      const dayData = dataMap.get(dateStr) || { count: 0, expense: 0, earning: 0, transactions: 0 };
+                      const level = getLevel(dayData.count);
 
                       if (isHidden) {
                         return (
@@ -191,12 +196,24 @@ export function ActivityHeatmap({ data, currency }: ActivityHeatmapProps) {
                             </TooltipTrigger>
                             <TooltipContent>
                               <div className="text-xs">
-                                <span className="font-semibold">
-                                  {count === 0
-                                    ? "No expenses"
-                                    : `${formatCurrency(count, currency)} spent`}
-                                </span>
-                                <div className="text-muted-foreground">
+                                <div className="font-semibold">
+                                  {dayData.transactions === 0
+                                    ? "No activity"
+                                    : (
+                                      <>
+                                        <div className="text-muted-foreground mb-1">
+                                          {dayData.transactions} transaction{dayData.transactions !== 1 ? "s" : ""}
+                                        </div>
+                                        {dayData.expense > 0 && (
+                                          <div>Spent: {formatCurrency(dayData.expense, currency)}</div>
+                                        )}
+                                        {dayData.earning > 0 && (
+                                          <div>Earned: {formatCurrency(dayData.earning, currency)}</div>
+                                        )}
+                                      </>
+                                    )}
+                                </div>
+                                <div className="text-muted-foreground mt-1">
                                   {format(day, "MMM d, yyyy")}
                                 </div>
                               </div>

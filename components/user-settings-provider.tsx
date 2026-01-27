@@ -6,6 +6,8 @@ import { toast } from "sonner";
 type UserSettings = {
   currency: string;
   setCurrency: (currency: string) => Promise<boolean>;
+  includeEarningInBudget: boolean;
+  setIncludeEarningInBudget: (value: boolean) => void;
   loading: boolean;
 };
 
@@ -29,6 +31,7 @@ export function UserSettingsProvider({
   children: React.ReactNode;
 }) {
   const [currency, setCurrencyState] = useState<string>("USD");
+  const [includeEarningInBudget, setIncludeEarningInBudgetState] = useState<boolean>(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,6 +40,15 @@ export function UserSettingsProvider({
         ? window.localStorage.getItem("user_currency")
         : null;
     if (cached) setCurrencyState(cached);
+
+    // Load includeEarningInBudget from localStorage
+    const earningInBudgetCached =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("include_earning_in_budget")
+        : null;
+    if (earningInBudgetCached !== null) {
+      setIncludeEarningInBudgetState(earningInBudgetCached === "true");
+    }
 
     let mounted = true;
     const load = async () => {
@@ -96,8 +108,15 @@ export function UserSettingsProvider({
     }
   }
 
+  function setIncludeEarningInBudget(value: boolean) {
+    setIncludeEarningInBudgetState(value);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("include_earning_in_budget", String(value));
+    }
+  }
+
   return (
-    <UserSettingsContext.Provider value={{ currency, setCurrency, loading }}>
+    <UserSettingsContext.Provider value={{ currency, setCurrency, includeEarningInBudget, setIncludeEarningInBudget, loading }}>
       {children}
     </UserSettingsContext.Provider>
   );

@@ -16,9 +16,9 @@ export function SyncStatus() {
       variant="ghost"
       size="icon"
       className={cn(
-        "h-9 w-9 rounded-full transition-colors",
+        "transition-colors",
         isError && "text-destructive hover:text-destructive/90",
-        !isError && !isSyncing && "text-primary hover:text-primary/90"
+        !isError && !isSyncing && "text-primary hover:text-primary/90",
       )}
       onClick={() => syncNow()}
       disabled={!isOnline || isSyncing}
@@ -30,11 +30,8 @@ export function SyncStatus() {
             : "Click to sync"
       }
     >
-      <RefreshCw
-        className={cn("h-5 w-5", isSyncing && "animate-spin")}
-      />
+      <RefreshCw className={cn("h-5 w-5", isSyncing && "animate-spin")} />
       <span className="sr-only">Sync status</span>
     </Button>
   );
 }
-

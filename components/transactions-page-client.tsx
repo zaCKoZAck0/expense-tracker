@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, useEffect, Fragment } from "react";
+import { useCallback, useMemo, useState, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,7 +17,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -38,10 +37,8 @@ import {
   ChevronRight,
   ArrowUpDown,
   Filter,
-  X,
   Loader2,
 } from "lucide-react";
-import { format } from "date-fns";
 
 // Component now uses Dexie data directly - no props needed
 export function TransactionsPageClient() {
@@ -95,7 +92,12 @@ export function TransactionsPageClient() {
       maxAmount: localMaxAmount ? parseFloat(localMaxAmount) : undefined,
     });
     setCurrentPage(1);
-  }, [localStartDate, localEndDate, localMinAmount, localMaxAmount]);
+  }, [
+    localStartDate,
+    localEndDate,
+    localMinAmount,
+    localMaxAmount,
+  ]);
 
   const resetFilters = useCallback(() => {
     setFilterType("all");
@@ -114,9 +116,11 @@ export function TransactionsPageClient() {
     const groups: Record<string, Transaction[]> = {};
     transactions.forEach((t) => {
       const date = new Date(t.date);
+      // Use UTC methods to get correct month/year for dates stored as UTC noon
       const key = date.toLocaleString("default", {
         month: "long",
         year: "numeric",
+        timeZone: "UTC",
       });
       if (!groups[key]) {
         groups[key] = [];

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { format, parse } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toUTCNoon } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { AmountInput } from "@/components/ui/amount-input";
@@ -38,9 +39,10 @@ export function EntryForm({
   // Parse initial date or use today
   const getInitialDate = () => {
     if (initialEntry?.date) {
-      return parse(initialEntry.date, "yyyy-MM-dd", new Date());
+      const parsed = parse(initialEntry.date, "yyyy-MM-dd", new Date());
+      return toUTCNoon(parsed);
     }
-    return new Date();
+    return toUTCNoon(new Date());
   };
 
   const [date, setDate] = useState<Date>(getInitialDate);
@@ -69,6 +71,7 @@ export function EntryForm({
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="0.00"
+          autoFocus
         />
       </div>
       <div className="space-y-1.5">
@@ -91,7 +94,7 @@ export function EntryForm({
             <Calendar
               mode="single"
               selected={date}
-              onSelect={(d) => d && setDate(d)}
+              onSelect={(d) => d && setDate(toUTCNoon(d))}
               disabled={(d) =>
                 d > new Date() || d < new Date("1900-01-01")
               }

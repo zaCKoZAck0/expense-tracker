@@ -105,6 +105,17 @@ export class ExpenseTrackerDB extends Dexie {
       syncQueue: "++id, entity, entityId, timestamp",
       syncMetadata: "id",
     });
+
+    // Version 2: simplified (removed tags)
+    this.version(2).stores({
+      users: "id, email, syncStatus",
+      expenses: "id, userId, date, type, category, syncStatus, [userId+date]",
+      budgets: "id, month, syncStatus",
+      savingsBuckets: "id, userId, syncStatus",
+      savingsEntries: "id, bucketId, userId, date, syncStatus",
+      syncQueue: "++id, entity, entityId, timestamp",
+      syncMetadata: "id",
+    });
   }
 }
 

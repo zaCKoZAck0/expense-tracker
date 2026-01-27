@@ -18,6 +18,10 @@ const categoryCacheByUser = new Map<
   string,
   ReturnType<typeof unstable_cache>
 >();
+const incomeCategoryCacheByUser = new Map<
+  string,
+  ReturnType<typeof unstable_cache>
+>();
 const trendCacheByUser = new Map<string, ReturnType<typeof unstable_cache>>();
 const activityCacheByUser = new Map<
   string,
@@ -103,6 +107,7 @@ const getCategoryCache = (userId: string) => {
       const start = startOfMonth(date);
       const end = endOfMonth(date);
 
+      // Only include expenses, exclude income entries
       const expenses = await db.expense.groupBy({
         by: ["category"],
         where: {
@@ -111,6 +116,7 @@ const getCategoryCache = (userId: string) => {
             gte: start,
             lte: end,
           },
+          type: "expense",
         },
         _sum: {
           amount: true,
@@ -151,6 +157,66 @@ const getCategoryCache = (userId: string) => {
   return cacheFn;
 };
 
+const getIncomeCategoryCache = (userId: string) => {
+  const cached = incomeCategoryCacheByUser.get(userId);
+  if (cached) return cached;
+
+  const cacheFn = unstable_cache(
+    async (monthStr: string) => {
+      const date = new Date(`${monthStr}-01`);
+      const start = startOfMonth(date);
+      const end = endOfMonth(date);
+
+      // Only include income entries
+      const incomeEntries = await db.expense.groupBy({
+        by: ["category"],
+        where: {
+          userId,
+          date: {
+            gte: start,
+            lte: end,
+          },
+          type: "income",
+        },
+        _sum: {
+          amount: true,
+        },
+      });
+
+      // Income category colors
+      const categoryColors: Record<string, string> = {
+        Salary: "#10b981",
+        Freelance: "#3b82f6",
+        Investments: "#8b5cf6",
+        Gifts: "#ec4899",
+        Refunds: "#14b8a6",
+        Other: "#6366f1",
+      };
+
+      const defaultColors = [
+        "#22c55e",
+        "#0ea5e9",
+        "#a855f7",
+        "#f43f5e",
+        "#eab308",
+      ];
+
+      return incomeEntries.map((entry, index) => ({
+        category: entry.category,
+        amount: entry._sum.amount || 0,
+        fill:
+          categoryColors[entry.category] ||
+          defaultColors[index % defaultColors.length],
+      }));
+    },
+    ["analytics-income-category-data", userId],
+    { tags: [getAnalyticsTag(userId)], revalidate: 900 },
+  );
+
+  incomeCategoryCacheByUser.set(userId, cacheFn);
+  return cacheFn;
+};
+
 const getTrendCache = (userId: string) => {
   const cached = trendCacheByUser.get(userId);
   if (cached) return cached;
@@ -183,6 +249,7 @@ const getTrendCache = (userId: string) => {
           const start = startOfMonth(monthMeta.date);
           const end = endOfMonth(monthMeta.date);
 
+          // Get only expenses (not income)
           const expenseSum = await db.expense.aggregate({
             where: {
               userId,
@@ -190,6 +257,20 @@ const getTrendCache = (userId: string) => {
                 gte: start,
                 lte: end,
               },
+              type: "expense",
+            },
+            _sum: { amount: true },
+          });
+
+          // Get only income (earnings)
+          const incomeSum = await db.expense.aggregate({
+            where: {
+              userId,
+              date: {
+                gte: start,
+                lte: end,
+              },
+              type: "income",
             },
             _sum: { amount: true },
           });
@@ -210,6 +291,7 @@ const getTrendCache = (userId: string) => {
             month: monthMeta.label,
             budget: budget?.amount || 0,
             spend: expenseSum._sum.amount || 0,
+            earning: incomeSum._sum.amount || 0,
           };
         }),
       );
@@ -234,29 +316,38 @@ const getActivityCache = (userId: string) => {
 
   const cacheFn = unstable_cache(
     async () => {
+      // Fetch all entries (both expense and income)
       const entries = await db.expense.findMany({
         where: {
           userId,
-          type: "expense",
           date: {
             gte: startWindow,
             lte: today,
           },
         },
-        select: { amount: true, date: true },
+        select: { amount: true, date: true, type: true },
       });
 
-      const dailyMap = new Map<string, number>();
+      const dailyMap = new Map<string, { expense: number; earning: number; transactions: number }>();
 
       for (const entry of entries) {
         const dayKey = format(entry.date, "yyyy-MM-dd");
-        const prev = dailyMap.get(dayKey) ?? 0;
-        dailyMap.set(dayKey, prev + entry.amount);
+        const prev = dailyMap.get(dayKey) ?? { expense: 0, earning: 0, transactions: 0 };
+        prev.transactions += 1;
+        if (entry.type === "income") {
+          prev.earning += entry.amount;
+        } else {
+          prev.expense += entry.amount;
+        }
+        dailyMap.set(dayKey, prev);
       }
 
-      return Array.from(dailyMap.entries()).map(([date, count]) => ({
+      return Array.from(dailyMap.entries()).map(([date, data]) => ({
         date,
-        count,
+        count: data.expense + data.earning, // Total activity for heatmap color
+        expense: data.expense,
+        earning: data.earning,
+        transactions: data.transactions,
       }));
     },
     ["analytics-daily-activity", userId, startKey],
@@ -304,6 +395,16 @@ export async function getExpenseCategoryData(monthStr: string) {
   }
 
   const data = await getCategoryCache(userRes.data)(monthStr);
+  return data;
+}
+
+export async function getIncomeCategoryData(monthStr: string) {
+  const userRes = await getOrCreateUserId();
+  if (!userRes.success) {
+    return [] as Array<{ category: string; amount: number; fill: string }>;
+  }
+
+  const data = await getIncomeCategoryCache(userRes.data)(monthStr);
   return data;
 }
 

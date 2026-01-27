@@ -12,7 +12,12 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { Expense } from "@/lib/types";
 import { getCurrentMonthKey } from "@/lib/utils";
 
-export type Page = "dashboard" | "analytics" | "savings" | "profile" | "transactions";
+export type Page =
+  | "dashboard"
+  | "analytics"
+  | "savings"
+  | "profile"
+  | "transactions";
 
 type NavigationContextType = {
   page: Page;
@@ -69,7 +74,8 @@ export function NavigationProvider({
 
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   // Show expense detail on dashboard and transactions pages
-  const visibleExpense = (page === "dashboard" || page === "transactions") ? selectedExpense : null;
+  const visibleExpense =
+    page === "dashboard" || page === "transactions" ? selectedExpense : null;
 
   // Refresh key to trigger data refetch in child components
   const [refreshKey, setRefreshKey] = useState(0);

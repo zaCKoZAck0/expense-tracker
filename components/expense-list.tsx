@@ -5,17 +5,7 @@ import { useUserSettings } from "@/components/user-settings-provider";
 import { formatCurrency, formatDateUTC } from "@/lib/utils";
 import { useNavigation } from "@/components/navigation-provider";
 import { cn } from "@/lib/utils";
-import { useMemo, useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowUpDown } from "lucide-react";
+import { useMemo } from "react";
 
 export interface Transaction {
   id: string;

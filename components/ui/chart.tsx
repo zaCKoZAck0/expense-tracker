@@ -178,7 +178,7 @@ function ChartTooltipContent({
       )}
     >
       {!nestLabel ? tooltipLabel : null}
-      <div className="grid gap-1.5">
+      <div className="grid gap-2">
         {payload
           .filter((item) => item.type !== "none")
           .map((item, index) => {
@@ -224,7 +224,7 @@ function ChartTooltipContent({
                     )}
                     <div
                       className={cn(
-                        "flex flex-1 justify-between leading-none",
+                        "flex flex-1 justify-between leading-none gap-2",
                         nestLabel ? "items-end" : "items-center",
                       )}
                     >

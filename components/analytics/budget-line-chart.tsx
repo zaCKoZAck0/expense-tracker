@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   Card,
@@ -14,6 +15,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export const description = "A multiple line chart";
 
@@ -22,28 +25,63 @@ interface BudgetLineChartProps {
     month: string;
     budget: number;
     spend: number;
+    earning: number;
   }[];
 }
 
-const chartConfig = {
-  budget: {
-    label: "Budget",
-    // Use secondary color for budget line
-    color: "var(--secondary)",
-  },
-  spend: {
-    label: "Spend",
-    // Use primary color for expenses line
-    color: "var(--primary)",
-  },
-} satisfies ChartConfig;
-
 export function BudgetLineChart({ data }: BudgetLineChartProps) {
+  const [includeEarningInBudget, setIncludeEarningInBudget] = useState(true);
+
+  // Transform data based on toggle state
+  const chartData = useMemo(() => {
+    if (includeEarningInBudget) {
+      // Combine earning with budget
+      return data.map((item) => ({
+        ...item,
+        budget: item.budget + item.earning,
+      }));
+    }
+    return data;
+  }, [data, includeEarningInBudget]);
+
+  // Dynamic chart config based on toggle
+  const chartConfig = useMemo(() => {
+    const config: ChartConfig = {
+      budget: {
+        label: includeEarningInBudget ? "Budget + Earning" : "Budget",
+        color: "var(--secondary)",
+      },
+      spend: {
+        label: "Spend",
+        color: "var(--primary)",
+      },
+    };
+
+    if (!includeEarningInBudget) {
+      config.earning = {
+        label: "Earning",
+        color: "var(--chart-3)",
+      };
+    }
+
+    return config;
+  }, [includeEarningInBudget]);
+
   return (
     <Card className="flex flex-col h-full">
       <CardHeader>
         <CardTitle>Budget vs Spend</CardTitle>
         <CardDescription>Last 6 months comparison</CardDescription>
+        <div className="flex items-center justify-end gap-2 pt-2">
+          <Switch
+            id="include-earning"
+            checked={includeEarningInBudget}
+            onCheckedChange={setIncludeEarningInBudget}
+          />
+          <Label htmlFor="include-earning" className="text-sm text-muted-foreground cursor-pointer">
+            Include earning in budget
+          </Label>
+        </div>
       </CardHeader>
       <CardContent className="flex-1 pb-4">
         <ChartContainer
@@ -52,7 +90,7 @@ export function BudgetLineChart({ data }: BudgetLineChartProps) {
         >
           <LineChart
             accessibilityLayer
-            data={data}
+            data={chartData}
             margin={{
               left: 12,
               right: 12,
@@ -88,6 +126,15 @@ export function BudgetLineChart({ data }: BudgetLineChartProps) {
               strokeWidth={2}
               dot={false}
             />
+            {!includeEarningInBudget && (
+              <Line
+                dataKey="earning"
+                type="monotone"
+                stroke="var(--color-earning)"
+                strokeWidth={2}
+                dot={false}
+              />
+            )}
           </LineChart>
         </ChartContainer>
       </CardContent>

@@ -20,6 +20,8 @@ import { formatCurrency } from "@/lib/utils";
 interface BudgetSummaryProps {
   remaining: number;
   budgetAmount: number;
+  baseBudgetAmount: number;
+  totalIncome: number;
   spentPercentage: number;
   dailySpending: {
     day: number;
@@ -31,12 +33,14 @@ interface BudgetSummaryProps {
 export function BudgetSummary({
   remaining,
   budgetAmount,
+  baseBudgetAmount,
+  totalIncome,
   spentPercentage,
   dailySpending,
   daysInMonth,
 }: BudgetSummaryProps) {
   const [open, setOpen] = useState(false);
-  const { currency } = useUserSettings();
+  const { currency, includeEarningInBudget } = useUserSettings();
   const { selectedMonth } = useNavigation();
   const isOverBudget = remaining < 0;
   const safeRemaining = Math.max(remaining, 0);
@@ -68,14 +72,26 @@ export function BudgetSummary({
                   <p className="text-sm text-muted-foreground">
                     Monthly budget: {formatCurrency(budgetAmount, currency)}
                   </p>
+                  {!includeEarningInBudget && totalIncome > 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Earning: {formatCurrency(totalIncome, currency)}
+                    </p>
+                  )}
                 </div>
               ) : (
-                <p>
-                  <span className="font-bold">
-                    {formatCurrency(safeRemaining, currency)}
-                  </span>{" "}
-                  out of {formatCurrency(budgetAmount, currency)}
-                </p>
+                <div className="space-y-1">
+                  <p>
+                    <span className="font-bold">
+                      {formatCurrency(safeRemaining, currency)}
+                    </span>{" "}
+                    out of {formatCurrency(budgetAmount, currency)}
+                  </p>
+                  {!includeEarningInBudget && totalIncome > 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      Earning: {formatCurrency(totalIncome, currency)}
+                    </p>
+                  )}
+                </div>
               )}
               <Progress
                 className={`h-4 ${isOverBudget ? "bg-destructive/20" : ""}`}
@@ -102,7 +118,7 @@ export function BudgetSummary({
         </DialogHeader>
         <BudgetForm
           defaultMonth={selectedMonth}
-          defaultAmount={budgetAmount}
+          defaultAmount={baseBudgetAmount}
           onSuccess={() => setOpen(false)}
         />
       </DialogContent>

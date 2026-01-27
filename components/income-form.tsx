@@ -73,7 +73,7 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
     defaultValues: {
       date: getDefaultDate(),
       notes: "",
-      amount: 0,
+      amount: "" as unknown as number,
       category: undefined,
     },
   });
@@ -98,7 +98,7 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
         form.reset({
           date: toUTCNoon(new Date()),
           notes: "",
-          amount: 0,
+          amount: "" as unknown as number,
           category: undefined,
         });
         onSuccess?.();
@@ -119,7 +119,13 @@ export function IncomeForm({ onSuccess }: IncomeFormProps) {
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <AmountInput step="0.01" placeholder="0.00" {...field} />
+                <AmountInput
+                  step="0.01"
+                  placeholder="0.00"
+                  autoFocus
+                  {...field}
+                  value={field.value || ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

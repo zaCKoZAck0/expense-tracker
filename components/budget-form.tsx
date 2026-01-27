@@ -16,16 +16,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { AmountInput } from "@/components/ui/amount-input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { getCurrentMonthKey } from "@/lib/utils";
 import { useNavigation } from "@/components/navigation-provider";
 import { useSetBudget } from "@/hooks/use-local-data";
 import { useSyncContext } from "@/components/sync-provider";
+import { useUserSettings } from "@/components/user-settings-provider";
 
 const formSchema = z.object({
   amount: z.preprocess(
     (val) => Number(val),
-    z.number().min(0.01, "Amount must be greater than 0"),
+    z.number().min(0, "Amount cannot be negative"),
   ) as z.ZodType<number>,
   month: z.string().regex(/^\d{4}-\d{2}$/, "Month must be in YYYY-MM format"),
 });
@@ -47,6 +50,7 @@ export function BudgetForm({
   const { triggerRefresh } = useNavigation();
   const setBudgetLocal = useSetBudget();
   const { syncNow } = useSyncContext();
+  const { includeEarningInBudget, setIncludeEarningInBudget } = useUserSettings();
 
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(formSchema) as Resolver<BudgetFormValues>,
@@ -103,6 +107,17 @@ export function BudgetForm({
             </FormItem>
           )}
         />
+
+        <div className="flex items-center justify-between gap-2 py-2">
+          <Label htmlFor="include-earning-budget" className="text-sm cursor-pointer">
+            Include earning in budget
+          </Label>
+          <Switch
+            id="include-earning-budget"
+            checked={includeEarningInBudget}
+            onCheckedChange={setIncludeEarningInBudget}
+          />
+        </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>
           {isPending ? "Saving..." : "Save Budget"}

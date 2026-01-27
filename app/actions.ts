@@ -257,7 +257,7 @@ const getDashboardCache = (userId: string) => {
 
       const dailySpendingMap = new Map<number, number>();
       for (const expense of expenseEntries) {
-        const day = new Date(expense.date).getDate();
+        const day = new Date(expense.date).getUTCDate();
         dailySpendingMap.set(
           day,
           (dailySpendingMap.get(day) || 0) + expense.amount,

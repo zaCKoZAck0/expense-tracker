@@ -7,16 +7,14 @@ import { usePWA } from "@/components/pwa-provider";
 
 export function PWAInstallPrompt() {
   const { canInstall, promptInstall, isInstalled } = usePWA();
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState<boolean>(() => {
+    const stored = typeof window !== "undefined" ? sessionStorage.getItem("pwa-install-dismissed") : null;
+    return Boolean(stored);
+  });
   const [isIOS, setIsIOS] = useState(false);
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
 
   useEffect(() => {
-    // Check if already dismissed in this session
-    const wasDismissed = sessionStorage.getItem("pwa-install-dismissed");
-    if (wasDismissed) {
-      setDismissed(true);
-    }
 
     // Check if iOS
     const isIOSDevice =
@@ -25,7 +23,7 @@ export function PWAInstallPrompt() {
     setIsIOS(isIOSDevice);
 
     // Show iOS prompt if on iOS, not installed, and not dismissed
-    if (isIOSDevice && !isInstalled && !wasDismissed) {
+    if (isIOSDevice && !isInstalled && !dismissed) {
       // Small delay to not show immediately on page load
       const timer = setTimeout(() => setShowIOSPrompt(true), 2000);
       return () => clearTimeout(timer);

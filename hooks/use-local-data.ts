@@ -63,12 +63,12 @@ export function useDashboardData(month: string) {
         .between(startDate, new Date(endDate.getTime() + 86400000), true, false)
         .toArray();
 
-      // Filter by month more precisely since IndexedDB date comparison can be tricky
+      // Filter by month more precisely using UTC methods since dates are stored as UTC noon
       return monthExpenses.filter((e) => {
         const expenseDate = new Date(e.date);
         return (
-          expenseDate.getFullYear() === year &&
-          expenseDate.getMonth() === monthNum - 1
+          expenseDate.getUTCFullYear() === year &&
+          expenseDate.getUTCMonth() === monthNum - 1
         );
       });
     },
@@ -113,7 +113,7 @@ export function useDashboardData(month: string) {
           for (let day = 1; day <= daysInMonth; day++) {
             const dayExpenses = expenseList.filter((e) => {
               const d = new Date(e.date);
-              return d.getDate() === day;
+              return d.getUTCDate() === day;
             });
             dailySpending.push({
               day,
@@ -212,7 +212,7 @@ export function useTransactions(options: TransactionsOptions = {}) {
         const [y, m] = month.split("-").map(Number);
         results = results.filter((e) => {
           const d = new Date(e.date);
-          return d.getFullYear() === y && d.getMonth() === m - 1;
+          return d.getUTCFullYear() === y && d.getUTCMonth() === m - 1;
         });
       }
 

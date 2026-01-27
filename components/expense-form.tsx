@@ -30,7 +30,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { AmountInput } from "@/components/ui/amount-input";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -81,7 +80,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
 
   // Default date to today for new expenses, or the existing date when editing
   const getDefaultDate = () => {
-    if (expense?.date) return new Date(expense.date);
+    if (expense?.date) return toUTCNoon(new Date(expense.date));
     return toUTCNoon(new Date()); // Today's date
   };
 
@@ -90,7 +89,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
     defaultValues: {
       date: getDefaultDate(),
       notes: expense?.notes ?? "",
-      amount: expense?.amount ?? 0,
+      amount: expense?.amount ?? ("" as unknown as number),
       category: expense?.category ?? "",
       type: expense?.type || "expense",
     },
@@ -101,13 +100,6 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
     transactionType === "income" ? incomeCategories : categories;
   const currentCategoryIcons =
     transactionType === "income" ? incomeCategoryIcons : categoryIcons;
-
-  // Handle type change - reset category when type changes
-  const handleTypeChange = (newType: "expense" | "income") => {
-    setTransactionType(newType);
-    form.setValue("type", newType);
-    form.setValue("category", ""); // Reset category when type changes
-  };
 
   function onSubmit(values: ExpenseFormValues) {
     startTransition(async () => {
@@ -145,7 +137,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
         form.reset({
           date: toUTCNoon(new Date()),
           notes: "",
-          amount: 0,
+          amount: "" as unknown as number,
           category: "",
           type: "expense",
         });
@@ -168,7 +160,13 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <AmountInput step="0.01" placeholder="0.00" {...field} />
+                <AmountInput
+                  step="0.01"
+                  placeholder="0.00"
+                  autoFocus
+                  {...field}
+                  value={field.value || ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -247,7 +245,9 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
                     <Calendar
                       mode="single"
                       selected={field.value}
-                      onSelect={field.onChange}
+                      onSelect={(date) =>
+                        field.onChange(date ? toUTCNoon(date) : undefined)
+                      }
                       disabled={(date) =>
                         date > new Date() || date < new Date("1900-01-01")
                       }

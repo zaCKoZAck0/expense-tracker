@@ -77,7 +77,9 @@ export function Navbar() {
 
         <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
           <SyncStatus />
-          <ThemeToggle />
+          <div className="hidden md:block">
+            <ThemeToggle />
+          </div>
         </div>
 
         {status === "loading" ? <span className="sr-only">Loading</span> : null}
@@ -85,4 +87,3 @@ export function Navbar() {
     </header>
   );
 }
-

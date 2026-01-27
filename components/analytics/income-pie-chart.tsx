@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface ExpensePieChartProps {
+interface IncomePieChartProps {
   data: {
     category: string;
     amount: number;
@@ -36,12 +36,12 @@ interface ExpensePieChartProps {
   onMonthChange: (month: string) => void;
 }
 
-export function ExpensePieChart({
+export function IncomePieChart({
   data,
   availableMonths,
   selectedMonth,
   onMonthChange,
-}: ExpensePieChartProps) {
+}: IncomePieChartProps) {
   const totalAmount = React.useMemo(() => {
     return data.reduce((acc, curr) => acc + curr.amount, 0);
   }, [data]);
@@ -65,12 +65,12 @@ export function ExpensePieChart({
 
   return (
     <Card className="flex flex-col h-full">
-      <CardHeader className="items-start pb-0">
-        <CardTitle>Expense By Category</CardTitle>
+      <CardHeader className="items-center pb-0">
+        <CardTitle>Earning By Category</CardTitle>
         <CardDescription>
-          Breakdown of your expenses for {selectedMonth}
+          Breakdown of your earnings for {selectedMonth}
         </CardDescription>
-        <div className="w-full flex justify-end">
+        <div className="w-full justify-end flex">
           <Select value={selectedMonth} onValueChange={onMonthChange}>
             <SelectTrigger className="w-45">
               <SelectValue placeholder="Select month" />
@@ -88,7 +88,7 @@ export function ExpensePieChart({
       <CardContent className="flex-1 pb-0">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-75"
+          className="mx-auto aspect-square max-h-[300px]"
         >
           <PieChart>
             <ChartTooltip
