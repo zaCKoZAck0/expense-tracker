@@ -296,16 +296,6 @@ export default function ExpenseDetail({
                       )}
                     </div>
                     <div className="text-right flex items-center gap-2">
-                      <p
-                        className={cn(
-                          "font-medium text-xl tabular-nums",
-                          split.isPaid &&
-                            !split.isYourShare &&
-                            "line-through text-muted-foreground",
-                        )}
-                      >
-                        {formatCurrency(split.amount, currency)}
-                      </p>
                       {!split.isYourShare &&
                         (split.isPaid ? (
                           <Badge variant="outline" className="text-xs mt-1">
@@ -318,9 +308,19 @@ export default function ExpenseDetail({
                             size="sm"
                             onClick={() => handleMarkPaid(split.id)}
                           >
-                            Mark paid
+                            Settle up
                           </Button>
                         ))}
+                      <p
+                        className={cn(
+                          "font-medium text-xl tabular-nums",
+                          split.isPaid &&
+                            !split.isYourShare &&
+                            "line-through text-muted-foreground",
+                        )}
+                      >
+                        {formatCurrency(split.amount, currency)}
+                      </p>
                     </div>
                   </div>
                 ))}
