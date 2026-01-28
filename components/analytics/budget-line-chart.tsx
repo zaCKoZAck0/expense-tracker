@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   Card,
@@ -31,6 +31,18 @@ interface BudgetLineChartProps {
 
 export function BudgetLineChart({ data }: BudgetLineChartProps) {
   const [includeEarningInBudget, setIncludeEarningInBudget] = useState(true);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("includeEarningInBudget");
+    if (stored !== null) {
+      setIncludeEarningInBudget(stored === "true");
+    }
+  }, []);
+
+  const handleIncludeEarningChange = (checked: boolean) => {
+    setIncludeEarningInBudget(checked);
+    localStorage.setItem("includeEarningInBudget", String(checked));
+  };
 
   // Transform data based on toggle state
   const chartData = useMemo(() => {
@@ -76,7 +88,7 @@ export function BudgetLineChart({ data }: BudgetLineChartProps) {
           <Switch
             id="include-earning"
             checked={includeEarningInBudget}
-            onCheckedChange={setIncludeEarningInBudget}
+            onCheckedChange={handleIncludeEarningChange}
           />
           <Label
             htmlFor="include-earning"
