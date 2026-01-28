@@ -201,7 +201,7 @@ export function useTransactions(options: TransactionsOptions = {}) {
 
   const transactions = useLiveQuery(
     async () => {
-      let query = localDb.expenses.toCollection();
+      const query = localDb.expenses.toCollection();
 
       let results = await query.toArray();
 

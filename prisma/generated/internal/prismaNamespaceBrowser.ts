@@ -56,7 +56,9 @@ export const ModelName = {
   Budget: 'Budget',
   CategoryBudget: 'CategoryBudget',
   SavingsBucket: 'SavingsBucket',
-  SavingsEntry: 'SavingsEntry'
+  SavingsEntry: 'SavingsEntry',
+  Contact: 'Contact',
+  ExpenseSplit: 'ExpenseSplit'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -83,7 +85,8 @@ export const ExpenseScalarFieldEnum = {
   notes: 'notes',
   type: 'type',
   createdAt: 'createdAt',
-  userId: 'userId'
+  userId: 'userId',
+  isSplit: 'isSplit'
 } as const
 
 export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
@@ -148,6 +151,34 @@ export const SavingsEntryScalarFieldEnum = {
 } as const
 
 export type SavingsEntryScalarFieldEnum = (typeof SavingsEntryScalarFieldEnum)[keyof typeof SavingsEntryScalarFieldEnum]
+
+
+export const ContactScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  avatarUrl: 'avatarUrl',
+  createdAt: 'createdAt',
+  userId: 'userId'
+} as const
+
+export type ContactScalarFieldEnum = (typeof ContactScalarFieldEnum)[keyof typeof ContactScalarFieldEnum]
+
+
+export const ExpenseSplitScalarFieldEnum = {
+  id: 'id',
+  expenseId: 'expenseId',
+  contactId: 'contactId',
+  amount: 'amount',
+  percentage: 'percentage',
+  isPaid: 'isPaid',
+  isYourShare: 'isYourShare',
+  paidByYou: 'paidByYou',
+  createdAt: 'createdAt'
+} as const
+
+export type ExpenseSplitScalarFieldEnum = (typeof ExpenseSplitScalarFieldEnum)[keyof typeof ExpenseSplitScalarFieldEnum]
 
 
 export const SortOrder = {

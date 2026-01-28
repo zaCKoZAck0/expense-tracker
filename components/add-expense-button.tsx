@@ -30,11 +30,17 @@ export function AddExpenseButton() {
           <span className="font-bold tracking-tight">Add Transaction</span>
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="overflow-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold tracking-tight">Add Transaction</DialogTitle>
+          <DialogTitle className="text-xl font-bold tracking-tight">
+            Add Transaction
+          </DialogTitle>
         </DialogHeader>
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "expense" | "income")} className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as "expense" | "income")}
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="expense">Expense</TabsTrigger>
             <TabsTrigger value="income">Income</TabsTrigger>

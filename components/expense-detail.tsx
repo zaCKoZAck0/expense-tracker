@@ -9,7 +9,7 @@ import {
 import { Button } from "./ui/button";
 import { useUserSettings } from "@/components/user-settings-provider";
 import { useNavigation } from "@/components/navigation-provider";
-import { formatCurrency, formatDateUTC } from "@/lib/utils";
+import { formatCurrency, formatDateUTC, cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -33,12 +33,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Edit, Trash, MoreVertical } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowLeft,
+  Edit,
+  Trash,
+  MoreVertical,
+  Users,
+  Check,
+} from "lucide-react";
 import { ExpenseForm } from "@/components/expense-form";
+import { SplitExpenseDialog } from "@/components/splits";
 import { toast } from "sonner";
-import type { Expense } from "@/lib/types";
+import type { Expense, ExpenseSplit } from "@/lib/types";
 import { useDeleteExpense } from "@/hooks/use-local-data";
 import { useSyncContext } from "@/components/sync-provider";
+import { getExpenseWithSplits, markSplitAsPaid } from "@/app/actions";
 
 export default function ExpenseDetail({
   expense,
@@ -57,7 +68,93 @@ export default function ExpenseDetail({
     : categoryIcons[expense.category] || defaultCategoryIcon;
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [splitOpen, setSplitOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  // Local state for expense with splits (refreshed when dialog closes)
+  const [expenseWithSplits, setExpenseWithSplits] = useState<Expense>(expense);
+  const [isLoadingSplits, setIsLoadingSplits] = useState(false);
+
+  // Load expense with splits data
+  const loadSplits = async () => {
+    if (!expense.isSplit) return;
+    setIsLoadingSplits(true);
+    try {
+      const result = await getExpenseWithSplits(expense.id);
+      if (result.success && result.data) {
+        setExpenseWithSplits(result.data as Expense);
+      }
+    } catch (error) {
+      console.error("Failed to load splits:", error);
+    } finally {
+      setIsLoadingSplits(false);
+    }
+  };
+
+  // Load splits on mount if expense is split
+  React.useEffect(() => {
+    if (expense.isSplit) {
+      loadSplits();
+    }
+  }, [expense.id, expense.isSplit]);
+
+  // Handle split dialog success
+  const handleSplitSuccess = () => {
+    loadSplits();
+    triggerRefresh();
+  };
+
+  // Get avatar initials
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Get consistent avatar color
+  const getAvatarColor = (name: string) => {
+    const colors = [
+      "bg-red-500",
+      "bg-orange-500",
+      "bg-amber-500",
+      "bg-yellow-500",
+      "bg-lime-500",
+      "bg-green-500",
+      "bg-emerald-500",
+      "bg-teal-500",
+      "bg-cyan-500",
+      "bg-sky-500",
+      "bg-blue-500",
+      "bg-indigo-500",
+      "bg-violet-500",
+      "bg-purple-500",
+      "bg-fuchsia-500",
+      "bg-pink-500",
+    ];
+    const index =
+      name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+      colors.length;
+    return colors[index];
+  };
+
+  // Handle marking a split as paid
+  const handleMarkPaid = async (splitId: string) => {
+    try {
+      const result = await markSplitAsPaid(splitId);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      toast.success("Marked as paid");
+      loadSplits();
+      triggerRefresh();
+    } catch (error) {
+      console.error("Failed to mark as paid:", error);
+      toast.error("Failed to mark as paid");
+    }
+  };
 
   async function handleDelete() {
     startTransition(async () => {
@@ -126,6 +223,12 @@ export default function ExpenseDetail({
             <p className="text-xl font-bold">
               {formatCurrency(expense.amount, currency)}
             </p>
+            {expenseWithSplits.isSplit && expenseWithSplits.splits && (
+              <Badge variant="secondary" className="mt-1">
+                <Users className="h-3 w-3 mr-1" />
+                Split
+              </Badge>
+            )}
           </div>
         </div>
 
@@ -136,7 +239,117 @@ export default function ExpenseDetail({
             {expense.notes || "No notes"}
           </p>
         </div>
+
+        {/* Split Details Section */}
+        {expenseWithSplits.isSplit &&
+          expenseWithSplits.splits &&
+          expenseWithSplits.splits.length > 0 && (
+            <div className="mt-4 pt-4 border-t">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-medium">Split Details</h4>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setSplitOpen(true)}
+                >
+                  <Edit />
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {expenseWithSplits.splits.map((split) => (
+                  <div
+                    key={split.id}
+                    className={cn(
+                      "flex items-center gap-3 p-2 rounded-lg border",
+                      split.isPaid ? "bg-muted/30" : "bg-muted/50",
+                    )}
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback
+                        className={cn(
+                          "text-white text-xs",
+                          split.isYourShare
+                            ? "bg-primary"
+                            : getAvatarColor(split.contact?.name || "Unknown"),
+                        )}
+                      >
+                        {split.isYourShare ? (
+                          <Users className="h-4 w-4" />
+                        ) : (
+                          getInitials(split.contact?.name || "?")
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <p
+                        className={cn(
+                          "font-medium text-sm truncate",
+                          split.isPaid &&
+                            !split.isYourShare &&
+                            "line-through text-muted-foreground",
+                        )}
+                      >
+                        {split.isYourShare
+                          ? "You"
+                          : split.contact?.name || "Unknown"}
+                      </p>
+                      {split.percentage && (
+                        <p className="text-xs text-muted-foreground">
+                          {split.percentage.toFixed(1)}%
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right flex items-center gap-2">
+                      <p
+                        className={cn(
+                          "font-medium text-xl tabular-nums",
+                          split.isPaid &&
+                            !split.isYourShare &&
+                            "line-through text-muted-foreground",
+                        )}
+                      >
+                        {formatCurrency(split.amount, currency)}
+                      </p>
+                      {!split.isYourShare &&
+                        (split.isPaid ? (
+                          <Badge variant="outline" className="text-xs mt-1">
+                            <Check className="h-3 w-3 mr-1 stroke-3" />
+                            Paid
+                          </Badge>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleMarkPaid(split.id)}
+                          >
+                            Mark paid
+                          </Button>
+                        ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        {/* Split Expense Button (only for expenses, not income) */}
+        {!isIncome && !expenseWithSplits.isSplit && (
+          <div className="mt-4 pt-4 border-t flex justify-end">
+            <Button variant="outline" onClick={() => setSplitOpen(true)}>
+              <Users className="h-4 w-4 mr-2" />
+              Split this expense
+            </Button>
+          </div>
+        )}
       </div>
+
+      {/* Split Expense Dialog */}
+      <SplitExpenseDialog
+        expense={expenseWithSplits}
+        open={splitOpen}
+        onOpenChange={setSplitOpen}
+        onSuccess={handleSplitSuccess}
+      />
 
       {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>

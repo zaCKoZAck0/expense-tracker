@@ -194,6 +194,7 @@ export type UserWhereInput = {
   savingsBuckets?: Prisma.SavingsBucketListRelationFilter
   savingsEntries?: Prisma.SavingsEntryListRelationFilter
   categoryBudgets?: Prisma.CategoryBudgetListRelationFilter
+  contacts?: Prisma.ContactListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -207,6 +208,7 @@ export type UserOrderByWithRelationInput = {
   savingsBuckets?: Prisma.SavingsBucketOrderByRelationAggregateInput
   savingsEntries?: Prisma.SavingsEntryOrderByRelationAggregateInput
   categoryBudgets?: Prisma.CategoryBudgetOrderByRelationAggregateInput
+  contacts?: Prisma.ContactOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -223,6 +225,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   savingsBuckets?: Prisma.SavingsBucketListRelationFilter
   savingsEntries?: Prisma.SavingsEntryListRelationFilter
   categoryBudgets?: Prisma.CategoryBudgetListRelationFilter
+  contacts?: Prisma.ContactListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -260,6 +263,7 @@ export type UserCreateInput = {
   savingsBuckets?: Prisma.SavingsBucketCreateNestedManyWithoutUserInput
   savingsEntries?: Prisma.SavingsEntryCreateNestedManyWithoutUserInput
   categoryBudgets?: Prisma.CategoryBudgetCreateNestedManyWithoutUserInput
+  contacts?: Prisma.ContactCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -273,6 +277,7 @@ export type UserUncheckedCreateInput = {
   savingsBuckets?: Prisma.SavingsBucketUncheckedCreateNestedManyWithoutUserInput
   savingsEntries?: Prisma.SavingsEntryUncheckedCreateNestedManyWithoutUserInput
   categoryBudgets?: Prisma.CategoryBudgetUncheckedCreateNestedManyWithoutUserInput
+  contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -286,6 +291,7 @@ export type UserUpdateInput = {
   savingsBuckets?: Prisma.SavingsBucketUpdateManyWithoutUserNestedInput
   savingsEntries?: Prisma.SavingsEntryUpdateManyWithoutUserNestedInput
   categoryBudgets?: Prisma.CategoryBudgetUpdateManyWithoutUserNestedInput
+  contacts?: Prisma.ContactUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -299,6 +305,7 @@ export type UserUncheckedUpdateInput = {
   savingsBuckets?: Prisma.SavingsBucketUncheckedUpdateManyWithoutUserNestedInput
   savingsEntries?: Prisma.SavingsEntryUncheckedUpdateManyWithoutUserNestedInput
   categoryBudgets?: Prisma.CategoryBudgetUncheckedUpdateManyWithoutUserNestedInput
+  contacts?: Prisma.ContactUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -416,6 +423,20 @@ export type UserUpdateOneRequiredWithoutSavingsEntriesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSavingsEntriesInput, Prisma.UserUpdateWithoutSavingsEntriesInput>, Prisma.UserUncheckedUpdateWithoutSavingsEntriesInput>
 }
 
+export type UserCreateNestedOneWithoutContactsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutContactsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutContactsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutContactsInput
+  upsert?: Prisma.UserUpsertWithoutContactsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutContactsInput, Prisma.UserUpdateWithoutContactsInput>, Prisma.UserUncheckedUpdateWithoutContactsInput>
+}
+
 export type UserCreateWithoutExpensesInput = {
   id?: string
   email: string
@@ -426,6 +447,7 @@ export type UserCreateWithoutExpensesInput = {
   savingsBuckets?: Prisma.SavingsBucketCreateNestedManyWithoutUserInput
   savingsEntries?: Prisma.SavingsEntryCreateNestedManyWithoutUserInput
   categoryBudgets?: Prisma.CategoryBudgetCreateNestedManyWithoutUserInput
+  contacts?: Prisma.ContactCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutExpensesInput = {
@@ -438,6 +460,7 @@ export type UserUncheckedCreateWithoutExpensesInput = {
   savingsBuckets?: Prisma.SavingsBucketUncheckedCreateNestedManyWithoutUserInput
   savingsEntries?: Prisma.SavingsEntryUncheckedCreateNestedManyWithoutUserInput
   categoryBudgets?: Prisma.CategoryBudgetUncheckedCreateNestedManyWithoutUserInput
+  contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutExpensesInput = {
@@ -466,6 +489,7 @@ export type UserUpdateWithoutExpensesInput = {
   savingsBuckets?: Prisma.SavingsBucketUpdateManyWithoutUserNestedInput
   savingsEntries?: Prisma.SavingsEntryUpdateManyWithoutUserNestedInput
   categoryBudgets?: Prisma.CategoryBudgetUpdateManyWithoutUserNestedInput
+  contacts?: Prisma.ContactUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExpensesInput = {
@@ -478,6 +502,7 @@ export type UserUncheckedUpdateWithoutExpensesInput = {
   savingsBuckets?: Prisma.SavingsBucketUncheckedUpdateManyWithoutUserNestedInput
   savingsEntries?: Prisma.SavingsEntryUncheckedUpdateManyWithoutUserNestedInput
   categoryBudgets?: Prisma.CategoryBudgetUncheckedUpdateManyWithoutUserNestedInput
+  contacts?: Prisma.ContactUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCategoryBudgetsInput = {
@@ -490,6 +515,7 @@ export type UserCreateWithoutCategoryBudgetsInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
   savingsBuckets?: Prisma.SavingsBucketCreateNestedManyWithoutUserInput
   savingsEntries?: Prisma.SavingsEntryCreateNestedManyWithoutUserInput
+  contacts?: Prisma.ContactCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCategoryBudgetsInput = {
@@ -502,6 +528,7 @@ export type UserUncheckedCreateWithoutCategoryBudgetsInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
   savingsBuckets?: Prisma.SavingsBucketUncheckedCreateNestedManyWithoutUserInput
   savingsEntries?: Prisma.SavingsEntryUncheckedCreateNestedManyWithoutUserInput
+  contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCategoryBudgetsInput = {
@@ -530,6 +557,7 @@ export type UserUpdateWithoutCategoryBudgetsInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
   savingsBuckets?: Prisma.SavingsBucketUpdateManyWithoutUserNestedInput
   savingsEntries?: Prisma.SavingsEntryUpdateManyWithoutUserNestedInput
+  contacts?: Prisma.ContactUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCategoryBudgetsInput = {
@@ -542,6 +570,7 @@ export type UserUncheckedUpdateWithoutCategoryBudgetsInput = {
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
   savingsBuckets?: Prisma.SavingsBucketUncheckedUpdateManyWithoutUserNestedInput
   savingsEntries?: Prisma.SavingsEntryUncheckedUpdateManyWithoutUserNestedInput
+  contacts?: Prisma.ContactUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSavingsBucketsInput = {
@@ -554,6 +583,7 @@ export type UserCreateWithoutSavingsBucketsInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
   savingsEntries?: Prisma.SavingsEntryCreateNestedManyWithoutUserInput
   categoryBudgets?: Prisma.CategoryBudgetCreateNestedManyWithoutUserInput
+  contacts?: Prisma.ContactCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSavingsBucketsInput = {
@@ -566,6 +596,7 @@ export type UserUncheckedCreateWithoutSavingsBucketsInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
   savingsEntries?: Prisma.SavingsEntryUncheckedCreateNestedManyWithoutUserInput
   categoryBudgets?: Prisma.CategoryBudgetUncheckedCreateNestedManyWithoutUserInput
+  contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSavingsBucketsInput = {
@@ -594,6 +625,7 @@ export type UserUpdateWithoutSavingsBucketsInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
   savingsEntries?: Prisma.SavingsEntryUpdateManyWithoutUserNestedInput
   categoryBudgets?: Prisma.CategoryBudgetUpdateManyWithoutUserNestedInput
+  contacts?: Prisma.ContactUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSavingsBucketsInput = {
@@ -606,6 +638,7 @@ export type UserUncheckedUpdateWithoutSavingsBucketsInput = {
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
   savingsEntries?: Prisma.SavingsEntryUncheckedUpdateManyWithoutUserNestedInput
   categoryBudgets?: Prisma.CategoryBudgetUncheckedUpdateManyWithoutUserNestedInput
+  contacts?: Prisma.ContactUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSavingsEntriesInput = {
@@ -618,6 +651,7 @@ export type UserCreateWithoutSavingsEntriesInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
   savingsBuckets?: Prisma.SavingsBucketCreateNestedManyWithoutUserInput
   categoryBudgets?: Prisma.CategoryBudgetCreateNestedManyWithoutUserInput
+  contacts?: Prisma.ContactCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSavingsEntriesInput = {
@@ -630,6 +664,7 @@ export type UserUncheckedCreateWithoutSavingsEntriesInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
   savingsBuckets?: Prisma.SavingsBucketUncheckedCreateNestedManyWithoutUserInput
   categoryBudgets?: Prisma.CategoryBudgetUncheckedCreateNestedManyWithoutUserInput
+  contacts?: Prisma.ContactUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSavingsEntriesInput = {
@@ -658,6 +693,7 @@ export type UserUpdateWithoutSavingsEntriesInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
   savingsBuckets?: Prisma.SavingsBucketUpdateManyWithoutUserNestedInput
   categoryBudgets?: Prisma.CategoryBudgetUpdateManyWithoutUserNestedInput
+  contacts?: Prisma.ContactUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSavingsEntriesInput = {
@@ -669,6 +705,75 @@ export type UserUncheckedUpdateWithoutSavingsEntriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
   savingsBuckets?: Prisma.SavingsBucketUncheckedUpdateManyWithoutUserNestedInput
+  categoryBudgets?: Prisma.CategoryBudgetUncheckedUpdateManyWithoutUserNestedInput
+  contacts?: Prisma.ContactUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutContactsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  image?: string | null
+  currency?: string
+  createdAt?: Date | string
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  savingsBuckets?: Prisma.SavingsBucketCreateNestedManyWithoutUserInput
+  savingsEntries?: Prisma.SavingsEntryCreateNestedManyWithoutUserInput
+  categoryBudgets?: Prisma.CategoryBudgetCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutContactsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  image?: string | null
+  currency?: string
+  createdAt?: Date | string
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  savingsBuckets?: Prisma.SavingsBucketUncheckedCreateNestedManyWithoutUserInput
+  savingsEntries?: Prisma.SavingsEntryUncheckedCreateNestedManyWithoutUserInput
+  categoryBudgets?: Prisma.CategoryBudgetUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutContactsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
+}
+
+export type UserUpsertWithoutContactsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutContactsInput, Prisma.UserUncheckedUpdateWithoutContactsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutContactsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutContactsInput, Prisma.UserUncheckedUpdateWithoutContactsInput>
+}
+
+export type UserUpdateWithoutContactsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  savingsBuckets?: Prisma.SavingsBucketUpdateManyWithoutUserNestedInput
+  savingsEntries?: Prisma.SavingsEntryUpdateManyWithoutUserNestedInput
+  categoryBudgets?: Prisma.CategoryBudgetUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutContactsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  savingsBuckets?: Prisma.SavingsBucketUncheckedUpdateManyWithoutUserNestedInput
+  savingsEntries?: Prisma.SavingsEntryUncheckedUpdateManyWithoutUserNestedInput
   categoryBudgets?: Prisma.CategoryBudgetUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -682,6 +787,7 @@ export type UserCountOutputType = {
   savingsBuckets: number
   savingsEntries: number
   categoryBudgets: number
+  contacts: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -689,6 +795,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   savingsBuckets?: boolean | UserCountOutputTypeCountSavingsBucketsArgs
   savingsEntries?: boolean | UserCountOutputTypeCountSavingsEntriesArgs
   categoryBudgets?: boolean | UserCountOutputTypeCountCategoryBudgetsArgs
+  contacts?: boolean | UserCountOutputTypeCountContactsArgs
 }
 
 /**
@@ -729,6 +836,13 @@ export type UserCountOutputTypeCountCategoryBudgetsArgs<ExtArgs extends runtime.
   where?: Prisma.CategoryBudgetWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountContactsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ContactWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -741,6 +855,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   savingsBuckets?: boolean | Prisma.User$savingsBucketsArgs<ExtArgs>
   savingsEntries?: boolean | Prisma.User$savingsEntriesArgs<ExtArgs>
   categoryBudgets?: boolean | Prisma.User$categoryBudgetsArgs<ExtArgs>
+  contacts?: boolean | Prisma.User$contactsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -777,6 +892,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   savingsBuckets?: boolean | Prisma.User$savingsBucketsArgs<ExtArgs>
   savingsEntries?: boolean | Prisma.User$savingsEntriesArgs<ExtArgs>
   categoryBudgets?: boolean | Prisma.User$categoryBudgetsArgs<ExtArgs>
+  contacts?: boolean | Prisma.User$contactsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -789,6 +905,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     savingsBuckets: Prisma.$SavingsBucketPayload<ExtArgs>[]
     savingsEntries: Prisma.$SavingsEntryPayload<ExtArgs>[]
     categoryBudgets: Prisma.$CategoryBudgetPayload<ExtArgs>[]
+    contacts: Prisma.$ContactPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1195,6 +1312,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   savingsBuckets<T extends Prisma.User$savingsBucketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$savingsBucketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavingsBucketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   savingsEntries<T extends Prisma.User$savingsEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$savingsEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SavingsEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   categoryBudgets<T extends Prisma.User$categoryBudgetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$categoryBudgetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CategoryBudgetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  contacts<T extends Prisma.User$contactsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$contactsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContactPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1711,6 +1829,30 @@ export type User$categoryBudgetsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.CategoryBudgetScalarFieldEnum | Prisma.CategoryBudgetScalarFieldEnum[]
+}
+
+/**
+ * User.contacts
+ */
+export type User$contactsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Contact
+   */
+  select?: Prisma.ContactSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Contact
+   */
+  omit?: Prisma.ContactOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContactInclude<ExtArgs> | null
+  where?: Prisma.ContactWhereInput
+  orderBy?: Prisma.ContactOrderByWithRelationInput | Prisma.ContactOrderByWithRelationInput[]
+  cursor?: Prisma.ContactWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ContactScalarFieldEnum | Prisma.ContactScalarFieldEnum[]
 }
 
 /**

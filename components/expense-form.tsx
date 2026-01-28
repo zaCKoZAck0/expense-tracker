@@ -105,21 +105,19 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
     startTransition(async () => {
       try {
         if (expense?.id) {
-          // Update existing expense locally first
+          // Update existing expense
           await updateExpenseLocal(expense.id, {
             ...values,
             type: transactionType,
           });
           toast.success("Transaction updated");
           triggerRefresh();
-          // Sync in background
           syncNow().catch(console.error);
           onSuccess?.();
           return;
         }
 
-        // Add new expense locally first
-        // Get userId from local DB
+        // Add new expense using local-first
         const userId = await getLocalUserId();
         await addExpenseLocal(
           {
@@ -128,12 +126,14 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
           },
           userId,
         );
+
         toast.success(
           transactionType === "income" ? "Income added" : "Expense added",
         );
         triggerRefresh();
-        // Sync in background
         syncNow().catch(console.error);
+
+        // Reset form
         form.reset({
           date: toUTCNoon(new Date()),
           notes: "",
@@ -276,6 +276,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
             </FormItem>
           )}
         />
+
         <div className="w-full flex justify-center pt-3">
           <Button type="submit" className="fn" disabled={isPending}>
             {isPending ? "Saving..." : "Save"}
