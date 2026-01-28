@@ -13,23 +13,6 @@ import { AmountInput } from "../ui/amount-input";
 
 export type SplitMethod = "equal" | "exact" | "percentage" | "shares";
 
-// Get currency symbol from currency code
-const getCurrencySymbol = (currency: string): string => {
-  try {
-    return (
-      new Intl.NumberFormat("en", {
-        style: "currency",
-        currency,
-        currencyDisplay: "narrowSymbol",
-      })
-        .formatToParts(0)
-        .find((part) => part.type === "currency")?.value || currency
-    );
-  } catch {
-    return currency;
-  }
-};
-
 export interface ParticipantSplit {
   contactId: string | null; // null = "You"
   contactName: string;

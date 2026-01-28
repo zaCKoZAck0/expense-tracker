@@ -685,3 +685,264 @@ export async function deleteCategoryBudget(id: string) {
     } as const;
   }
 }
+
+// =============================================================================
+// CONTACTS & SPLITS - Server Actions
+// =============================================================================
+
+import type { Contact, SplitInput, ContactInput, Expense, ExpenseSplit } from "@/lib/types";
+
+const getContactsTag = (userId: string) => `contacts-${userId}`;
+
+/**
+ * Get all contacts for the current user
+ */
+export async function getContacts(): Promise<
+  { success: true; data: Contact[] } | { success: false; error: string }
+> {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error };
+    }
+
+    const contacts = await db.contact.findMany({
+      where: { userId: userRes.data.id },
+      orderBy: { name: "asc" },
+    });
+
+    return { success: true, data: contacts };
+  } catch (error) {
+    console.error("Failed to get contacts:", error);
+    return { success: false, error: "Failed to get contacts" };
+  }
+}
+
+/**
+ * Add a new contact
+ */
+export async function addContact(
+  data: ContactInput
+): Promise<{ success: true; data: Contact } | { success: false; error: string }> {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error };
+    }
+
+    const contact = await db.contact.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        userId: userRes.data.id,
+      },
+    });
+
+    revalidateTag(getContactsTag(userRes.data.id), {});
+    return { success: true, data: contact };
+  } catch (error) {
+    console.error("Failed to add contact:", error);
+    return { success: false, error: "Failed to add contact" };
+  }
+}
+
+/**
+ * Update an existing contact
+ */
+export async function updateContact(
+  id: string,
+  data: Partial<ContactInput>
+): Promise<{ success: true; data: Contact } | { success: false; error: string }> {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error };
+    }
+
+    const existing = await db.contact.findUnique({ where: { id } });
+    if (!existing || existing.userId !== userRes.data.id) {
+      return { success: false, error: "Contact not found" };
+    }
+
+    const contact = await db.contact.update({
+      where: { id },
+      data: {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+      },
+    });
+
+    revalidateTag(getContactsTag(userRes.data.id), {});
+    return { success: true, data: contact };
+  } catch (error) {
+    console.error("Failed to update contact:", error);
+    return { success: false, error: "Failed to update contact" };
+  }
+}
+
+/**
+ * Delete a contact
+ */
+export async function deleteContact(
+  id: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error };
+    }
+
+    const existing = await db.contact.findUnique({ where: { id } });
+    if (!existing || existing.userId !== userRes.data.id) {
+      return { success: false, error: "Contact not found" };
+    }
+
+    await db.contact.delete({ where: { id } });
+
+    revalidateTag(getContactsTag(userRes.data.id), {});
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete contact:", error);
+    return { success: false, error: "Failed to delete contact" };
+  }
+}
+
+/**
+ * Get an expense with its splits
+ */
+export async function getExpenseWithSplits(
+  expenseId: string
+): Promise<
+  { success: true; data: Expense & { splits: ExpenseSplit[] } } | { success: false; error: string }
+> {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error };
+    }
+
+    const expense = await db.expense.findUnique({
+      where: { id: expenseId },
+      include: {
+        splits: {
+          include: { contact: true },
+        },
+      },
+    });
+
+    if (!expense || expense.userId !== userRes.data.id) {
+      return { success: false, error: "Expense not found" };
+    }
+
+    return { success: true, data: expense as Expense & { splits: ExpenseSplit[] } };
+  } catch (error) {
+    console.error("Failed to get expense with splits:", error);
+    return { success: false, error: "Failed to get expense with splits" };
+  }
+}
+
+type ExpenseWithSplitsInput = ExpenseInput & {
+  isSplit?: boolean;
+  splits?: SplitInput[];
+};
+
+/**
+ * Update an expense with splits
+ */
+export async function updateExpenseWithSplits(
+  id: string,
+  data: ExpenseWithSplitsInput
+): Promise<{ success: true; data: Expense } | { success: false; error: string }> {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error };
+    }
+
+    const existing = await db.expense.findUnique({ where: { id } });
+    if (!existing || existing.userId !== userRes.data.id) {
+      return { success: false, error: "Expense not found" };
+    }
+
+    // Update expense and replace splits in a transaction
+    const result = await db.$transaction(async (tx) => {
+      // Delete existing splits
+      await tx.expenseSplit.deleteMany({ where: { expenseId: id } });
+
+      // Update expense
+      const expense = await tx.expense.update({
+        where: { id },
+        data: {
+          amount: data.amount,
+          category: data.category,
+          date: data.date,
+          notes: data.notes,
+          type: data.type ?? "expense",
+          isSplit: data.isSplit ?? false,
+        },
+      });
+
+      // Create new splits if provided
+      if (data.splits && data.splits.length > 0) {
+        await tx.expenseSplit.createMany({
+          data: data.splits.map((split) => ({
+            expenseId: id,
+            contactId: split.contactId,
+            amount: split.amount,
+            percentage: split.percentage,
+            isYourShare: split.isYourShare,
+            isPaid: split.isYourShare, // Your share is always "paid"
+            paidByYou: true, // You paid for this expense
+          })),
+        });
+      }
+
+      return expense;
+    });
+
+    revalidatePath("/");
+    revalidateTag(getExpensesTag(userRes.data.id), {});
+    revalidateTag(getDashboardTag(userRes.data.id), {});
+
+    return { success: true, data: result as Expense };
+  } catch (error) {
+    console.error("Failed to update expense with splits:", error);
+    return { success: false, error: "Failed to update expense with splits" };
+  }
+}
+
+/**
+ * Mark a split as paid (when someone pays you back)
+ */
+export async function markSplitAsPaid(
+  splitId: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error };
+    }
+
+    const split = await db.expenseSplit.findUnique({
+      where: { id: splitId },
+      include: { expense: true },
+    });
+
+    if (!split || split.expense.userId !== userRes.data.id) {
+      return { success: false, error: "Split not found" };
+    }
+
+    await db.expenseSplit.update({
+      where: { id: splitId },
+      data: { isPaid: true },
+    });
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to mark split as paid:", error);
+    return { success: false, error: "Failed to mark split as paid" };
+  }
+}

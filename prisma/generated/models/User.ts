@@ -381,6 +381,20 @@ export type UserUpdateOneRequiredWithoutExpensesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutExpensesInput, Prisma.UserUpdateWithoutExpensesInput>, Prisma.UserUncheckedUpdateWithoutExpensesInput>
 }
 
+export type UserCreateNestedOneWithoutContactsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutContactsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutContactsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutContactsInput
+  upsert?: Prisma.UserUpsertWithoutContactsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutContactsInput, Prisma.UserUpdateWithoutContactsInput>, Prisma.UserUncheckedUpdateWithoutContactsInput>
+}
+
 export type UserCreateNestedOneWithoutCategoryBudgetsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCategoryBudgetsInput, Prisma.UserUncheckedCreateWithoutCategoryBudgetsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCategoryBudgetsInput
@@ -421,20 +435,6 @@ export type UserUpdateOneRequiredWithoutSavingsEntriesNestedInput = {
   upsert?: Prisma.UserUpsertWithoutSavingsEntriesInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSavingsEntriesInput, Prisma.UserUpdateWithoutSavingsEntriesInput>, Prisma.UserUncheckedUpdateWithoutSavingsEntriesInput>
-}
-
-export type UserCreateNestedOneWithoutContactsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutContactsInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
-export type UserUpdateOneRequiredWithoutContactsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutContactsInput
-  upsert?: Prisma.UserUpsertWithoutContactsInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutContactsInput, Prisma.UserUpdateWithoutContactsInput>, Prisma.UserUncheckedUpdateWithoutContactsInput>
 }
 
 export type UserCreateWithoutExpensesInput = {
@@ -503,6 +503,74 @@ export type UserUncheckedUpdateWithoutExpensesInput = {
   savingsEntries?: Prisma.SavingsEntryUncheckedUpdateManyWithoutUserNestedInput
   categoryBudgets?: Prisma.CategoryBudgetUncheckedUpdateManyWithoutUserNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutContactsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  image?: string | null
+  currency?: string
+  createdAt?: Date | string
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  savingsBuckets?: Prisma.SavingsBucketCreateNestedManyWithoutUserInput
+  savingsEntries?: Prisma.SavingsEntryCreateNestedManyWithoutUserInput
+  categoryBudgets?: Prisma.CategoryBudgetCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutContactsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  image?: string | null
+  currency?: string
+  createdAt?: Date | string
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  savingsBuckets?: Prisma.SavingsBucketUncheckedCreateNestedManyWithoutUserInput
+  savingsEntries?: Prisma.SavingsEntryUncheckedCreateNestedManyWithoutUserInput
+  categoryBudgets?: Prisma.CategoryBudgetUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutContactsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
+}
+
+export type UserUpsertWithoutContactsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutContactsInput, Prisma.UserUncheckedUpdateWithoutContactsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutContactsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutContactsInput, Prisma.UserUncheckedUpdateWithoutContactsInput>
+}
+
+export type UserUpdateWithoutContactsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  savingsBuckets?: Prisma.SavingsBucketUpdateManyWithoutUserNestedInput
+  savingsEntries?: Prisma.SavingsEntryUpdateManyWithoutUserNestedInput
+  categoryBudgets?: Prisma.CategoryBudgetUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutContactsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  savingsBuckets?: Prisma.SavingsBucketUncheckedUpdateManyWithoutUserNestedInput
+  savingsEntries?: Prisma.SavingsEntryUncheckedUpdateManyWithoutUserNestedInput
+  categoryBudgets?: Prisma.CategoryBudgetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCategoryBudgetsInput = {
@@ -707,74 +775,6 @@ export type UserUncheckedUpdateWithoutSavingsEntriesInput = {
   savingsBuckets?: Prisma.SavingsBucketUncheckedUpdateManyWithoutUserNestedInput
   categoryBudgets?: Prisma.CategoryBudgetUncheckedUpdateManyWithoutUserNestedInput
   contacts?: Prisma.ContactUncheckedUpdateManyWithoutUserNestedInput
-}
-
-export type UserCreateWithoutContactsInput = {
-  id?: string
-  email: string
-  name?: string | null
-  image?: string | null
-  currency?: string
-  createdAt?: Date | string
-  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
-  savingsBuckets?: Prisma.SavingsBucketCreateNestedManyWithoutUserInput
-  savingsEntries?: Prisma.SavingsEntryCreateNestedManyWithoutUserInput
-  categoryBudgets?: Prisma.CategoryBudgetCreateNestedManyWithoutUserInput
-}
-
-export type UserUncheckedCreateWithoutContactsInput = {
-  id?: string
-  email: string
-  name?: string | null
-  image?: string | null
-  currency?: string
-  createdAt?: Date | string
-  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
-  savingsBuckets?: Prisma.SavingsBucketUncheckedCreateNestedManyWithoutUserInput
-  savingsEntries?: Prisma.SavingsEntryUncheckedCreateNestedManyWithoutUserInput
-  categoryBudgets?: Prisma.CategoryBudgetUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutContactsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
-}
-
-export type UserUpsertWithoutContactsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutContactsInput, Prisma.UserUncheckedUpdateWithoutContactsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutContactsInput, Prisma.UserUncheckedCreateWithoutContactsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutContactsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutContactsInput, Prisma.UserUncheckedUpdateWithoutContactsInput>
-}
-
-export type UserUpdateWithoutContactsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
-  savingsBuckets?: Prisma.SavingsBucketUpdateManyWithoutUserNestedInput
-  savingsEntries?: Prisma.SavingsEntryUpdateManyWithoutUserNestedInput
-  categoryBudgets?: Prisma.CategoryBudgetUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutContactsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currency?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
-  savingsBuckets?: Prisma.SavingsBucketUncheckedUpdateManyWithoutUserNestedInput
-  savingsEntries?: Prisma.SavingsEntryUncheckedUpdateManyWithoutUserNestedInput
-  categoryBudgets?: Prisma.CategoryBudgetUncheckedUpdateManyWithoutUserNestedInput
 }
 
 

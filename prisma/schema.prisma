@@ -9,15 +9,17 @@ datasource db {
 }
 
 model Expense {
-  id        String   @id @default(uuid())
+  id        String         @id @default(uuid())
   amount    Float
   category  String
   date      DateTime
   notes     String?
-  type      String   @default("expense") // "expense" or "income"
-  createdAt DateTime @default(now())
+  type      String         @default("expense") // "expense" or "income"
+  isSplit   Boolean        @default(false)
+  createdAt DateTime       @default(now())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  splits    ExpenseSplit[]
 
   @@index([userId, date])
   @@index([userId, type, date])
@@ -35,6 +37,38 @@ model User {
   savingsBuckets  SavingsBucket[]
   savingsEntries  SavingsEntry[]
   categoryBudgets CategoryBudget[]
+  contacts        Contact[]
+}
+
+model Contact {
+  id        String         @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  avatarUrl String?
+  createdAt DateTime       @default(now())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  splits    ExpenseSplit[]
+
+  @@index([userId, name])
+}
+
+model ExpenseSplit {
+  id         String   @id @default(uuid())
+  amount     Float
+  percentage Float?
+  isPaid     Boolean  @default(false)
+  isYourShare Boolean @default(false)
+  paidByYou  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  expenseId  String
+  contactId  String?
+  expense    Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([expenseId])
+  @@index([contactId])
 }
 
 model Budget {

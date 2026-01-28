@@ -465,14 +465,6 @@ export type SavingsBucketUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.SavingsBucketScalarWhereInput | Prisma.SavingsBucketScalarWhereInput[]
 }
 
-export type NullableFloatFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type SavingsBucketCreateNestedOneWithoutEntriesInput = {
   create?: Prisma.XOR<Prisma.SavingsBucketCreateWithoutEntriesInput, Prisma.SavingsBucketUncheckedCreateWithoutEntriesInput>
   connectOrCreate?: Prisma.SavingsBucketCreateOrConnectWithoutEntriesInput

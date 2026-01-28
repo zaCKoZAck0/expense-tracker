@@ -46,7 +46,7 @@ import {
 import { ExpenseForm } from "@/components/expense-form";
 import { SplitExpenseDialog } from "@/components/splits";
 import { toast } from "sonner";
-import type { Expense, ExpenseSplit } from "@/lib/types";
+import type { Expense } from "@/lib/types";
 import { useDeleteExpense } from "@/hooks/use-local-data";
 import { useSyncContext } from "@/components/sync-provider";
 import { getExpenseWithSplits, markSplitAsPaid } from "@/app/actions";
@@ -73,12 +73,10 @@ export default function ExpenseDetail({
 
   // Local state for expense with splits (refreshed when dialog closes)
   const [expenseWithSplits, setExpenseWithSplits] = useState<Expense>(expense);
-  const [isLoadingSplits, setIsLoadingSplits] = useState(false);
 
   // Load expense with splits data
-  const loadSplits = async () => {
+  const loadSplits = React.useCallback(async () => {
     if (!expense.isSplit) return;
-    setIsLoadingSplits(true);
     try {
       const result = await getExpenseWithSplits(expense.id);
       if (result.success && result.data) {
@@ -86,17 +84,15 @@ export default function ExpenseDetail({
       }
     } catch (error) {
       console.error("Failed to load splits:", error);
-    } finally {
-      setIsLoadingSplits(false);
     }
-  };
+  }, [expense.id, expense.isSplit]);
 
   // Load splits on mount if expense is split
   React.useEffect(() => {
     if (expense.isSplit) {
       loadSplits();
     }
-  }, [expense.id, expense.isSplit]);
+  }, [expense.isSplit, loadSplits]);
 
   // Handle split dialog success
   const handleSplitSuccess = () => {

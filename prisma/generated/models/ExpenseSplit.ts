@@ -38,38 +38,38 @@ export type ExpenseSplitSumAggregateOutputType = {
 
 export type ExpenseSplitMinAggregateOutputType = {
   id: string | null
-  expenseId: string | null
-  contactId: string | null
   amount: number | null
   percentage: number | null
   isPaid: boolean | null
   isYourShare: boolean | null
   paidByYou: boolean | null
   createdAt: Date | null
+  expenseId: string | null
+  contactId: string | null
 }
 
 export type ExpenseSplitMaxAggregateOutputType = {
   id: string | null
-  expenseId: string | null
-  contactId: string | null
   amount: number | null
   percentage: number | null
   isPaid: boolean | null
   isYourShare: boolean | null
   paidByYou: boolean | null
   createdAt: Date | null
+  expenseId: string | null
+  contactId: string | null
 }
 
 export type ExpenseSplitCountAggregateOutputType = {
   id: number
-  expenseId: number
-  contactId: number
   amount: number
   percentage: number
   isPaid: number
   isYourShare: number
   paidByYou: number
   createdAt: number
+  expenseId: number
+  contactId: number
   _all: number
 }
 
@@ -86,38 +86,38 @@ export type ExpenseSplitSumAggregateInputType = {
 
 export type ExpenseSplitMinAggregateInputType = {
   id?: true
-  expenseId?: true
-  contactId?: true
   amount?: true
   percentage?: true
   isPaid?: true
   isYourShare?: true
   paidByYou?: true
   createdAt?: true
+  expenseId?: true
+  contactId?: true
 }
 
 export type ExpenseSplitMaxAggregateInputType = {
   id?: true
-  expenseId?: true
-  contactId?: true
   amount?: true
   percentage?: true
   isPaid?: true
   isYourShare?: true
   paidByYou?: true
   createdAt?: true
+  expenseId?: true
+  contactId?: true
 }
 
 export type ExpenseSplitCountAggregateInputType = {
   id?: true
-  expenseId?: true
-  contactId?: true
   amount?: true
   percentage?: true
   isPaid?: true
   isYourShare?: true
   paidByYou?: true
   createdAt?: true
+  expenseId?: true
+  contactId?: true
   _all?: true
 }
 
@@ -209,14 +209,14 @@ export type ExpenseSplitGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 
 export type ExpenseSplitGroupByOutputType = {
   id: string
-  expenseId: string
-  contactId: string | null
   amount: number
   percentage: number | null
   isPaid: boolean
   isYourShare: boolean
   paidByYou: boolean
   createdAt: Date
+  expenseId: string
+  contactId: string | null
   _count: ExpenseSplitCountAggregateOutputType | null
   _avg: ExpenseSplitAvgAggregateOutputType | null
   _sum: ExpenseSplitSumAggregateOutputType | null
@@ -244,28 +244,28 @@ export type ExpenseSplitWhereInput = {
   OR?: Prisma.ExpenseSplitWhereInput[]
   NOT?: Prisma.ExpenseSplitWhereInput | Prisma.ExpenseSplitWhereInput[]
   id?: Prisma.StringFilter<"ExpenseSplit"> | string
-  expenseId?: Prisma.StringFilter<"ExpenseSplit"> | string
-  contactId?: Prisma.StringNullableFilter<"ExpenseSplit"> | string | null
   amount?: Prisma.FloatFilter<"ExpenseSplit"> | number
   percentage?: Prisma.FloatNullableFilter<"ExpenseSplit"> | number | null
   isPaid?: Prisma.BoolFilter<"ExpenseSplit"> | boolean
   isYourShare?: Prisma.BoolFilter<"ExpenseSplit"> | boolean
   paidByYou?: Prisma.BoolFilter<"ExpenseSplit"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ExpenseSplit"> | Date | string
+  expenseId?: Prisma.StringFilter<"ExpenseSplit"> | string
+  contactId?: Prisma.StringNullableFilter<"ExpenseSplit"> | string | null
   expense?: Prisma.XOR<Prisma.ExpenseScalarRelationFilter, Prisma.ExpenseWhereInput>
   contact?: Prisma.XOR<Prisma.ContactNullableScalarRelationFilter, Prisma.ContactWhereInput> | null
 }
 
 export type ExpenseSplitOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  expenseId?: Prisma.SortOrder
-  contactId?: Prisma.SortOrderInput | Prisma.SortOrder
   amount?: Prisma.SortOrder
   percentage?: Prisma.SortOrderInput | Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   isYourShare?: Prisma.SortOrder
   paidByYou?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
+  contactId?: Prisma.SortOrderInput | Prisma.SortOrder
   expense?: Prisma.ExpenseOrderByWithRelationInput
   contact?: Prisma.ContactOrderByWithRelationInput
 }
@@ -275,28 +275,28 @@ export type ExpenseSplitWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ExpenseSplitWhereInput | Prisma.ExpenseSplitWhereInput[]
   OR?: Prisma.ExpenseSplitWhereInput[]
   NOT?: Prisma.ExpenseSplitWhereInput | Prisma.ExpenseSplitWhereInput[]
-  expenseId?: Prisma.StringFilter<"ExpenseSplit"> | string
-  contactId?: Prisma.StringNullableFilter<"ExpenseSplit"> | string | null
   amount?: Prisma.FloatFilter<"ExpenseSplit"> | number
   percentage?: Prisma.FloatNullableFilter<"ExpenseSplit"> | number | null
   isPaid?: Prisma.BoolFilter<"ExpenseSplit"> | boolean
   isYourShare?: Prisma.BoolFilter<"ExpenseSplit"> | boolean
   paidByYou?: Prisma.BoolFilter<"ExpenseSplit"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ExpenseSplit"> | Date | string
+  expenseId?: Prisma.StringFilter<"ExpenseSplit"> | string
+  contactId?: Prisma.StringNullableFilter<"ExpenseSplit"> | string | null
   expense?: Prisma.XOR<Prisma.ExpenseScalarRelationFilter, Prisma.ExpenseWhereInput>
   contact?: Prisma.XOR<Prisma.ContactNullableScalarRelationFilter, Prisma.ContactWhereInput> | null
 }, "id">
 
 export type ExpenseSplitOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  expenseId?: Prisma.SortOrder
-  contactId?: Prisma.SortOrderInput | Prisma.SortOrder
   amount?: Prisma.SortOrder
   percentage?: Prisma.SortOrderInput | Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   isYourShare?: Prisma.SortOrder
   paidByYou?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
+  contactId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ExpenseSplitCountOrderByAggregateInput
   _avg?: Prisma.ExpenseSplitAvgOrderByAggregateInput
   _max?: Prisma.ExpenseSplitMaxOrderByAggregateInput
@@ -309,14 +309,14 @@ export type ExpenseSplitScalarWhereWithAggregatesInput = {
   OR?: Prisma.ExpenseSplitScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ExpenseSplitScalarWhereWithAggregatesInput | Prisma.ExpenseSplitScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ExpenseSplit"> | string
-  expenseId?: Prisma.StringWithAggregatesFilter<"ExpenseSplit"> | string
-  contactId?: Prisma.StringNullableWithAggregatesFilter<"ExpenseSplit"> | string | null
   amount?: Prisma.FloatWithAggregatesFilter<"ExpenseSplit"> | number
   percentage?: Prisma.FloatNullableWithAggregatesFilter<"ExpenseSplit"> | number | null
   isPaid?: Prisma.BoolWithAggregatesFilter<"ExpenseSplit"> | boolean
   isYourShare?: Prisma.BoolWithAggregatesFilter<"ExpenseSplit"> | boolean
   paidByYou?: Prisma.BoolWithAggregatesFilter<"ExpenseSplit"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ExpenseSplit"> | Date | string
+  expenseId?: Prisma.StringWithAggregatesFilter<"ExpenseSplit"> | string
+  contactId?: Prisma.StringNullableWithAggregatesFilter<"ExpenseSplit"> | string | null
 }
 
 export type ExpenseSplitCreateInput = {
@@ -333,14 +333,14 @@ export type ExpenseSplitCreateInput = {
 
 export type ExpenseSplitUncheckedCreateInput = {
   id?: string
-  expenseId: string
-  contactId?: string | null
   amount: number
   percentage?: number | null
   isPaid?: boolean
   isYourShare?: boolean
   paidByYou?: boolean
   createdAt?: Date | string
+  expenseId: string
+  contactId?: string | null
 }
 
 export type ExpenseSplitUpdateInput = {
@@ -357,26 +357,26 @@ export type ExpenseSplitUpdateInput = {
 
 export type ExpenseSplitUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  expenseId?: Prisma.StringFieldUpdateOperationsInput | string
-  contactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   percentage?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isYourShare?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidByYou?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenseId?: Prisma.StringFieldUpdateOperationsInput | string
+  contactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ExpenseSplitCreateManyInput = {
   id?: string
-  expenseId: string
-  contactId?: string | null
   amount: number
   percentage?: number | null
   isPaid?: boolean
   isYourShare?: boolean
   paidByYou?: boolean
   createdAt?: Date | string
+  expenseId: string
+  contactId?: string | null
 }
 
 export type ExpenseSplitUpdateManyMutationInput = {
@@ -391,14 +391,14 @@ export type ExpenseSplitUpdateManyMutationInput = {
 
 export type ExpenseSplitUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  expenseId?: Prisma.StringFieldUpdateOperationsInput | string
-  contactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   percentage?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isYourShare?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidByYou?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenseId?: Prisma.StringFieldUpdateOperationsInput | string
+  contactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ExpenseSplitListRelationFilter = {
@@ -413,14 +413,14 @@ export type ExpenseSplitOrderByRelationAggregateInput = {
 
 export type ExpenseSplitCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  expenseId?: Prisma.SortOrder
-  contactId?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   percentage?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   isYourShare?: Prisma.SortOrder
   paidByYou?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
+  contactId?: Prisma.SortOrder
 }
 
 export type ExpenseSplitAvgOrderByAggregateInput = {
@@ -430,26 +430,26 @@ export type ExpenseSplitAvgOrderByAggregateInput = {
 
 export type ExpenseSplitMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  expenseId?: Prisma.SortOrder
-  contactId?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   percentage?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   isYourShare?: Prisma.SortOrder
   paidByYou?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
+  contactId?: Prisma.SortOrder
 }
 
 export type ExpenseSplitMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  expenseId?: Prisma.SortOrder
-  contactId?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   percentage?: Prisma.SortOrder
   isPaid?: Prisma.SortOrder
   isYourShare?: Prisma.SortOrder
   paidByYou?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  expenseId?: Prisma.SortOrder
+  contactId?: Prisma.SortOrder
 }
 
 export type ExpenseSplitSumOrderByAggregateInput = {
@@ -541,6 +541,14 @@ export type ExpenseSplitUncheckedUpdateManyWithoutContactNestedInput = {
   deleteMany?: Prisma.ExpenseSplitScalarWhereInput | Prisma.ExpenseSplitScalarWhereInput[]
 }
 
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type ExpenseSplitCreateWithoutExpenseInput = {
   id?: string
   amount: number
@@ -554,13 +562,13 @@ export type ExpenseSplitCreateWithoutExpenseInput = {
 
 export type ExpenseSplitUncheckedCreateWithoutExpenseInput = {
   id?: string
-  contactId?: string | null
   amount: number
   percentage?: number | null
   isPaid?: boolean
   isYourShare?: boolean
   paidByYou?: boolean
   createdAt?: Date | string
+  contactId?: string | null
 }
 
 export type ExpenseSplitCreateOrConnectWithoutExpenseInput = {
@@ -594,14 +602,14 @@ export type ExpenseSplitScalarWhereInput = {
   OR?: Prisma.ExpenseSplitScalarWhereInput[]
   NOT?: Prisma.ExpenseSplitScalarWhereInput | Prisma.ExpenseSplitScalarWhereInput[]
   id?: Prisma.StringFilter<"ExpenseSplit"> | string
-  expenseId?: Prisma.StringFilter<"ExpenseSplit"> | string
-  contactId?: Prisma.StringNullableFilter<"ExpenseSplit"> | string | null
   amount?: Prisma.FloatFilter<"ExpenseSplit"> | number
   percentage?: Prisma.FloatNullableFilter<"ExpenseSplit"> | number | null
   isPaid?: Prisma.BoolFilter<"ExpenseSplit"> | boolean
   isYourShare?: Prisma.BoolFilter<"ExpenseSplit"> | boolean
   paidByYou?: Prisma.BoolFilter<"ExpenseSplit"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ExpenseSplit"> | Date | string
+  expenseId?: Prisma.StringFilter<"ExpenseSplit"> | string
+  contactId?: Prisma.StringNullableFilter<"ExpenseSplit"> | string | null
 }
 
 export type ExpenseSplitCreateWithoutContactInput = {
@@ -617,13 +625,13 @@ export type ExpenseSplitCreateWithoutContactInput = {
 
 export type ExpenseSplitUncheckedCreateWithoutContactInput = {
   id?: string
-  expenseId: string
   amount: number
   percentage?: number | null
   isPaid?: boolean
   isYourShare?: boolean
   paidByYou?: boolean
   createdAt?: Date | string
+  expenseId: string
 }
 
 export type ExpenseSplitCreateOrConnectWithoutContactInput = {
@@ -654,13 +662,13 @@ export type ExpenseSplitUpdateManyWithWhereWithoutContactInput = {
 
 export type ExpenseSplitCreateManyExpenseInput = {
   id?: string
-  contactId?: string | null
   amount: number
   percentage?: number | null
   isPaid?: boolean
   isYourShare?: boolean
   paidByYou?: boolean
   createdAt?: Date | string
+  contactId?: string | null
 }
 
 export type ExpenseSplitUpdateWithoutExpenseInput = {
@@ -676,35 +684,35 @@ export type ExpenseSplitUpdateWithoutExpenseInput = {
 
 export type ExpenseSplitUncheckedUpdateWithoutExpenseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  contactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   percentage?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isYourShare?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidByYou?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ExpenseSplitUncheckedUpdateManyWithoutExpenseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  contactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   percentage?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isYourShare?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidByYou?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  contactId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ExpenseSplitCreateManyContactInput = {
   id?: string
-  expenseId: string
   amount: number
   percentage?: number | null
   isPaid?: boolean
   isYourShare?: boolean
   paidByYou?: boolean
   createdAt?: Date | string
+  expenseId: string
 }
 
 export type ExpenseSplitUpdateWithoutContactInput = {
@@ -720,83 +728,83 @@ export type ExpenseSplitUpdateWithoutContactInput = {
 
 export type ExpenseSplitUncheckedUpdateWithoutContactInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  expenseId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   percentage?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isYourShare?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidByYou?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenseId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ExpenseSplitUncheckedUpdateManyWithoutContactInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  expenseId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.FloatFieldUpdateOperationsInput | number
   percentage?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   isPaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isYourShare?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paidByYou?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  expenseId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
 
 export type ExpenseSplitSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  expenseId?: boolean
-  contactId?: boolean
   amount?: boolean
   percentage?: boolean
   isPaid?: boolean
   isYourShare?: boolean
   paidByYou?: boolean
   createdAt?: boolean
+  expenseId?: boolean
+  contactId?: boolean
   expense?: boolean | Prisma.ExpenseDefaultArgs<ExtArgs>
   contact?: boolean | Prisma.ExpenseSplit$contactArgs<ExtArgs>
 }, ExtArgs["result"]["expenseSplit"]>
 
 export type ExpenseSplitSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  expenseId?: boolean
-  contactId?: boolean
   amount?: boolean
   percentage?: boolean
   isPaid?: boolean
   isYourShare?: boolean
   paidByYou?: boolean
   createdAt?: boolean
+  expenseId?: boolean
+  contactId?: boolean
   expense?: boolean | Prisma.ExpenseDefaultArgs<ExtArgs>
   contact?: boolean | Prisma.ExpenseSplit$contactArgs<ExtArgs>
 }, ExtArgs["result"]["expenseSplit"]>
 
 export type ExpenseSplitSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  expenseId?: boolean
-  contactId?: boolean
   amount?: boolean
   percentage?: boolean
   isPaid?: boolean
   isYourShare?: boolean
   paidByYou?: boolean
   createdAt?: boolean
+  expenseId?: boolean
+  contactId?: boolean
   expense?: boolean | Prisma.ExpenseDefaultArgs<ExtArgs>
   contact?: boolean | Prisma.ExpenseSplit$contactArgs<ExtArgs>
 }, ExtArgs["result"]["expenseSplit"]>
 
 export type ExpenseSplitSelectScalar = {
   id?: boolean
-  expenseId?: boolean
-  contactId?: boolean
   amount?: boolean
   percentage?: boolean
   isPaid?: boolean
   isYourShare?: boolean
   paidByYou?: boolean
   createdAt?: boolean
+  expenseId?: boolean
+  contactId?: boolean
 }
 
-export type ExpenseSplitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "expenseId" | "contactId" | "amount" | "percentage" | "isPaid" | "isYourShare" | "paidByYou" | "createdAt", ExtArgs["result"]["expenseSplit"]>
+export type ExpenseSplitOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "amount" | "percentage" | "isPaid" | "isYourShare" | "paidByYou" | "createdAt" | "expenseId" | "contactId", ExtArgs["result"]["expenseSplit"]>
 export type ExpenseSplitInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   expense?: boolean | Prisma.ExpenseDefaultArgs<ExtArgs>
   contact?: boolean | Prisma.ExpenseSplit$contactArgs<ExtArgs>
@@ -818,14 +826,14 @@ export type $ExpenseSplitPayload<ExtArgs extends runtime.Types.Extensions.Intern
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    expenseId: string
-    contactId: string | null
     amount: number
     percentage: number | null
     isPaid: boolean
     isYourShare: boolean
     paidByYou: boolean
     createdAt: Date
+    expenseId: string
+    contactId: string | null
   }, ExtArgs["result"]["expenseSplit"]>
   composites: {}
 }
@@ -1252,14 +1260,14 @@ export interface Prisma__ExpenseSplitClient<T, Null = never, ExtArgs extends run
  */
 export interface ExpenseSplitFieldRefs {
   readonly id: Prisma.FieldRef<"ExpenseSplit", 'String'>
-  readonly expenseId: Prisma.FieldRef<"ExpenseSplit", 'String'>
-  readonly contactId: Prisma.FieldRef<"ExpenseSplit", 'String'>
   readonly amount: Prisma.FieldRef<"ExpenseSplit", 'Float'>
   readonly percentage: Prisma.FieldRef<"ExpenseSplit", 'Float'>
   readonly isPaid: Prisma.FieldRef<"ExpenseSplit", 'Boolean'>
   readonly isYourShare: Prisma.FieldRef<"ExpenseSplit", 'Boolean'>
   readonly paidByYou: Prisma.FieldRef<"ExpenseSplit", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"ExpenseSplit", 'DateTime'>
+  readonly expenseId: Prisma.FieldRef<"ExpenseSplit", 'String'>
+  readonly contactId: Prisma.FieldRef<"ExpenseSplit", 'String'>
 }
     
 

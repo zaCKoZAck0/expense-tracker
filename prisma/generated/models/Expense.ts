@@ -41,9 +41,9 @@ export type ExpenseMinAggregateOutputType = {
   date: Date | null
   notes: string | null
   type: string | null
+  isSplit: boolean | null
   createdAt: Date | null
   userId: string | null
-  isSplit: boolean | null
 }
 
 export type ExpenseMaxAggregateOutputType = {
@@ -53,9 +53,9 @@ export type ExpenseMaxAggregateOutputType = {
   date: Date | null
   notes: string | null
   type: string | null
+  isSplit: boolean | null
   createdAt: Date | null
   userId: string | null
-  isSplit: boolean | null
 }
 
 export type ExpenseCountAggregateOutputType = {
@@ -65,9 +65,9 @@ export type ExpenseCountAggregateOutputType = {
   date: number
   notes: number
   type: number
+  isSplit: number
   createdAt: number
   userId: number
-  isSplit: number
   _all: number
 }
 
@@ -87,9 +87,9 @@ export type ExpenseMinAggregateInputType = {
   date?: true
   notes?: true
   type?: true
+  isSplit?: true
   createdAt?: true
   userId?: true
-  isSplit?: true
 }
 
 export type ExpenseMaxAggregateInputType = {
@@ -99,9 +99,9 @@ export type ExpenseMaxAggregateInputType = {
   date?: true
   notes?: true
   type?: true
+  isSplit?: true
   createdAt?: true
   userId?: true
-  isSplit?: true
 }
 
 export type ExpenseCountAggregateInputType = {
@@ -111,9 +111,9 @@ export type ExpenseCountAggregateInputType = {
   date?: true
   notes?: true
   type?: true
+  isSplit?: true
   createdAt?: true
   userId?: true
-  isSplit?: true
   _all?: true
 }
 
@@ -210,9 +210,9 @@ export type ExpenseGroupByOutputType = {
   date: Date
   notes: string | null
   type: string
+  isSplit: boolean
   createdAt: Date
   userId: string
-  isSplit: boolean
   _count: ExpenseCountAggregateOutputType | null
   _avg: ExpenseAvgAggregateOutputType | null
   _sum: ExpenseSumAggregateOutputType | null
@@ -245,9 +245,9 @@ export type ExpenseWhereInput = {
   date?: Prisma.DateTimeFilter<"Expense"> | Date | string
   notes?: Prisma.StringNullableFilter<"Expense"> | string | null
   type?: Prisma.StringFilter<"Expense"> | string
+  isSplit?: Prisma.BoolFilter<"Expense"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   userId?: Prisma.StringFilter<"Expense"> | string
-  isSplit?: Prisma.BoolFilter<"Expense"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   splits?: Prisma.ExpenseSplitListRelationFilter
 }
@@ -259,9 +259,9 @@ export type ExpenseOrderByWithRelationInput = {
   date?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
+  isSplit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  isSplit?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   splits?: Prisma.ExpenseSplitOrderByRelationAggregateInput
 }
@@ -276,9 +276,9 @@ export type ExpenseWhereUniqueInput = Prisma.AtLeast<{
   date?: Prisma.DateTimeFilter<"Expense"> | Date | string
   notes?: Prisma.StringNullableFilter<"Expense"> | string | null
   type?: Prisma.StringFilter<"Expense"> | string
+  isSplit?: Prisma.BoolFilter<"Expense"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   userId?: Prisma.StringFilter<"Expense"> | string
-  isSplit?: Prisma.BoolFilter<"Expense"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   splits?: Prisma.ExpenseSplitListRelationFilter
 }, "id">
@@ -290,9 +290,9 @@ export type ExpenseOrderByWithAggregationInput = {
   date?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
+  isSplit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  isSplit?: Prisma.SortOrder
   _count?: Prisma.ExpenseCountOrderByAggregateInput
   _avg?: Prisma.ExpenseAvgOrderByAggregateInput
   _max?: Prisma.ExpenseMaxOrderByAggregateInput
@@ -310,9 +310,9 @@ export type ExpenseScalarWhereWithAggregatesInput = {
   date?: Prisma.DateTimeWithAggregatesFilter<"Expense"> | Date | string
   notes?: Prisma.StringNullableWithAggregatesFilter<"Expense"> | string | null
   type?: Prisma.StringWithAggregatesFilter<"Expense"> | string
+  isSplit?: Prisma.BoolWithAggregatesFilter<"Expense"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Expense"> | Date | string
   userId?: Prisma.StringWithAggregatesFilter<"Expense"> | string
-  isSplit?: Prisma.BoolWithAggregatesFilter<"Expense"> | boolean
 }
 
 export type ExpenseCreateInput = {
@@ -322,8 +322,8 @@ export type ExpenseCreateInput = {
   date: Date | string
   notes?: string | null
   type?: string
-  createdAt?: Date | string
   isSplit?: boolean
+  createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutExpensesInput
   splits?: Prisma.ExpenseSplitCreateNestedManyWithoutExpenseInput
 }
@@ -335,9 +335,9 @@ export type ExpenseUncheckedCreateInput = {
   date: Date | string
   notes?: string | null
   type?: string
+  isSplit?: boolean
   createdAt?: Date | string
   userId: string
-  isSplit?: boolean
   splits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutExpenseInput
 }
 
@@ -348,8 +348,8 @@ export type ExpenseUpdateInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutExpensesNestedInput
   splits?: Prisma.ExpenseSplitUpdateManyWithoutExpenseNestedInput
 }
@@ -361,9 +361,9 @@ export type ExpenseUncheckedUpdateInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
+  isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
   splits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutExpenseNestedInput
 }
 
@@ -374,9 +374,9 @@ export type ExpenseCreateManyInput = {
   date: Date | string
   notes?: string | null
   type?: string
+  isSplit?: boolean
   createdAt?: Date | string
   userId: string
-  isSplit?: boolean
 }
 
 export type ExpenseUpdateManyMutationInput = {
@@ -386,8 +386,8 @@ export type ExpenseUpdateManyMutationInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ExpenseUncheckedUpdateManyInput = {
@@ -397,9 +397,9 @@ export type ExpenseUncheckedUpdateManyInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
+  isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ExpenseCountOrderByAggregateInput = {
@@ -409,9 +409,9 @@ export type ExpenseCountOrderByAggregateInput = {
   date?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  isSplit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  isSplit?: Prisma.SortOrder
 }
 
 export type ExpenseAvgOrderByAggregateInput = {
@@ -425,9 +425,9 @@ export type ExpenseMaxOrderByAggregateInput = {
   date?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  isSplit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  isSplit?: Prisma.SortOrder
 }
 
 export type ExpenseMinOrderByAggregateInput = {
@@ -437,9 +437,9 @@ export type ExpenseMinOrderByAggregateInput = {
   date?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   type?: Prisma.SortOrder
+  isSplit?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  isSplit?: Prisma.SortOrder
 }
 
 export type ExpenseSumOrderByAggregateInput = {
@@ -548,8 +548,8 @@ export type ExpenseCreateWithoutUserInput = {
   date: Date | string
   notes?: string | null
   type?: string
-  createdAt?: Date | string
   isSplit?: boolean
+  createdAt?: Date | string
   splits?: Prisma.ExpenseSplitCreateNestedManyWithoutExpenseInput
 }
 
@@ -560,8 +560,8 @@ export type ExpenseUncheckedCreateWithoutUserInput = {
   date: Date | string
   notes?: string | null
   type?: string
-  createdAt?: Date | string
   isSplit?: boolean
+  createdAt?: Date | string
   splits?: Prisma.ExpenseSplitUncheckedCreateNestedManyWithoutExpenseInput
 }
 
@@ -601,9 +601,9 @@ export type ExpenseScalarWhereInput = {
   date?: Prisma.DateTimeFilter<"Expense"> | Date | string
   notes?: Prisma.StringNullableFilter<"Expense"> | string | null
   type?: Prisma.StringFilter<"Expense"> | string
+  isSplit?: Prisma.BoolFilter<"Expense"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Expense"> | Date | string
   userId?: Prisma.StringFilter<"Expense"> | string
-  isSplit?: Prisma.BoolFilter<"Expense"> | boolean
 }
 
 export type ExpenseCreateWithoutSplitsInput = {
@@ -613,8 +613,8 @@ export type ExpenseCreateWithoutSplitsInput = {
   date: Date | string
   notes?: string | null
   type?: string
-  createdAt?: Date | string
   isSplit?: boolean
+  createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutExpensesInput
 }
 
@@ -625,9 +625,9 @@ export type ExpenseUncheckedCreateWithoutSplitsInput = {
   date: Date | string
   notes?: string | null
   type?: string
+  isSplit?: boolean
   createdAt?: Date | string
   userId: string
-  isSplit?: boolean
 }
 
 export type ExpenseCreateOrConnectWithoutSplitsInput = {
@@ -653,8 +653,8 @@ export type ExpenseUpdateWithoutSplitsInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutExpensesNestedInput
 }
 
@@ -665,9 +665,9 @@ export type ExpenseUncheckedUpdateWithoutSplitsInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
+  isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ExpenseCreateManyUserInput = {
@@ -677,8 +677,8 @@ export type ExpenseCreateManyUserInput = {
   date: Date | string
   notes?: string | null
   type?: string
-  createdAt?: Date | string
   isSplit?: boolean
+  createdAt?: Date | string
 }
 
 export type ExpenseUpdateWithoutUserInput = {
@@ -688,8 +688,8 @@ export type ExpenseUpdateWithoutUserInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   splits?: Prisma.ExpenseSplitUpdateManyWithoutExpenseNestedInput
 }
 
@@ -700,8 +700,8 @@ export type ExpenseUncheckedUpdateWithoutUserInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   splits?: Prisma.ExpenseSplitUncheckedUpdateManyWithoutExpenseNestedInput
 }
 
@@ -712,8 +712,8 @@ export type ExpenseUncheckedUpdateManyWithoutUserInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isSplit?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -754,9 +754,9 @@ export type ExpenseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   date?: boolean
   notes?: boolean
   type?: boolean
+  isSplit?: boolean
   createdAt?: boolean
   userId?: boolean
-  isSplit?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   splits?: boolean | Prisma.Expense$splitsArgs<ExtArgs>
   _count?: boolean | Prisma.ExpenseCountOutputTypeDefaultArgs<ExtArgs>
@@ -769,9 +769,9 @@ export type ExpenseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   date?: boolean
   notes?: boolean
   type?: boolean
+  isSplit?: boolean
   createdAt?: boolean
   userId?: boolean
-  isSplit?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
 
@@ -782,9 +782,9 @@ export type ExpenseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   date?: boolean
   notes?: boolean
   type?: boolean
+  isSplit?: boolean
   createdAt?: boolean
   userId?: boolean
-  isSplit?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["expense"]>
 
@@ -795,12 +795,12 @@ export type ExpenseSelectScalar = {
   date?: boolean
   notes?: boolean
   type?: boolean
+  isSplit?: boolean
   createdAt?: boolean
   userId?: boolean
-  isSplit?: boolean
 }
 
-export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "amount" | "category" | "date" | "notes" | "type" | "createdAt" | "userId" | "isSplit", ExtArgs["result"]["expense"]>
+export type ExpenseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "amount" | "category" | "date" | "notes" | "type" | "isSplit" | "createdAt" | "userId", ExtArgs["result"]["expense"]>
 export type ExpenseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   splits?: boolean | Prisma.Expense$splitsArgs<ExtArgs>
@@ -826,9 +826,9 @@ export type $ExpensePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     date: Date
     notes: string | null
     type: string
+    isSplit: boolean
     createdAt: Date
     userId: string
-    isSplit: boolean
   }, ExtArgs["result"]["expense"]>
   composites: {}
 }
@@ -1260,9 +1260,9 @@ export interface ExpenseFieldRefs {
   readonly date: Prisma.FieldRef<"Expense", 'DateTime'>
   readonly notes: Prisma.FieldRef<"Expense", 'String'>
   readonly type: Prisma.FieldRef<"Expense", 'String'>
+  readonly isSplit: Prisma.FieldRef<"Expense", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Expense", 'DateTime'>
   readonly userId: Prisma.FieldRef<"Expense", 'String'>
-  readonly isSplit: Prisma.FieldRef<"Expense", 'Boolean'>
 }
     
 

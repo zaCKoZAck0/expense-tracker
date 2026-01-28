@@ -50,6 +50,16 @@ export type Expense = Prisma.ExpenseModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model Contact
+ * 
+ */
+export type Contact = Prisma.ContactModel
+/**
+ * Model ExpenseSplit
+ * 
+ */
+export type ExpenseSplit = Prisma.ExpenseSplitModel
+/**
  * Model Budget
  * 
  */
@@ -69,13 +79,3 @@ export type SavingsBucket = Prisma.SavingsBucketModel
  * 
  */
 export type SavingsEntry = Prisma.SavingsEntryModel
-/**
- * Model Contact
- * 
- */
-export type Contact = Prisma.ContactModel
-/**
- * Model ExpenseSplit
- * 
- */
-export type ExpenseSplit = Prisma.ExpenseSplitModel

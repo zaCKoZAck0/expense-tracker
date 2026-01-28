@@ -53,12 +53,12 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Expense: 'Expense',
   User: 'User',
+  Contact: 'Contact',
+  ExpenseSplit: 'ExpenseSplit',
   Budget: 'Budget',
   CategoryBudget: 'CategoryBudget',
   SavingsBucket: 'SavingsBucket',
-  SavingsEntry: 'SavingsEntry',
-  Contact: 'Contact',
-  ExpenseSplit: 'ExpenseSplit'
+  SavingsEntry: 'SavingsEntry'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -84,9 +84,9 @@ export const ExpenseScalarFieldEnum = {
   date: 'date',
   notes: 'notes',
   type: 'type',
+  isSplit: 'isSplit',
   createdAt: 'createdAt',
-  userId: 'userId',
-  isSplit: 'isSplit'
+  userId: 'userId'
 } as const
 
 export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
@@ -102,6 +102,34 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const ContactScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  avatarUrl: 'avatarUrl',
+  createdAt: 'createdAt',
+  userId: 'userId'
+} as const
+
+export type ContactScalarFieldEnum = (typeof ContactScalarFieldEnum)[keyof typeof ContactScalarFieldEnum]
+
+
+export const ExpenseSplitScalarFieldEnum = {
+  id: 'id',
+  amount: 'amount',
+  percentage: 'percentage',
+  isPaid: 'isPaid',
+  isYourShare: 'isYourShare',
+  paidByYou: 'paidByYou',
+  createdAt: 'createdAt',
+  expenseId: 'expenseId',
+  contactId: 'contactId'
+} as const
+
+export type ExpenseSplitScalarFieldEnum = (typeof ExpenseSplitScalarFieldEnum)[keyof typeof ExpenseSplitScalarFieldEnum]
 
 
 export const BudgetScalarFieldEnum = {
@@ -151,34 +179,6 @@ export const SavingsEntryScalarFieldEnum = {
 } as const
 
 export type SavingsEntryScalarFieldEnum = (typeof SavingsEntryScalarFieldEnum)[keyof typeof SavingsEntryScalarFieldEnum]
-
-
-export const ContactScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  email: 'email',
-  phone: 'phone',
-  avatarUrl: 'avatarUrl',
-  createdAt: 'createdAt',
-  userId: 'userId'
-} as const
-
-export type ContactScalarFieldEnum = (typeof ContactScalarFieldEnum)[keyof typeof ContactScalarFieldEnum]
-
-
-export const ExpenseSplitScalarFieldEnum = {
-  id: 'id',
-  expenseId: 'expenseId',
-  contactId: 'contactId',
-  amount: 'amount',
-  percentage: 'percentage',
-  isPaid: 'isPaid',
-  isYourShare: 'isYourShare',
-  paidByYou: 'paidByYou',
-  createdAt: 'createdAt'
-} as const
-
-export type ExpenseSplitScalarFieldEnum = (typeof ExpenseSplitScalarFieldEnum)[keyof typeof ExpenseSplitScalarFieldEnum]
 
 
 export const SortOrder = {
