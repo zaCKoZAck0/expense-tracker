@@ -690,7 +690,13 @@ export async function deleteCategoryBudget(id: string) {
 // CONTACTS & SPLITS - Server Actions
 // =============================================================================
 
-import type { Contact, SplitInput, ContactInput, Expense, ExpenseSplit } from "@/lib/types";
+import type {
+  Contact,
+  SplitInput,
+  ContactInput,
+  Expense,
+  ExpenseSplit,
+} from "@/lib/types";
 
 const getContactsTag = (userId: string) => `contacts-${userId}`;
 
@@ -722,8 +728,10 @@ export async function getContacts(): Promise<
  * Add a new contact
  */
 export async function addContact(
-  data: ContactInput
-): Promise<{ success: true; data: Contact } | { success: false; error: string }> {
+  data: ContactInput,
+): Promise<
+  { success: true; data: Contact } | { success: false; error: string }
+> {
   try {
     const userRes = await getCachedUser();
     if (!userRes.success) {
@@ -752,8 +760,10 @@ export async function addContact(
  */
 export async function updateContact(
   id: string,
-  data: Partial<ContactInput>
-): Promise<{ success: true; data: Contact } | { success: false; error: string }> {
+  data: Partial<ContactInput>,
+): Promise<
+  { success: true; data: Contact } | { success: false; error: string }
+> {
   try {
     const userRes = await getCachedUser();
     if (!userRes.success) {
@@ -786,7 +796,7 @@ export async function updateContact(
  * Delete a contact
  */
 export async function deleteContact(
-  id: string
+  id: string,
 ): Promise<{ success: true } | { success: false; error: string }> {
   try {
     const userRes = await getCachedUser();
@@ -813,9 +823,10 @@ export async function deleteContact(
  * Get an expense with its splits
  */
 export async function getExpenseWithSplits(
-  expenseId: string
+  expenseId: string,
 ): Promise<
-  { success: true; data: Expense & { splits: ExpenseSplit[] } } | { success: false; error: string }
+  | { success: true; data: Expense & { splits: ExpenseSplit[] } }
+  | { success: false; error: string }
 > {
   try {
     const userRes = await getCachedUser();
@@ -836,7 +847,10 @@ export async function getExpenseWithSplits(
       return { success: false, error: "Expense not found" };
     }
 
-    return { success: true, data: expense as Expense & { splits: ExpenseSplit[] } };
+    return {
+      success: true,
+      data: expense as Expense & { splits: ExpenseSplit[] },
+    };
   } catch (error) {
     console.error("Failed to get expense with splits:", error);
     return { success: false, error: "Failed to get expense with splits" };
@@ -853,8 +867,10 @@ type ExpenseWithSplitsInput = ExpenseInput & {
  */
 export async function updateExpenseWithSplits(
   id: string,
-  data: ExpenseWithSplitsInput
-): Promise<{ success: true; data: Expense } | { success: false; error: string }> {
+  data: ExpenseWithSplitsInput,
+): Promise<
+  { success: true; data: Expense } | { success: false; error: string }
+> {
   try {
     const userRes = await getCachedUser();
     if (!userRes.success) {
@@ -917,7 +933,7 @@ export async function updateExpenseWithSplits(
  * Mark a split as paid (when someone pays you back)
  */
 export async function markSplitAsPaid(
-  splitId: string
+  splitId: string,
 ): Promise<{ success: true } | { success: false; error: string }> {
   try {
     const userRes = await getCachedUser();

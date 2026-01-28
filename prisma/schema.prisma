@@ -55,17 +55,17 @@ model Contact {
 }
 
 model ExpenseSplit {
-  id         String   @id @default(uuid())
-  amount     Float
-  percentage Float?
-  isPaid     Boolean  @default(false)
-  isYourShare Boolean @default(false)
-  paidByYou  Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  expenseId  String
-  contactId  String?
-  expense    Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
-  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  id          String   @id @default(uuid())
+  amount      Float
+  percentage  Float?
+  isPaid      Boolean  @default(false)
+  isYourShare Boolean  @default(false)
+  paidByYou   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  expenseId   String
+  contactId   String?
+  expense     Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  contact     Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
 
   @@index([expenseId])
   @@index([contactId])
