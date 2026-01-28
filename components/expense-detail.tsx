@@ -17,6 +17,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from "@/components/ui/table";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -110,31 +116,7 @@ export default function ExpenseDetail({
       .slice(0, 2);
   };
 
-  // Get consistent avatar color
-  const getAvatarColor = (name: string) => {
-    const colors = [
-      "bg-red-500",
-      "bg-orange-500",
-      "bg-amber-500",
-      "bg-yellow-500",
-      "bg-lime-500",
-      "bg-green-500",
-      "bg-emerald-500",
-      "bg-teal-500",
-      "bg-cyan-500",
-      "bg-sky-500",
-      "bg-blue-500",
-      "bg-indigo-500",
-      "bg-violet-500",
-      "bg-purple-500",
-      "bg-fuchsia-500",
-      "bg-pink-500",
-    ];
-    const index =
-      name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
-      colors.length;
-    return colors[index];
-  };
+
 
   // Handle marking a split as paid
   const handleMarkPaid = async (splitId: string) => {
@@ -205,8 +187,18 @@ export default function ExpenseDetail({
       <div className="p-4 border rounded-md">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent">
-              <Icon className="h-6 w-6 text-accent-foreground" />
+            <div
+              className={cn(
+                "flex h-12 w-12 items-center justify-center rounded-full bg-accent",
+                isIncome && "bg-primary/10",
+              )}
+            >
+              <Icon
+                className={cn(
+                  "h-6 w-6 text-accent-foreground",
+                  isIncome && "text-primary",
+                )}
+              />
             </div>
             <div>
               <h3 className="text-lg font-semibold">{expense.category}</h3>
@@ -216,7 +208,9 @@ export default function ExpenseDetail({
             </div>
           </div>
           <div className="text-right">
-            <p className="text-xl font-bold">
+            <p
+              className={cn("text-xl font-bold", isIncome && "text-primary")}
+            >
               {formatCurrency(expense.amount, currency)}
             </p>
             {expenseWithSplits.isSplit && expenseWithSplits.splits && (
@@ -251,79 +245,92 @@ export default function ExpenseDetail({
                   <Edit />
                 </Button>
               </div>
-              <div className="space-y-2">
-                {expenseWithSplits.splits.map((split) => (
-                  <div
-                    key={split.id}
-                    className={cn(
-                      "flex items-center gap-3 p-2 rounded-lg border",
-                      split.isPaid ? "bg-muted/30" : "bg-muted/50",
-                    )}
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback
+              <div className="border rounded-md overflow-hidden bg-background">
+                <Table>
+                  <TableBody>
+                    {expenseWithSplits.splits.map((split) => (
+                      <TableRow
+                        key={split.id}
                         className={cn(
-                          "text-white text-xs",
-                          split.isYourShare
-                            ? "bg-primary"
-                            : getAvatarColor(split.contact?.name || "Unknown"),
+                          "hover:bg-muted/30",
+                          split.isPaid ? "bg-muted/30" : "",
                         )}
                       >
-                        {split.isYourShare ? (
-                          <Users className="h-4 w-4" />
-                        ) : (
-                          getInitials(split.contact?.name || "?")
-                        )}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p
-                        className={cn(
-                          "font-medium text-sm truncate",
-                          split.isPaid &&
-                            !split.isYourShare &&
-                            "line-through text-muted-foreground",
-                        )}
-                      >
-                        {split.isYourShare
-                          ? "You"
-                          : split.contact?.name || "Unknown"}
-                      </p>
-                      {split.percentage && (
-                        <p className="text-xs text-muted-foreground">
-                          {split.percentage.toFixed(1)}%
-                        </p>
-                      )}
-                    </div>
-                    <div className="text-right flex items-center gap-2">
-                      {!split.isYourShare &&
-                        (split.isPaid ? (
-                          <Badge variant="outline" className="text-xs mt-1">
-                            <Check className="h-3 w-3 mr-1 stroke-3" />
-                            Paid
-                          </Badge>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleMarkPaid(split.id)}
-                          >
-                            Settle up
-                          </Button>
-                        ))}
-                      <p
-                        className={cn(
-                          "font-medium text-xl tabular-nums",
-                          split.isPaid &&
-                            !split.isYourShare &&
-                            "line-through text-muted-foreground",
-                        )}
-                      >
-                        {formatCurrency(split.amount, currency)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                        <TableCell className="w-12 pr-0">
+                          <Avatar className="h-9 w-9">
+                            <AvatarFallback
+                              className={cn(
+                                "text-xs",
+                                split.isYourShare
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted text-muted-foreground",
+                              )}
+                            >
+                              {split.isYourShare ? (
+                                <Users className="h-4 w-4" />
+                              ) : (
+                                getInitials(split.contact?.name || "?")
+                              )}
+                            </AvatarFallback>
+                          </Avatar>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span
+                              className={cn(
+                                "font-medium truncate",
+                                split.isPaid &&
+                                  !split.isYourShare &&
+                                  "line-through text-muted-foreground",
+                              )}
+                            >
+                              {split.isYourShare
+                                ? "You"
+                                : split.contact?.name || "Unknown"}
+                            </span>
+                            {split.percentage && (
+                              <span className="text-xs text-muted-foreground">
+                                {split.percentage.toFixed(1)}% share
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex flex-col items-end gap-1">
+                            <span
+                              className={cn(
+                                "font-medium tabular-nums text-primary",
+                                split.isPaid &&
+                                  !split.isYourShare &&
+                                  "line-through text-muted-foreground",
+                              )}
+                            >
+                              {formatCurrency(split.amount, currency)}
+                            </span>
+                            {!split.isYourShare &&
+                              (split.isPaid ? (
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] uppercase font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full h-auto border-0"
+                                >
+                                  Settled
+                                </Badge>
+                              ) : (
+                                <Button
+                                  variant="link"
+                                  size="sm"
+                                  className="h-auto p-0 text-xs text-primary"
+                                  onClick={() => handleMarkPaid(split.id)}
+                                >
+                                  Mark paid
+                                </Button>
+                              ))}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             </div>
           )}

@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { categoryIcons, defaultCategoryIcon } from "@/lib/constants";
+import { categoryIcons, defaultCategoryIcon, incomeCategoryIcons } from "@/lib/constants";
 import { Button } from "./ui/button";
 import { useUserSettings } from "@/components/user-settings-provider";
 import { formatCurrency, formatDateUTC } from "@/lib/utils";
@@ -105,10 +105,12 @@ export function TransactionList({
                     </TableCell>
                   </TableRow>
                   {monthTransactions.map((transaction) => {
-                    const Icon =
-                      categoryIcons[transaction.category] ||
-                      defaultCategoryIcon;
                     const isIncome = transaction.type === "income";
+                    const Icon =
+                      (isIncome
+                        ? incomeCategoryIcons[transaction.category]
+                        : categoryIcons[transaction.category]) ||
+                      defaultCategoryIcon;
 
                     // Calculate share
                     let yourShare = null;
@@ -131,14 +133,14 @@ export function TransactionList({
                               className={cn(
                                 "flex h-10 w-10 items-center justify-center rounded-full bg-accent transition-colors",
                                 isIncome &&
-                                  "bg-emerald-100 dark:bg-emerald-900/30",
+                                  "bg-primary/10",
                               )}
                             >
                               <Icon
                                 className={cn(
                                   "h-5 w-5 text-accent-foreground",
                                   isIncome &&
-                                    "text-green-700 dark:text-green-300",
+                                    "text-primary",
                                 )}
                               />
                             </div>
@@ -156,7 +158,7 @@ export function TransactionList({
                           className={cn(
                             "text-right font-medium",
                             isIncome
-                              ? "text-green-600 dark:text-green-400"
+                              ? "text-primary"
                               : "",
                           )}
                         >

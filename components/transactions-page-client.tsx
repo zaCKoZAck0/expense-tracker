@@ -389,15 +389,14 @@ export function TransactionsPageClient() {
                                 <div
                                   className={cn(
                                     "flex h-10 w-10 items-center justify-center rounded-full bg-accent transition-colors",
-                                    isIncome &&
-                                      "bg-green-100 dark:bg-green-900/40",
+                                    isIncome && "bg-primary/10",
                                   )}
                                 >
                                   <Icon
                                     className={cn(
                                       "h-5 w-5 text-accent-foreground",
                                       isIncome &&
-                                        "text-green-700 dark:text-green-300",
+                                        "text-primary",
                                     )}
                                   />
                                 </div>
@@ -414,9 +413,7 @@ export function TransactionsPageClient() {
                             <TableCell
                               className={cn(
                                 "text-right font-medium",
-                                isIncome
-                                  ? "text-green-600 dark:text-green-400"
-                                  : "",
+                                isIncome ? "text-primary" : "",
                               )}
                             >
                               <div>
@@ -465,13 +462,13 @@ export function TransactionsPageClient() {
                         <div
                           className={cn(
                             "flex h-10 w-10 items-center justify-center rounded-full bg-accent transition-colors",
-                            isIncome && "bg-green-100 dark:bg-green-900/40",
+                            isIncome && "bg-primary/10",
                           )}
                         >
                           <Icon
                             className={cn(
                               "h-5 w-5 text-accent-foreground",
-                              isIncome && "text-green-700 dark:text-green-300",
+                              isIncome && "text-primary",
                             )}
                           />
                         </div>
@@ -488,7 +485,7 @@ export function TransactionsPageClient() {
                     <TableCell
                       className={cn(
                         "text-right font-medium",
-                        isIncome ? "text-green-600 dark:text-green-400" : "",
+                        isIncome ? "text-primary" : "",
                       )}
                     >
                       <div>

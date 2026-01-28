@@ -69,7 +69,7 @@ export function BudgetSummary({
               </CardTitle>
               <WalletIcon className="h-4 w-4" />
             </CardHeader>
-            <CardContent className="space-y-2 pb-2">
+            <CardContent className="space-y-2 pt-6">
               {isOverBudget ? (
                 <div className="space-y-1">
                   <p className="font-semibold text-destructive">
@@ -79,7 +79,7 @@ export function BudgetSummary({
                     Monthly budget: {formatCurrency(budgetAmount, currency)}
                   </p>
                   {!includeEarningInBudget && totalIncome > 0 && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-primary">
                       Earning: {formatCurrency(totalIncome, currency)}
                     </p>
                   )}
@@ -93,7 +93,7 @@ export function BudgetSummary({
                     out of {formatCurrency(budgetAmount, currency)}
                   </p>
                   {!includeEarningInBudget && totalIncome > 0 && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-primary">
                       Earning: {formatCurrency(totalIncome, currency)}
                     </p>
                   )}
