@@ -46,6 +46,9 @@ export async function GET(request: Request) {
             userId: user.id,
             ...dateFilter,
           },
+          include: {
+            splits: true,
+          },
           orderBy: { date: "desc" },
         }),
 

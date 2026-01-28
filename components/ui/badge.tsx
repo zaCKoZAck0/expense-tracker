@@ -14,7 +14,7 @@ const badgeVariants = cva(
         secondary:
           "bg-gradient-to-br from-secondary/80 via-secondary/70 to-secondary/60 text-secondary-foreground shadow-sm [a&]:hover:shadow-md",
         destructive:
-          "bg-gradient-to-br from-destructive via-destructive to-destructive/80 text-white shadow-md shadow-destructive/20 [a&]:hover:shadow-lg focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+          "bg-gradient-to-br from-destructive via-destructive to-destructive/80 text-destructive-foreground shadow-md shadow-destructive/20 [a&]:hover:shadow-lg focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
         outline:
           "border-2 border-primary/20 text-foreground bg-background/80 backdrop-blur-sm [a&]:hover:bg-primary/5 [a&]:hover:border-primary/30",
       },

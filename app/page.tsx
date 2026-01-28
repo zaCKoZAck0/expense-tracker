@@ -5,7 +5,9 @@ import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard-client";
 import SavingsPage from "../components/savings-page";
 import TransactionsPage from "@/components/transactions-page";
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
+
+const SplitPage = lazy(() => import("@/components/split-page"));
 
 export default async function Home({
   searchParams,
@@ -67,6 +69,21 @@ export default async function Home({
 
   if (page === "profile") {
     return <ProfilePage />;
+  }
+
+  if (page === "split") {
+    if (!isAuthed) {
+      redirect("/auth");
+    }
+    return (
+      <Suspense
+        fallback={
+          <div className="p-6 text-muted-foreground">Loading split...</div>
+        }
+      >
+        <SplitPage />
+      </Suspense>
+    );
   }
 
   if (!isAuthed) {

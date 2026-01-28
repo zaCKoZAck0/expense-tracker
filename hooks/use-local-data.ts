@@ -102,43 +102,69 @@ export function useDashboardData(month: string) {
   const data: DashboardData | null =
     expenses !== undefined
       ? (() => {
-          const expenseList = expenses.filter((e) => e.type === "expense");
-          const incomeList = expenses.filter((e) => e.type === "income");
+        const expenseList = expenses.filter((e) => e.type === "expense");
+        const incomeList = expenses.filter((e) => e.type === "income");
 
-          const totalSpent = expenseList.reduce((sum, e) => sum + e.amount, 0);
-          const totalIncome = incomeList.reduce((sum, e) => sum + e.amount, 0);
-          const budgetAmount = budget?.amount ?? 0;
-          const remaining = budgetAmount + totalIncome - totalSpent;
-
-          // Calculate daily spending
-          const dailySpending: { day: number; amount: number }[] = [];
-          for (let day = 1; day <= daysInMonth; day++) {
-            const dayExpenses = expenseList.filter((e) => {
-              const d = new Date(e.date);
-              return d.getUTCDate() === day;
-            });
-            dailySpending.push({
-              day,
-              amount: dayExpenses.reduce((sum, e) => sum + e.amount, 0),
-            });
+        const totalSpent = expenseList.reduce((sum, e) => {
+          let amount = e.amount;
+          if (e.isSplit && e.splits && e.splits.length > 0) {
+            const mySplit = e.splits.find((s) => s.isYourShare);
+            if (mySplit) amount = mySplit.amount;
           }
+          return sum + amount;
+        }, 0);
 
-          return {
-            budget: budget
-              ? { id: budget.id, amount: budget.amount, month: budget.month }
-              : null,
-            totalSpent,
-            totalIncome,
-            remaining,
-            expenses: expenses.map((e) => ({
-              ...e,
-              date: new Date(e.date),
-              createdAt: e.createdAt ? new Date(e.createdAt) : undefined,
-            })),
-            dailySpending,
-            daysInMonth,
-          };
-        })()
+        const totalIncome = incomeList.reduce((sum, e) => {
+          let amount = e.amount;
+          if (e.isSplit && e.splits && e.splits.length > 0) {
+            const mySplit = e.splits.find((s) => s.isYourShare);
+            if (mySplit) amount = mySplit.amount;
+          }
+          return sum + amount;
+        }, 0);
+
+        const budgetAmount = budget?.amount ?? 0;
+        const remaining = budgetAmount + totalIncome - totalSpent;
+
+        // Calculate daily spending
+        const dailySpending: { day: number; amount: number }[] = [];
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayExpenses = expenseList.filter((e) => {
+            const d = new Date(e.date);
+            return d.getUTCDate() === day;
+          });
+
+          const dailyTotal = dayExpenses.reduce((sum, e) => {
+            let amount = e.amount;
+            if (e.isSplit && e.splits && e.splits.length > 0) {
+              const mySplit = e.splits.find((s) => s.isYourShare);
+              if (mySplit) amount = mySplit.amount;
+            }
+            return sum + amount;
+          }, 0);
+
+          dailySpending.push({
+            day,
+            amount: dailyTotal,
+          });
+        }
+
+        return {
+          budget: budget
+            ? { id: budget.id, amount: budget.amount, month: budget.month }
+            : null,
+          totalSpent,
+          totalIncome,
+          remaining,
+          expenses: expenses.map((e) => ({
+            ...e,
+            date: new Date(e.date),
+            createdAt: e.createdAt ? new Date(e.createdAt) : undefined,
+          })),
+          dailySpending,
+          daysInMonth,
+        };
+      })()
       : null;
 
   // Initial load and server refresh
@@ -258,6 +284,8 @@ export function useTransactions(options: TransactionsOptions = {}) {
           ...e,
           date: new Date(e.date),
           createdAt: e.createdAt ? new Date(e.createdAt) : undefined,
+          isSplit: e.isSplit,
+          splits: e.splits,
         })),
         total: results.length,
         page,
@@ -480,8 +508,14 @@ export function useCategoryBudgets(month: string) {
     // Calculate spent amount per category
     const spentByCategory = new Map<string, number>();
     for (const expense of expenses) {
+      let amount = expense.amount;
+      if (expense.isSplit && expense.splits && expense.splits.length > 0) {
+        const mySplit = expense.splits.find((s) => s.isYourShare);
+        if (mySplit) amount = mySplit.amount;
+      }
+
       const current = spentByCategory.get(expense.category) || 0;
-      spentByCategory.set(expense.category, current + expense.amount);
+      spentByCategory.set(expense.category, current + amount);
     }
 
     return categoryBudgets.map((cb) => {

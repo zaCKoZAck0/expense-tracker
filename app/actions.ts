@@ -221,6 +221,9 @@ const getDashboardCache = (userId: string) => {
         },
         orderBy: { date: "desc" },
         take: 50,
+        include: {
+          splits: true,
+        },
       });
 
       const statsEntriesPromise = db.expense.findMany({
@@ -232,6 +235,15 @@ const getDashboardCache = (userId: string) => {
           amount: true,
           date: true,
           type: true,
+          isSplit: true,
+          splits: {
+            where: {
+              isYourShare: true,
+            },
+            select: {
+              amount: true,
+            },
+          },
         },
       });
 
@@ -246,22 +258,29 @@ const getDashboardCache = (userId: string) => {
         (entry) => entry.type === "income",
       );
 
-      const totalSpent = expenseEntries.reduce(
-        (acc, curr) => acc + curr.amount,
-        0,
-      );
-      const totalIncome = incomeEntries.reduce(
-        (acc, curr) => acc + curr.amount,
-        0,
-      );
+      const totalSpent = expenseEntries.reduce((acc, curr) => {
+        let amount = curr.amount;
+        if (curr.isSplit && curr.splits.length > 0) {
+          amount = curr.splits[0].amount;
+        }
+        return acc + amount;
+      }, 0);
+
+      const totalIncome = incomeEntries.reduce((acc, curr) => {
+        // Income usually isn't split in this app context, but if so, similar logic could apply.
+        // For now assuming income is not split or full amount counts.
+        return acc + curr.amount;
+      }, 0);
 
       const dailySpendingMap = new Map<number, number>();
       for (const expense of expenseEntries) {
+        let amount = expense.amount;
+        if (expense.isSplit && expense.splits.length > 0) {
+          amount = expense.splits[0].amount;
+        }
+
         const day = new Date(expense.date).getUTCDate();
-        dailySpendingMap.set(
-          day,
-          (dailySpendingMap.get(day) || 0) + expense.amount,
-        );
+        dailySpendingMap.set(day, (dailySpendingMap.get(day) || 0) + amount);
       }
 
       const dailySpending = Array.from(dailySpendingMap.entries()).map(
@@ -955,10 +974,88 @@ export async function markSplitAsPaid(
       data: { isPaid: true },
     });
 
+
     revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Failed to mark split as paid:", error);
     return { success: false, error: "Failed to mark split as paid" };
+  }
+}
+
+/**
+ * Get split summary for dashboard
+ */
+export async function getSplitSummary() {
+  try {
+    const userRes = await getCachedUser();
+    if (!userRes.success) {
+      return { success: false, error: userRes.error };
+    }
+    const userId = userRes.data.id;
+
+    // 1. Get all splits related to user's expenses
+    // We want splits where:
+    // - Expense is owned by user AND split is NOT their share (Others owe user)
+    // - OR (Future support): Expense owned by others AND split IS user's share (User owes others)
+    // Currently system only supports "User paid", so effectively we only look for others owing user.
+
+    const splits = await db.expenseSplit.findMany({
+      where: {
+        expense: { userId },
+        isYourShare: false,
+      },
+      include: {
+        contact: true,
+        expense: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    // Calculate totals
+    const totalOwedToYou = splits.reduce((acc, split) => {
+      return acc + (split.isPaid ? 0 : split.amount);
+    }, 0);
+
+    // Group by contact
+    const contactBalances = new Map<string, { contact: Contact; balance: number; openSplits: (ExpenseSplit & { expense: Expense })[] }>();
+
+    splits.forEach((split) => {
+      if (!split.contact) return;
+
+      const current = contactBalances.get(split.contact.id) || {
+        contact: split.contact,
+        balance: 0,
+        openSplits: [],
+      };
+
+      // If not paid, add to balance and list
+      if (!split.isPaid) {
+        current.balance += split.amount;
+        current.openSplits.push(split as any);
+      }
+
+      contactBalances.set(split.contact.id, current);
+    });
+
+    const contacts = Array.from(contactBalances.values())
+      .filter((c) => Math.abs(c.balance) > 0.01) // Only show contacts with non-zero balance
+      .sort((a, b) => b.balance - a.balance);
+
+    // Recent activity - just the splits themselves
+    const recentActivity = splits.slice(0, 5);
+
+    return {
+      success: true,
+      data: {
+        totalOwed: 0, // Currently not supported as you always pay
+        totalOwedToYou,
+        contacts,
+        recentActivity,
+      },
+    };
+  } catch (error) {
+    console.error("Failed to get split summary:", error);
+    return { success: false, error: "Failed to get split summary" };
   }
 }

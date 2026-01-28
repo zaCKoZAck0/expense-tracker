@@ -7,6 +7,8 @@ import { useNavigation } from "@/components/navigation-provider";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 
+import { ExpenseSplit } from "@/lib/types";
+
 export interface Transaction {
   id: string;
   amount: number;
@@ -14,6 +16,8 @@ export interface Transaction {
   category: string;
   notes: string | null;
   type: "expense" | "income";
+  isSplit?: boolean;
+  splits?: ExpenseSplit[];
 }
 
 interface TransactionListProps {
@@ -106,6 +110,15 @@ export function TransactionList({
                       defaultCategoryIcon;
                     const isIncome = transaction.type === "income";
 
+                    // Calculate share
+                    let yourShare = null;
+                    if (transaction.isSplit && transaction.splits) {
+                      const shareSplit = transaction.splits.find(s => s.isYourShare);
+                      if (shareSplit) {
+                        yourShare = shareSplit.amount;
+                      }
+                    }
+
                     return (
                       <TableRow
                         key={transaction.id}
@@ -147,8 +160,15 @@ export function TransactionList({
                               : "",
                           )}
                         >
-                          {isIncome ? "+" : "-"}
-                          {formatCurrency(transaction.amount, currency)}
+                          <div>
+                            {isIncome ? "+" : "-"}
+                            {formatCurrency(transaction.amount, currency)}
+                          </div>
+                          {yourShare !== null && (
+                            <div className="text-xs text-muted-foreground font-normal mt-0.5">
+                              Your share: {formatCurrency(yourShare, currency)}
+                            </div>
+                          )}
                         </TableCell>
                       </TableRow>
                     );

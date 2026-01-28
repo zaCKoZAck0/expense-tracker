@@ -62,7 +62,7 @@ const formSchema = z.object({
 type ExpenseFormValues = z.infer<typeof formSchema>;
 
 interface ExpenseFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (id?: string) => void;
   expense?: Expense;
 }
 
@@ -113,13 +113,13 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
           toast.success("Transaction updated");
           triggerRefresh();
           syncNow().catch(console.error);
-          onSuccess?.();
+          onSuccess?.(expense.id);
           return;
         }
 
         // Add new expense using local-first
         const userId = await getLocalUserId();
-        await addExpenseLocal(
+        const newId = await addExpenseLocal(
           {
             ...values,
             type: transactionType,
@@ -142,7 +142,7 @@ export function ExpenseForm({ onSuccess, expense }: ExpenseFormProps) {
           type: "expense",
         });
         setTransactionType("expense");
-        onSuccess?.();
+        onSuccess?.(newId);
       } catch (error) {
         console.error("Failed to save expense:", error);
         toast.error("Failed to save expense");

@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, Home, PiggyBank } from "lucide-react";
+import { BarChart3, Home, PiggyBank, Users } from "lucide-react";
 import Link from "next/link";
 import { useNavigation, Page } from "@/components/navigation-provider";
 import type React from "react";
@@ -32,10 +32,15 @@ export function BottomNav() {
       label: "Savings",
       icon: PiggyBank,
     },
+    {
+      page: "split",
+      label: "Split",
+      icon: Users,
+    },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-lg p-2 pb-6 z-50">
+    <div className="fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-lg p-2 md:pb-6 z-50">
       <nav className="flex justify-around items-center max-w-3xl mx-auto">
         {links.map(({ page, label, icon: Icon }) => {
           const isActive = currentPage === page;
@@ -45,12 +50,12 @@ export function BottomNav() {
               href={`/?page=${page}`}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
                 isActive
-                  ? "text-primary"
+                  ? "text-secondary"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <Icon className="h-6 w-6" />
-              <span className="text-xs font-medium">{label}</span>
+              <span className="text-xs font-medium hidden md:block">{label}</span>
             </Link>
           );
         })}

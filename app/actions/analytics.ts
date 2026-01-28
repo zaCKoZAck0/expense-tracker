@@ -107,9 +107,8 @@ const getCategoryCache = (userId: string) => {
       const start = startOfMonth(date);
       const end = endOfMonth(date);
 
-      // Only include expenses, exclude income entries
-      const expenses = await db.expense.groupBy({
-        by: ["category"],
+      // Only include expenses
+      const expenses = await db.expense.findMany({
         where: {
           userId,
           date: {
@@ -118,10 +117,27 @@ const getCategoryCache = (userId: string) => {
           },
           type: "expense",
         },
-        _sum: {
-          amount: true,
+        include: {
+          splits: {
+            where: { isYourShare: true },
+            select: { amount: true },
+          },
         },
       });
+
+      const categoryTotals = new Map<string, number>();
+
+      for (const expense of expenses) {
+        let amount = expense.amount;
+        if (expense.isSplit && expense.splits.length > 0) {
+          amount = expense.splits[0].amount;
+        }
+
+        categoryTotals.set(
+          expense.category,
+          (categoryTotals.get(expense.category) || 0) + amount,
+        );
+      }
 
       const categoryColors: Record<string, string> = {
         Food: "#ef4444",
@@ -141,13 +157,15 @@ const getCategoryCache = (userId: string) => {
         "#f43f5e",
       ];
 
-      return expenses.map((entry, index) => ({
-        category: entry.category,
-        amount: entry._sum.amount || 0,
-        fill:
-          categoryColors[entry.category] ||
-          defaultColors[index % defaultColors.length],
-      }));
+      return Array.from(categoryTotals.entries()).map(
+        ([category, amount], index) => ({
+          category,
+          amount,
+          fill:
+            categoryColors[category] ||
+            defaultColors[index % defaultColors.length],
+        }),
+      );
     },
     ["analytics-category-data", userId],
     { tags: [getAnalyticsTag(userId)], revalidate: 900 },
@@ -168,8 +186,7 @@ const getIncomeCategoryCache = (userId: string) => {
       const end = endOfMonth(date);
 
       // Only include income entries
-      const incomeEntries = await db.expense.groupBy({
-        by: ["category"],
+      const incomeEntries = await db.expense.findMany({
         where: {
           userId,
           date: {
@@ -178,10 +195,28 @@ const getIncomeCategoryCache = (userId: string) => {
           },
           type: "income",
         },
-        _sum: {
-          amount: true,
+        include: {
+          splits: {
+            where: { isYourShare: true },
+            select: { amount: true },
+          },
         },
       });
+
+      const categoryTotals = new Map<string, number>();
+
+      for (const entry of incomeEntries) {
+        let amount = entry.amount;
+        // Logic for income splits if applicable
+        if (entry.isSplit && entry.splits.length > 0) {
+          amount = entry.splits[0].amount;
+        }
+
+        categoryTotals.set(
+          entry.category,
+          (categoryTotals.get(entry.category) || 0) + amount,
+        );
+      }
 
       // Income category colors
       const categoryColors: Record<string, string> = {
@@ -201,13 +236,15 @@ const getIncomeCategoryCache = (userId: string) => {
         "#eab308",
       ];
 
-      return incomeEntries.map((entry, index) => ({
-        category: entry.category,
-        amount: entry._sum.amount || 0,
-        fill:
-          categoryColors[entry.category] ||
-          defaultColors[index % defaultColors.length],
-      }));
+      return Array.from(categoryTotals.entries()).map(
+        ([category, amount], index) => ({
+          category,
+          amount,
+          fill:
+            categoryColors[category] ||
+            defaultColors[index % defaultColors.length],
+        }),
+      );
     },
     ["analytics-income-category-data", userId],
     { tags: [getAnalyticsTag(userId)], revalidate: 900 },
@@ -250,7 +287,7 @@ const getTrendCache = (userId: string) => {
           const end = endOfMonth(monthMeta.date);
 
           // Get only expenses (not income)
-          const expenseSum = await db.expense.aggregate({
+          const expenses = await db.expense.findMany({
             where: {
               userId,
               date: {
@@ -259,11 +296,16 @@ const getTrendCache = (userId: string) => {
               },
               type: "expense",
             },
-            _sum: { amount: true },
+            include: {
+              splits: {
+                where: { isYourShare: true },
+                select: { amount: true },
+              },
+            },
           });
 
           // Get only income (earnings)
-          const incomeSum = await db.expense.aggregate({
+          const incomeEntries = await db.expense.findMany({
             where: {
               userId,
               date: {
@@ -272,8 +314,31 @@ const getTrendCache = (userId: string) => {
               },
               type: "income",
             },
-            _sum: { amount: true },
+            include: {
+              splits: {
+                where: { isYourShare: true },
+                select: { amount: true },
+              },
+            },
           });
+
+          let expenseSum = 0;
+          for (const expense of expenses) {
+            let amount = expense.amount;
+            if (expense.isSplit && expense.splits.length > 0) {
+              amount = expense.splits[0].amount;
+            }
+            expenseSum += amount;
+          }
+
+          let incomeSum = 0;
+          for (const entry of incomeEntries) {
+            let amount = entry.amount;
+            if (entry.isSplit && entry.splits.length > 0) {
+              amount = entry.splits[0].amount;
+            }
+            incomeSum += amount;
+          }
 
           const monthKey = format(monthMeta.date, "yyyy-MM");
 
@@ -290,8 +355,8 @@ const getTrendCache = (userId: string) => {
           return {
             month: monthMeta.label,
             budget: budget?.amount || 0,
-            spend: expenseSum._sum.amount || 0,
-            earning: incomeSum._sum.amount || 0,
+            spend: expenseSum,
+            earning: incomeSum,
           };
         }),
       );
@@ -325,7 +390,16 @@ const getActivityCache = (userId: string) => {
             lte: today,
           },
         },
-        select: { amount: true, date: true, type: true },
+        select: {
+          amount: true,
+          date: true,
+          type: true,
+          isSplit: true,
+          splits: {
+            where: { isYourShare: true },
+            select: { amount: true },
+          },
+        },
       });
 
       const dailyMap = new Map<
@@ -334,6 +408,11 @@ const getActivityCache = (userId: string) => {
       >();
 
       for (const entry of entries) {
+        let amount = entry.amount;
+        if (entry.isSplit && entry.splits.length > 0) {
+          amount = entry.splits[0].amount;
+        }
+
         const dayKey = format(entry.date, "yyyy-MM-dd");
         const prev = dailyMap.get(dayKey) ?? {
           expense: 0,
@@ -342,9 +421,9 @@ const getActivityCache = (userId: string) => {
         };
         prev.transactions += 1;
         if (entry.type === "income") {
-          prev.earning += entry.amount;
+          prev.earning += amount;
         } else {
-          prev.expense += entry.amount;
+          prev.expense += amount;
         }
         dailyMap.set(dayKey, prev);
       }

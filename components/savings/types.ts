@@ -35,33 +35,33 @@ export const COLOR_OPTIONS: ColorOption[] = [
   {
     id: "peach",
     label: "Peach",
-    swatchLight: "#ea8a68",
-    swatchDark: "#f7c6b5",
+    swatchLight: "var(--chart-3)",
+    swatchDark: "var(--chart-3)",
   },
-  { id: "mint", label: "Mint", swatchLight: "#3ba475", swatchDark: "#b5e3c6" },
-  { id: "sky", label: "Sky", swatchLight: "#3b82f6", swatchDark: "#cde8ff" },
+  { id: "mint", label: "Mint", swatchLight: "var(--chart-5)", swatchDark: "var(--chart-5)" },
+  { id: "sky", label: "Sky", swatchLight: "var(--chart-4)", swatchDark: "var(--chart-4)" },
   {
     id: "lavender",
     label: "Lavender",
-    swatchLight: "#7c69ef",
-    swatchDark: "#e1d7ff",
+    swatchLight: "var(--chart-1)",
+    swatchDark: "var(--chart-1)",
   },
-  { id: "gold", label: "Gold", swatchLight: "#d18b16", swatchDark: "#f4d36a" },
-  { id: "rose", label: "Rose", swatchLight: "#e05a87", swatchDark: "#ffd1dc" },
-  { id: "sage", label: "Sage", swatchLight: "#6d8c6c", swatchDark: "#d8e7d4" },
+  { id: "gold", label: "Gold", swatchLight: "var(--chart-2)", swatchDark: "var(--chart-2)" },
+  { id: "rose", label: "Rose", swatchLight: "var(--destructive)", swatchDark: "var(--destructive)" },
+  { id: "sage", label: "Sage", swatchLight: "var(--secondary)", swatchDark: "var(--secondary)" },
   {
     id: "denim",
     label: "Denim",
-    swatchLight: "#3f69c6",
-    swatchDark: "#d2dcff",
+    swatchLight: "var(--primary)",
+    swatchDark: "var(--primary)",
   },
   {
     id: "coral",
     label: "Coral",
-    swatchLight: "#e4644f",
-    swatchDark: "#ffd3c7",
+    swatchLight: "var(--chart-3)",
+    swatchDark: "var(--chart-3)",
   },
-  { id: "plum", label: "Plum", swatchLight: "#8e5dbd", swatchDark: "#ead9ff" },
+  { id: "plum", label: "Plum", swatchLight: "var(--muted-foreground)", swatchDark: "var(--muted-foreground)" },
 ];
 
 export function getBucketSwatch(
@@ -69,8 +69,8 @@ export function getBucketSwatch(
   theme: "light" | "dark" | undefined,
 ): string {
   const option = COLOR_OPTIONS.find((c) => c.id === colorId);
-  if (!option) return "#6b7280";
-  if (theme === "dark") return option.swatchDark;
+  if (!option) return "var(--muted)";
+  // Theme vars handle light/dark automatically, so we can return the same var
   return option.swatchLight;
 }
 

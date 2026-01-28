@@ -11,12 +11,12 @@ export interface SyncOperation {
   id?: number;
   operationType: "create" | "update" | "delete";
   entity:
-    | "expense"
-    | "budget"
-    | "categoryBudget"
-    | "savingsBucket"
-    | "savingsEntry"
-    | "user";
+  | "expense"
+  | "budget"
+  | "categoryBudget"
+  | "savingsBucket"
+  | "savingsEntry"
+  | "user";
   entityId: string;
   data: unknown;
   timestamp: number;
@@ -37,6 +37,18 @@ export interface LocalUser {
   syncStatus: EntitySyncStatus;
 }
 
+export interface LocalExpenseSplit {
+  id: string;
+  expenseId: string;
+  contactId: string | null;
+  amount: number;
+  percentage: number | null;
+  isPaid: boolean;
+  isYourShare: boolean;
+  paidByYou: boolean;
+  createdAt: Date;
+}
+
 export interface LocalExpense {
   id: string;
   amount: number;
@@ -47,6 +59,8 @@ export interface LocalExpense {
   createdAt: Date;
   userId: string;
   syncStatus: EntitySyncStatus;
+  isSplit?: boolean;
+  splits?: LocalExpenseSplit[];
 }
 
 export interface LocalBudget {

@@ -1,15 +1,18 @@
 "use client";
 
-import * as React from "react";
-import { Percent, DollarSign, Users, X, Equal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { ContactSelect } from "./contact-select";
 import type { Contact, SplitType, SplitInput } from "@/lib/types";
+import { getInitials, getAvatarColor } from "@/lib/avatar";
+import { Equal, Percent, DollarSign, Users, X } from "lucide-react";
+import * as React from "react";
+import { useSession } from "next-auth/react";
+
 
 interface SplitConfigurationProps {
   totalAmount: number;
@@ -32,47 +35,12 @@ export function SplitConfiguration({
   onAddContact,
   disabled = false,
 }: SplitConfigurationProps) {
+  const { data: session } = useSession();
   const [splitType, setSplitType] = React.useState<SplitType>("equal");
   const [selectedContactIds, setSelectedContactIds] = React.useState<
     (string | null)[]
   >([null]); // Start with "You" selected
 
-  // Get initials from name for avatar
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  // Get color based on name for consistent avatar colors
-  const getAvatarColor = (name: string) => {
-    const colors = [
-      "bg-red-500",
-      "bg-orange-500",
-      "bg-amber-500",
-      "bg-yellow-500",
-      "bg-lime-500",
-      "bg-green-500",
-      "bg-emerald-500",
-      "bg-teal-500",
-      "bg-cyan-500",
-      "bg-sky-500",
-      "bg-blue-500",
-      "bg-indigo-500",
-      "bg-violet-500",
-      "bg-purple-500",
-      "bg-fuchsia-500",
-      "bg-pink-500",
-      "bg-rose-500",
-    ];
-    const index =
-      name.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
-      colors.length;
-    return colors[index];
-  };
 
   // Get contact name by id
   const getContactName = (contactId: string | null): string => {
@@ -343,11 +311,17 @@ export function SplitConfiguration({
               >
                 {/* Avatar */}
                 <Avatar className="h-8 w-8">
+                  {split.contactId === null && session?.user?.image ? (
+                    <AvatarImage
+                      src={session.user.image}
+                      alt={session.user.name || "You"}
+                    />
+                  ) : null}
                   <AvatarFallback
                     className={cn(
-                      "text-white text-xs",
+                      "text-foreground text-xs",
                       split.contactId === null
-                        ? "bg-primary"
+                        ? "bg-primary text-primary-foreground"
                         : getAvatarColor(split.contactName || ""),
                     )}
                   >

@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  ReferenceLine,
 } from "recharts";
 import { useUserSettings } from "@/components/user-settings-provider";
 import { useNavigation } from "@/components/navigation-provider";
@@ -85,6 +86,11 @@ export function DailySpendingChart({
               interval={0}
             />
             <YAxis hide domain={[0, "auto"]} />
+            <ReferenceLine
+              y={0}
+              stroke="var(--muted-foreground)"
+              opacity={0.2}
+            />
             <Tooltip
               cursor={{ fill: "transparent" }}
               content={({ active, payload }) => {

@@ -17,7 +17,8 @@ export type Page =
   | "analytics"
   | "savings"
   | "profile"
-  | "transactions";
+  | "transactions"
+  | "split";
 
 type NavigationContextType = {
   page: Page;
@@ -48,7 +49,8 @@ export function NavigationProvider({
       pageParam === "analytics" ||
       pageParam === "profile" ||
       pageParam === "savings" ||
-      pageParam === "transactions"
+      pageParam === "transactions" ||
+      pageParam === "split"
     ) {
       return pageParam;
     }
@@ -75,7 +77,9 @@ export function NavigationProvider({
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   // Show expense detail on dashboard and transactions pages
   const visibleExpense =
-    page === "dashboard" || page === "transactions" ? selectedExpense : null;
+    page === "dashboard" || page === "transactions" || page === "split"
+      ? selectedExpense
+      : null;
 
   // Refresh key to trigger data refetch in child components
   const [refreshKey, setRefreshKey] = useState(0);

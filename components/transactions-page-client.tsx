@@ -419,8 +419,15 @@ export function TransactionsPageClient() {
                                   : "",
                               )}
                             >
-                              {isIncome ? "+" : "-"}
-                              {formatCurrency(transaction.amount, currency)}
+                              <div>
+                                {isIncome ? "+" : "-"}
+                                {formatCurrency(transaction.amount, currency)}
+                              </div>
+                              {transaction.isSplit && transaction.splits?.find(s => s.isYourShare) && (
+                                <div className="text-xs text-muted-foreground font-normal mt-0.5">
+                                  Your share: {formatCurrency(transaction.splits.find(s => s.isYourShare)!.amount, currency)}
+                                </div>
+                              )}
                             </TableCell>
                           </TableRow>
                         );
@@ -484,8 +491,15 @@ export function TransactionsPageClient() {
                         isIncome ? "text-green-600 dark:text-green-400" : "",
                       )}
                     >
-                      {isIncome ? "+" : "-"}
-                      {formatCurrency(transaction.amount, currency)}
+                      <div>
+                        {isIncome ? "+" : "-"}
+                        {formatCurrency(transaction.amount, currency)}
+                      </div>
+                      {transaction.isSplit && transaction.splits?.find(s => s.isYourShare) && (
+                        <div className="text-xs text-muted-foreground font-normal mt-0.5">
+                          Your share: {formatCurrency(transaction.splits.find(s => s.isYourShare)!.amount, currency)}
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 );

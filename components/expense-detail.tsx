@@ -220,7 +220,7 @@ export default function ExpenseDetail({
               {formatCurrency(expense.amount, currency)}
             </p>
             {expenseWithSplits.isSplit && expenseWithSplits.splits && (
-              <Badge variant="secondary" className="mt-1">
+              <Badge variant="default" className="mt-1">
                 <Users className="h-3 w-3 mr-1" />
                 Split
               </Badge>
