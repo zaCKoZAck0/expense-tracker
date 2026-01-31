@@ -6,6 +6,11 @@ import { DashboardClient } from "@/components/dashboard-client";
 import SavingsPage from "../components/savings-page";
 import TransactionsPage from "@/components/transactions-page";
 import { Suspense, lazy } from "react";
+import { DashboardSkeleton } from "@/components/skeletons/dashboard-skeleton";
+import { AnalyticsSkeleton } from "@/components/skeletons/analytics-skeleton";
+import { SavingsSkeleton } from "@/components/skeletons/savings-skeleton";
+import { TransactionsSkeleton } from "@/components/skeletons/transactions-skeleton";
+import { SplitSkeleton } from "@/components/skeletons/split-skeleton";
 
 const SplitPage = lazy(() => import("@/components/split-page"));
 
@@ -25,11 +30,7 @@ export default async function Home({
       redirect("/auth");
     }
     return (
-      <Suspense
-        fallback={
-          <div className="p-6 text-muted-foreground">Loading analytics...</div>
-        }
-      >
+      <Suspense fallback={<AnalyticsSkeleton />}>
         <AnalyticsPage />
       </Suspense>
     );
@@ -40,11 +41,7 @@ export default async function Home({
       redirect("/auth");
     }
     return (
-      <Suspense
-        fallback={
-          <div className="p-6 text-muted-foreground">Loading savings...</div>
-        }
-      >
+      <Suspense fallback={<SavingsSkeleton />}>
         <SavingsPage />
       </Suspense>
     );
@@ -55,13 +52,7 @@ export default async function Home({
       redirect("/auth");
     }
     return (
-      <Suspense
-        fallback={
-          <div className="p-6 text-muted-foreground">
-            Loading transactions...
-          </div>
-        }
-      >
+      <Suspense fallback={<TransactionsSkeleton />}>
         <TransactionsPage />
       </Suspense>
     );
@@ -76,11 +67,7 @@ export default async function Home({
       redirect("/auth");
     }
     return (
-      <Suspense
-        fallback={
-          <div className="p-6 text-muted-foreground">Loading split...</div>
-        }
-      >
+      <Suspense fallback={<SplitSkeleton />}>
         <SplitPage />
       </Suspense>
     );
@@ -92,11 +79,7 @@ export default async function Home({
 
   // Dashboard now fetches data on client based on selected month
   return (
-    <Suspense
-      fallback={
-        <div className="p-6 text-muted-foreground">Loading dashboard...</div>
-      }
-    >
+    <Suspense fallback={<DashboardSkeleton />}>
       <DashboardClient />
     </Suspense>
   );

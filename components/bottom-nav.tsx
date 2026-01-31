@@ -3,12 +3,17 @@
 import { BarChart3, Home, PiggyBank, Users } from "lucide-react";
 import Link from "next/link";
 import { useNavigation, Page } from "@/components/navigation-provider";
-import type React from "react";
+import React from "react";
 import { usePathname } from "next/navigation";
 
 export function BottomNav() {
   const { page: currentPage } = useNavigation();
   const pathname = usePathname();
+  const [optimisticPage, setOptimisticPage] = React.useState(currentPage);
+
+  React.useEffect(() => {
+    setOptimisticPage(currentPage);
+  }, [currentPage]);
 
   if (pathname.startsWith("/auth")) return null;
 
@@ -40,14 +45,15 @@ export function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-lg p-2 md:pb-6 z-50">
+    <div className="fixed bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-lg p-2 md:pb-6 z-50 safe-area-bottom">
       <nav className="flex justify-around items-center max-w-3xl mx-auto">
         {links.map(({ page, label, icon: Icon }) => {
-          const isActive = currentPage === page;
+          const isActive = optimisticPage === page;
           return (
             <Link
               key={page}
               href={`/?page=${page}`}
+              onClick={() => setOptimisticPage(page)}
               className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
                 isActive
                   ? "text-secondary"
