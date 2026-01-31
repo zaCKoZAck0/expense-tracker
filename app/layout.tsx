@@ -11,6 +11,7 @@ import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PWAProvider } from "@/components/pwa-provider";
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
+import { Toaster } from "@/components/ui/sonner";
 
 const sourceSans3 = Source_Sans_3({
   variable: "--font-source-sans-3",
@@ -70,6 +71,7 @@ export default function RootLayout({
               </UserSettingsProvider>
             </AuthSessionProvider>
           </PWAProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

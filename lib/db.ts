@@ -9,7 +9,7 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const globalForPrisma = global as unknown as { prisma?: PrismaClientType };
 
 const logLevels: Prisma.LogLevel[] =
-  process.env.NODE_ENV === "development" ? ["query"] : [];
+  process.env.NODE_ENV === "development" ? ["error", "warn", "info"] : [];
 
 export const db: PrismaClientType =
   globalForPrisma.prisma ?? new PrismaClient({ adapter, log: logLevels });
